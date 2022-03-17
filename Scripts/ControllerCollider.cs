@@ -1,0 +1,54 @@
+using System;
+using UnityEngine;
+
+namespace DefaultNamespace
+{
+    /// <summary>
+    /// Detects what object the participant/controller is in contact with,
+    /// needs to be attached to the controller object 
+    /// </summary>
+    public class ControllerCollider : MonoBehaviour
+    {
+        public static ControllerCollider Instance { get; private set; }
+
+        public string controllerSelection;
+
+        private FileHandler fileHandler = new FileHandler();
+        private string lastNodePosition = "";
+
+        public void OnTriggerEnter(Collider other)
+        {
+            if (other.name.Length == 2 & lastNodePosition!=other.name & ExperimentController.Instance.recordCameraAndNodes)
+            {
+                fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(".csv", "_nodePath.csv"),
+                    other.name);
+                lastNodePosition = other.name;
+                ExperimentController.Instance.retraceNodes++; 
+            }
+            else if(other.name.Length>2 & !other.name.Contains("Cube"))
+                controllerSelection = other.name;
+        }
+
+        public void OnTriggerExit(Collider other)
+        {
+            if(other.name.Length>2 & !other.name.Contains("Cube"))
+                controllerSelection = "Not_Selected"; 
+        }
+
+
+        //Following code will make instance of ControllerCollider persist between scenes
+        void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+    }
+
+}
