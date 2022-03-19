@@ -17,9 +17,11 @@ public class ExperimentController : MonoBehaviour
     public static ExperimentController  Instance { get; private set; }
 
     [SerializeField] public Canvas introCanvas;
+    [SerializeField] public Canvas stressCanvas;
     [SerializeField] private GameObject maze;
     [SerializeField] private GameObject footprints;
-    [SerializeField] private GameObject moveForwardArrow; 
+    [SerializeField] private GameObject moveForwardArrow;
+    [SerializeField] public GameObject stressLevel;
 
     [SerializeField] private GameObject subjectInput;
     [SerializeField] private GameObject trialInput;
@@ -40,6 +42,7 @@ public class ExperimentController : MonoBehaviour
     public int phase = 0;
     public int stepInPhase = 0; 
     public int currentTrial;
+    public bool confirm = false;
 
     private FileHandler fileHandler = new FileHandler();
     public string subjectFile;
@@ -378,18 +381,25 @@ public class ExperimentController : MonoBehaviour
 
                 case 3: // Rate stress
                     //todo Add Apurv's code
+                    stressCanvas.enabled = true;
+                    
                     recordCameraAndNodes = false; 
                     recordCameraAndNodes = false; 
                     // select stress, once selected disable stress UI and move phase forward
+                    if (confirm)
+                    {
+                        //move forward
+                    }
                     stepInPhase = 0;
                     footprints.transform.position = new Vector3(Random.Range(-4, 4), footprints.transform.position.y,
                         Random.Range(-4, 4));
                     currentTrial++;
                     Debug.Log("Current trial: " + currentTrial);
                     break;
+                    
 
                 default:
-                    Debug.Log("Unexpected stepInPhase durring RunTesting()");
+                    Debug.Log("Unexpected stepInPhase during RunTesting()");
                     break;
             }
         }
@@ -397,6 +407,19 @@ public class ExperimentController : MonoBehaviour
         {
             phase++; 
         }
+    }
+    
+    public void UpdateStressOnClick(string stressValue)
+    {
+        stressLevel.GetComponent<TextMeshProUGUI>().text = stressValue;
+    }
+
+    public void ConfirmStressOnClick()
+    {
+        if (stressLevel.GetComponent<TextMeshProUGUI>().text == "N/A") return;
+        confirm = true;
+        stressLevel.GetComponent<TextMeshProUGUI>().text = "N/A";
+        stressCanvas.enabled = false;
     }
 
     /// <summary>
