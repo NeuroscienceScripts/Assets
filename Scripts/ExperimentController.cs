@@ -43,7 +43,8 @@ public class ExperimentController : MonoBehaviour
     public int stepInPhase = 0; 
     public int currentTrial;
     public bool confirm = false;
-
+    public float trialStartTime = 0.0f; 
+    
     private FileHandler fileHandler = new FileHandler();
     public string subjectFile;
     public bool recordCameraAndNodes = false; 
@@ -76,6 +77,7 @@ public class ExperimentController : MonoBehaviour
     private string[] obstaclesList = {"B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7"};
 
     private int[] trialOrder; //Randomized at start
+
 
     /* Debug */
     [SerializeField] bool debugActive = true; 
@@ -356,6 +358,7 @@ public class ExperimentController : MonoBehaviour
                         fileHandler.AppendLine(
                             (ExperimentController.Instance.subjectFile).Replace(".csv", "_nodePath.csv"),
                             PrintStepInfo() + "," + GetTrialInfo().start.GetString() + "," + GetTrialInfo().end.GetString());
+                        trialStartTime = Time.realtimeSinceStartup; 
                     }
                     break;
 
