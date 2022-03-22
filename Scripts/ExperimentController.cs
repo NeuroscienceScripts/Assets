@@ -70,7 +70,7 @@ public class ExperimentController : MonoBehaviour
     //todo Add trials to this list
     private Trial[] trialList =
     {
-        new Trial(new GridLocation("A", 1), new GridLocation("C", 1)),
+        new Trial(new GridLocation("A", 1), new GridLocation("F", 1)),
         new Trial(new GridLocation("A", 1), new GridLocation("D", 1))
     };
 
@@ -83,6 +83,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] bool debugActive = true; 
     [SerializeField] private GameObject phaseDisplay;
     [SerializeField] private GameObject stepDisplay; 
+    [SerializeField] private GameObject trialDisplay;
     
     /// <summary>
     /// Called every frame. Checks which phase of the experiment to run then calls the correct function
@@ -119,12 +120,14 @@ public class ExperimentController : MonoBehaviour
         if (debugActive)
         {
             phaseDisplay.GetComponent<TextMeshProUGUI>().text = "Phase: " + phase.ToString();
-            stepDisplay.GetComponent<TextMeshProUGUI>().text = "Step: " + stepInPhase.ToString(); 
+            stepDisplay.GetComponent<TextMeshProUGUI>().text = "Step: " + stepInPhase.ToString();
+            trialDisplay.GetComponent<TextMeshProUGUI>().text = "Trial: " + currentTrial; 
         }
         else
         {
             phaseDisplay.SetActive(false);
             stepDisplay.SetActive(false);
+            trialDisplay.SetActive(false);
         }
     }
 
@@ -139,10 +142,14 @@ public class ExperimentController : MonoBehaviour
         subjectNumber = int.Parse(subjectInput.GetComponent<TMP_InputField>().text);
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data"+ Path.DirectorySeparatorChar + subjectNumber + ".csv";
         fileHandler.AppendLine(subjectFile,
-            "Start,End,Selected," + DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" +
+            "trialID,timeInTrial,phase,trialNumber,stepInPhase," + DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" +
             DateTime.Now.Minute); 
         fileHandler.AppendLine(subjectFile.Replace(".csv", "_nodePath.csv"),
             DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute); 
+        fileHandler.AppendLine(subjectFile.Replace(".csv", "_cameraRot.csv"),
+            "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xRot,yRot,zRot"); 
+        fileHandler.AppendLine(subjectFile.Replace(".csv", "_cameraPos.csv"),
+            "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xPos,yPos,zPos"); 
 
         currentTrial = int.Parse(trialInput.GetComponent<TMP_InputField>().text);
         phase = phaseNumberStart;
@@ -327,11 +334,15 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void RunTesting()
     {
-        foreach (var  painting in paintings.GetComponentsInChildren<MeshRenderer>())
-            if(hidePaintingsDuringTesting & !painting.name.Contains("frame"))
-                painting.enabled = false;  // Hides all text/pictures in the paintings
         if (currentTrial < trialList.Length)
         {
+            foreach (var  painting in paintings.GetComponentsInChildren<MeshRenderer>())
+                if(hidePaintingsDuringTesting & !painting.name.Contains("frame"))
+                    if(stepInPhase > 2)
+                        painting.enabled = false;  // Hides all text/pictures in the paintings
+                    else if (!painting.name.Contains(GetTrialInfo().start.GetTarget()))
+                        painting.enabled = false; 
+            
             switch (stepInPhase)
             {
                 case 0: // Reorient
@@ -361,8 +372,15 @@ public class ExperimentController : MonoBehaviour
                         trialStartTime = Time.realtimeSinceStartup; 
                     }
                     break;
-
-                case 2: // Walk to end
+                
+                case 2: // Wait for them to touch painting
+                    userText.GetComponent<TextMeshProUGUI>().text =
+                        "Touch the painting and pull the trigger to start trial";
+                    if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(GetTrialInfo().start.GetString()))
+                        stepInPhase++;
+                    break; 
+                
+                case 3: // Walk to end
                     recordCameraAndNodes = true; 
                     recordCameraAndNodes = true; 
                     userText.GetComponent<TextMeshProUGUI>().text =
@@ -382,7 +400,7 @@ public class ExperimentController : MonoBehaviour
 
                     break;
 
-                case 3: // Rate stress
+                case 4: // Rate stress
                     //todo Add Apurv's code
                     stressCanvas.enabled = true;
                     
@@ -396,6 +414,10 @@ public class ExperimentController : MonoBehaviour
                     stepInPhase = 0;
                     footprints.transform.position = new Vector3(Random.Range(-4, 4), footprints.transform.position.y,
                         Random.Range(-4, 4));
+                    
+                    foreach (var  painting in paintings.GetComponentsInChildren<MeshRenderer>())
+                        painting.enabled = true;  
+                    
                     currentTrial++;
                     Debug.Log("Current trial: " + currentTrial);
                     break;
@@ -461,9 +483,13 @@ public class ExperimentController : MonoBehaviour
         return trialList[trialOrder[currentTrial]]; 
     }
 
+    /// <summary>
+    /// Returns trial ID, time in trial, phase, trial number, step in phase
+    /// </summary>
+    /// <returns></returns>
     public string PrintStepInfo()
     {
-        return Time.realtimeSinceStartup.ToString() + "," + phase + "," + currentTrial + "," + stepInPhase; 
+        return trialOrder[currentTrial] + "," + (Time.realtimeSinceStartup-trialStartTime) + "," + phase + "," + currentTrial + "," + stepInPhase; 
     }
     
     // The following code will make instance of ExperimentController persist between scenes and destroy subsequent instances
