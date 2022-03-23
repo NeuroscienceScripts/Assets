@@ -97,6 +97,7 @@ public class ExperimentController : MonoBehaviour
         switch (phase)
         {
             case 0:
+                stressCanvas.enabled = false;
                 userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase"; 
                 break;
             case 1:
@@ -404,24 +405,27 @@ public class ExperimentController : MonoBehaviour
 
                 case 4: // Rate stress
                     //todo Add Apurv's code
+                    userText.GetComponent<TextMeshProUGUI>().text = ""; 
                     stressCanvas.enabled = true;
-                    
+                    Debug.Log(stressCanvas.enabled);
                     recordCameraAndNodes = false; 
                     recordCameraAndNodes = false; 
                     // select stress, once selected disable stress UI and move phase forward
                     if (confirm)
                     {
                         //move forward
+                        stressCanvas.enabled = false;
+                        stepInPhase = 0;
+                        footprints.transform.position = new Vector3(Random.Range(-4, 4), footprints.transform.position.y,
+                            Random.Range(-4, 4));
+                    
+                        foreach (var  painting in paintings.GetComponentsInChildren<MeshRenderer>())
+                            painting.enabled = true;  
+                    
+                        currentTrial++;
+                    
+                        Debug.Log("Current trial: " + currentTrial);
                     }
-                    stepInPhase = 0;
-                    footprints.transform.position = new Vector3(Random.Range(-4, 4), footprints.transform.position.y,
-                        Random.Range(-4, 4));
-                    
-                    foreach (var  painting in paintings.GetComponentsInChildren<MeshRenderer>())
-                        painting.enabled = true;  
-                    
-                    currentTrial++;
-                    Debug.Log("Current trial: " + currentTrial);
                     break;
                     
 
@@ -446,7 +450,6 @@ public class ExperimentController : MonoBehaviour
         if (stressLevel.GetComponent<TextMeshProUGUI>().text == "N/A") return;
         confirm = true;
         stressLevel.GetComponent<TextMeshProUGUI>().text = "N/A";
-        stressCanvas.enabled = false;
     }
 
     /// <summary>
