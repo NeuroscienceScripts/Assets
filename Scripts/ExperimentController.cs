@@ -27,9 +27,11 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject trialInput;
     [SerializeField] private GameObject userText;
 
+    [SerializeField] public bool desktopMode = false; 
     [SerializeField] private bool hidePaintingsDuringTesting = true; 
     [SerializeField] private GameObject paintings;
     [SerializeField] private GameObject node; 
+    
     
     [SerializeField] private int learningRounds = 2;
     [SerializeField] private int retraceRounds = 2;

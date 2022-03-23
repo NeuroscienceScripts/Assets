@@ -1,5 +1,6 @@
-using Unity.VisualScripting;
 using UnityEngine;
+using Valve.VR;
+ 
 
 namespace DefaultNamespace
 {
@@ -12,17 +13,28 @@ namespace DefaultNamespace
         [SerializeField] private FirstPersonMovement firstPersonMovement;
         [SerializeField] private FirstPersonLook firstPersonLook;
 
+        [SerializeField]
+        private SteamVR_CameraHelper cameraHelperVR;
+
         void Update()
         {
             if (ExperimentController.Instance.introCanvas.enabled)
             {
                 firstPersonLook.enabled = false;
-                firstPersonMovement.enabled = false; 
+                firstPersonMovement.enabled = false;
             }
             else
             {
-                firstPersonLook.enabled = true;
-                firstPersonMovement.enabled = true; 
+                if (ExperimentController.Instance.desktopMode)
+                {
+                    firstPersonLook.enabled = true;
+                    firstPersonMovement.enabled = true;
+                   
+                }
+                else
+                 {
+                     cameraHelperVR.enabled = true;
+                 }
             }
         }
     }
