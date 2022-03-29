@@ -74,6 +74,7 @@ public class ExperimentController : MonoBehaviour
     {
         new Trial(new GridLocation("A", 1), new GridLocation("F", 1)),
         new Trial(new GridLocation("A", 1), new GridLocation("D", 1))
+        // new Trial(new GridLocation("A", 1), new GridLocation("D", 1), true, new GridLocation("A", 1))  <- stress trial
     };
 
     private string[] obstaclesList = {"B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7"};
