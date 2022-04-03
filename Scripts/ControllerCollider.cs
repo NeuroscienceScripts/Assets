@@ -1,4 +1,5 @@
 using System;
+using Classes;
 using UnityEngine;
 
 namespace DefaultNamespace
@@ -12,6 +13,7 @@ namespace DefaultNamespace
         public static ControllerCollider Instance { get; private set; }
 
         public string controllerSelection;
+        public GridLocation currentNode;
 
         private FileHandler fileHandler = new FileHandler();
         private string lastNodePosition = "";
@@ -20,10 +22,11 @@ namespace DefaultNamespace
         {
             if (other.name.Length == 2 & lastNodePosition!=other.name & ExperimentController.Instance.recordCameraAndNodes)
             {
+                currentNode = new GridLocation("" + other.name[0], int.Parse("" + other.name[1]));
                 fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(".csv", "_nodePath.csv"),
                     other.name);
                 lastNodePosition = other.name;
-                ExperimentController.Instance.retraceNodes++; 
+                ExperimentController.Instance.retraceNodes++;
             }
             else if(other.name.Length>2 & !other.name.Contains("Cube"))
                 controllerSelection = other.name;

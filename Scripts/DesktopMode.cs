@@ -5,12 +5,14 @@ using UnityEngine.EventSystems;
 
 public class DesktopMode : MonoBehaviour
 {
-    //Always keep CurvedUIInputModule disabled before Play
+    /*Always keep CurvedUIInputModule disabled before Play
+     * StandaloneInputModule and CurvedUIInputModule references are on Event System
+    */
 
     [SerializeField] private StandaloneInputModule input;
     [SerializeField] private CurvedUIInputModule curvedUI;
     
-    void Update()
+    void OnEnable()
     {
         if (ExperimentController.Instance.desktopMode)
         {
