@@ -5,7 +5,9 @@ using UnityEngine.EventSystems;
 
 public class DesktopMode : MonoBehaviour
 {
-    /*Always keep CurvedUIInputModule disabled before Play
+    /*
+     * Attatch to ExperimentController
+     * Always keep CurvedUIInputModule disabled before Play
      * StandaloneInputModule and CurvedUIInputModule references are on Event System
     */
 
