@@ -13,7 +13,7 @@ namespace DefaultNamespace
         public static ControllerCollider Instance { get; private set; }
 
         public string controllerSelection;
-        public GridLocation currentNode;
+        public GridLocation currentNode; 
 
         private FileHandler fileHandler = new FileHandler();
         private string lastNodePosition = "";
