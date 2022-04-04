@@ -18,39 +18,43 @@ namespace DefaultNamespace
         
         private void Update()
         {
-            if (ExperimentController.Instance.GetTrialInfo().stressTrial)
-            {
-                nonStressSound.Stop();
-                stressSound.Play();
-                pathBlockObject.transform.position = new Vector3(
-                    ExperimentController.Instance.GetTrialInfo().blockedLocation.GetX(),
-                    pathBlockObject.transform.position.y,
-                    ExperimentController.Instance.GetTrialInfo().blockedLocation.GetY());
-                pathBlockObject.SetActive(true);
-
-                stressTimer.GetComponent<TextMeshProUGUI>().text = stressTime - 
-                    (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime) + " Seconds";
-                stressTimer.SetActive(true);
-
-                // Beep plays every 5 seconds until less than 10 seconds left, then a beep a second until 5 seconds left, then two beeps a second
-                float nextBeep = Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime > (stressTime - 10)
-                    ? (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime > 5 ? 0.5f : 1.0f)
-                    : 5.0f;
-                if (Time.realtimeSinceStartup - lastBeep > nextBeep)
+            //TODO: since this function will not work unless there audio sources and an actual game object added, I have just temporarily comment blocked 
+            //the current code not involving the dynamic blocking
+                if (ExperimentController.Instance.GetTrialInfo().stressTrial)
                 {
-                    stressBeep.Play();
-                    lastBeep = Time.realtimeSinceStartup; 
-                }
-            }
-            
-            else
-            {
-                stressSound.Stop();
-                nonStressSound.Play();
-                pathBlockObject.SetActive(false);
-                stressTimer.SetActive(false); 
+                /*
+                    nonStressSound.Stop();
+                    stressSound.Play();
 
+                    stressTimer.GetComponent<TextMeshProUGUI>().text = stressTime -
+                        (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime) + " Seconds";
+                    stressTimer.SetActive(true);
+                    
+                    // Beep plays every 5 seconds until less than 10 seconds left, then a beep a second until 5 seconds left, then two beeps a second
+                    float nextBeep = Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime > (stressTime - 10)
+                        ? (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime > 5 ? 0.5f : 1.0f)
+                        : 5.0f;
+                    if (Time.realtimeSinceStartup - lastBeep > nextBeep)
+                    {
+                        stressBeep.Play();
+                        lastBeep = Time.realtimeSinceStartup;
+                    }
+                */
+                pathBlockObject.transform.position = new Vector3(
+                        ExperimentController.Instance.GetTrialInfo().blockedLocation.GetX(),
+                        pathBlockObject.transform.position.y,
+                        ExperimentController.Instance.GetTrialInfo().blockedLocation.GetY());
+                pathBlockObject.SetActive(true);
             }
+
+                else
+                {
+                    /*stressSound.Stop();
+                    nonStressSound.Play();
+                    stressTimer.SetActive(false);*/
+                    pathBlockObject.SetActive(false);
+
+                }
         }
     }
 }

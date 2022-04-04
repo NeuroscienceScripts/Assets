@@ -72,8 +72,9 @@ public class ExperimentController : MonoBehaviour
     //todo Add trials to this list
     private Trial[] trialList =
     {
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 1)),
-        new Trial(new GridLocation("A", 1), new GridLocation("D", 1))
+        //G7 is just a placeholder, ideally Trial can be changed now so that this parameter is completely removed
+        new Trial(new GridLocation("A", 1), new GridLocation("F", 1), true, new GridLocation("G", 7)),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 1), true, new GridLocation("G", 7))
         // new Trial(new GridLocation("A", 1), new GridLocation("D", 1), true, new GridLocation("A", 1))  <- stress trial
     };
 
@@ -486,7 +487,24 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     public Trial GetTrialInfo()
     {
-        return trialList[trialOrder[currentTrial]]; 
+        //NOTE: this if-else statement is a temporary fix for errors, please remove once trialList&trialOrder is populated
+        if(trialOrder?.Length >= currentTrial-1)
+            return trialList[trialOrder[currentTrial]];
+        else
+        {
+            return trialList[0];
+        }
+    }
+
+    public void SetTrialBlockedLocation(string letter, int num)
+    {
+        //NOTE: this if-else statement is a temporary fix for errors, please remove once trialList&trialOrder is populated
+        if (trialOrder?.Length >= currentTrial - 1)
+            trialList[trialOrder[currentTrial]].blockedLocation = new GridLocation(letter, num);
+        else
+        {
+            trialList[0].blockedLocation = new GridLocation(letter, num);
+        }
     }
 
     /// <summary>
