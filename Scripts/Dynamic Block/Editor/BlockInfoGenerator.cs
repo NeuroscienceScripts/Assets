@@ -76,7 +76,8 @@ public class BlockInfoGenerator : EditorWindow
         }
         if (GUI.Button(new Rect(125, 480, 100, 40), "Generate"))
         {
-            EditorCoroutineUtility.StartCoroutineOwnerless(Generate());
+            //EditorCoroutineUtility.StartCoroutineOwnerless(Failed_Generate());
+
         }
         if (manualBtn)
         {
@@ -127,7 +128,7 @@ public class BlockInfoGenerator : EditorWindow
         }
     }
 
-    private IEnumerator Generate()
+    private IEnumerator Failed_Generate()
     {
         if (!blockInfo)
         {

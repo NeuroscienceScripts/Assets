@@ -56,8 +56,8 @@ namespace Classes
     public struct GridLocation
     {
         private Coordinate pos;
-        private string y;
-        private int x;
+        [SerializeField] private string y;
+        [SerializeField] private int x;
 
         public GridLocation(string y, int x)
         {

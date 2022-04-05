@@ -4,130 +4,123 @@ using UnityEngine;
 using Classes;
 using DefaultNamespace;
 
-public enum WallDirection
-{
-    North = 0,
-    South = 1,
-    East = 2,
-    West = 3
-}
 
 public class DynamicBlock : MonoBehaviour
 {
-    private string prevRow;
-    private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
+    //private string prevRow;
+    //private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
 
-    [SerializeField] private GameObject[] walls; // 0 is north, 1 is south, 2 is east, 3 is west
-    [SerializeField] private BlockInfoObject blockInfo;
-    private Trial trial;
-    private Dictionary<GridLocation, Dictionary<GridLocation, List<Coordinate>>> wallLocations = new();
-    private List<GridLocation> blockLocations;
-    private List<GridLocation> nodeTriggers;
-    private WallDirection wallDirection;
-    private GameObject wall;
+    //[SerializeField] private GameObject[] walls; // 0 is north, 1 is south, 2 is east, 3 is west
+    //[SerializeField] private BlockInfoObject blockInfo;
+    //private Trial trial;
+    //private Dictionary<GridLocation, Dictionary<GridLocation, List<Coordinate>>> wallLocations = new();
+    //private List<GridLocation> blockLocations;
+    //private List<GridLocation> nodeTriggers;
+    //private WallDirection wallDirection;
+    //private GameObject wall;
 
-    private void OnEnable()
-    {
-        blockLocations = new();
-        nodeTriggers = new();
-        blockInfo.MakeDict();
-        wallLocations = blockInfo.wallLocations;
-        trial = ExperimentController.Instance.GetTrialInfo();
-        if (trial.stressTrial)
-        {
-            foreach (Coordinate coordinate in wallLocations[trial.start][trial.end])
-            {
-                blockLocations.Add(coordinate.ToGridLocation());
-            }
-        }
-        CheckWallDirection();
-        CreateNodeTriggers();
-    }
+    //private void OnEnable()
+    //{
+    //    blockLocations = new();
+    //    nodeTriggers = new();
+    //    blockInfo.MakeDict();
+    //    wallLocations = blockInfo.wallLocations;
+    //    trial = ExperimentController.Instance.GetTrialInfo();
+    //    if (trial.stressTrial)
+    //    {
+    //        foreach (Coordinate coordinate in wallLocations[trial.start][trial.end])
+    //        {
+    //            blockLocations.Add(coordinate.ToGridLocation());
+    //        }
+    //    }
+    //    CheckWallDirection();
+    //    CreateNodeTriggers();
+    //}
 
-    private void OnDisable()
-    {
-        blockLocations = null;
-        nodeTriggers = null;
-    }
+    //private void OnDisable()
+    //{
+    //    blockLocations = null;
+    //    nodeTriggers = null;
+    //}
 
-    private void Update()
-    {
-        int index = IndexOf(nodeTriggers, ControllerCollider.Instance.currentNode);
-        Debug.Log(index);
-        if (index >= 0)
-        {
-            wall = Instantiate(walls[(int)wallDirection], new Vector3(blockLocations[index].GetX(), 1, blockLocations[index].GetY()), walls[(int)wallDirection].transform.rotation);
-            enabled = false;
-        }
-    }
+    //private void Update()
+    //{
+    //    int index = IndexOf(nodeTriggers, ControllerCollider.Instance.currentNode);
+    //    Debug.Log(index);
+    //    if (index >= 0)
+    //    {
+    //        wall = Instantiate(walls[(int)wallDirection], new Vector3(blockLocations[index].GetX(), 1, blockLocations[index].GetY()), walls[(int)wallDirection].transform.rotation);
+    //        enabled = false;
+    //    }
+    //}
 
-    private int IndexOf(List<GridLocation> list, GridLocation target)
-    {
-        for (int i = 0; i < list.Count; i++)
-        {
-            if(list[i] == target)
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
+    //private int IndexOf(List<GridLocation> list, GridLocation target)
+    //{
+    //    for (int i = 0; i < list.Count; i++)
+    //    {
+    //        if(list[i] == target)
+    //        {
+    //            return i;
+    //        }
+    //    }
+    //    return -1;
+    //}
 
-    private void CheckWallDirection()
-    {
-        if(blockLocations[0].GetX() == blockLocations[1].GetX())
-        {
-            // Horizontal Wall
-            if(trial.start.GetX() < trial.end.GetX())
-            {
-                //Instantiate facing west
-                wallDirection = WallDirection.West;
-            }
-            else
-            {
-                // east
-                wallDirection = WallDirection.East;
-            }
-        }
-        else if(blockLocations[0].GetY() == blockLocations[1].GetY())
-        {
-            // Vertical
-            if(trial.start.GetY() > trial.end.GetY())
-            {
-                // south
-                wallDirection = WallDirection.North;
-            }
-            else
-            {
-                // north
-                wallDirection = WallDirection.South;
-            }
-        }
-    }
+    //private void CheckWallDirection()
+    //{
+    //    if(blockLocations[0].GetX() == blockLocations[1].GetX())
+    //    {
+    //        // Horizontal Wall
+    //        if(trial.start.GetX() < trial.end.GetX())
+    //        {
+    //            //Instantiate facing west
+    //            wallDirection = WallDirection.West;
+    //        }
+    //        else
+    //        {
+    //            // east
+    //            wallDirection = WallDirection.East;
+    //        }
+    //    }
+    //    else if(blockLocations[0].GetY() == blockLocations[1].GetY())
+    //    {
+    //        // Vertical
+    //        if(trial.start.GetY() > trial.end.GetY())
+    //        {
+    //            // south
+    //            wallDirection = WallDirection.North;
+    //        }
+    //        else
+    //        {
+    //            // north
+    //            wallDirection = WallDirection.South;
+    //        }
+    //    }
+    //}
 
-    private void CreateNodeTriggers()
-    {
-        foreach (GridLocation node in blockLocations)
-        {
-            switch (wallDirection)
-            {
-                case WallDirection.North:
-                    nodeTriggers.Add(new GridLocation(node.GetX(), node.GetY()+1));
-                    break;
-                case WallDirection.South:
-                    nodeTriggers.Add(new GridLocation(node.GetX(), node.GetY() - 1));
-                    break;
-                case WallDirection.East:
-                    nodeTriggers.Add(new GridLocation(node.GetX() + 1, node.GetY()));
-                    break;
-                case WallDirection.West:
-                    nodeTriggers.Add(new GridLocation(node.GetX() - 1, node.GetY()));
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+    //private void CreateNodeTriggers()
+    //{
+    //    foreach (GridLocation node in blockLocations)
+    //    {
+    //        switch (wallDirection)
+    //        {
+    //            case WallDirection.North:
+    //                nodeTriggers.Add(new GridLocation(node.GetX(), node.GetY()+1));
+    //                break;
+    //            case WallDirection.South:
+    //                nodeTriggers.Add(new GridLocation(node.GetX(), node.GetY() - 1));
+    //                break;
+    //            case WallDirection.East:
+    //                nodeTriggers.Add(new GridLocation(node.GetX() + 1, node.GetY()));
+    //                break;
+    //            case WallDirection.West:
+    //                nodeTriggers.Add(new GridLocation(node.GetX() - 1, node.GetY()));
+    //                break;
+    //            default:
+    //                break;
+    //        }
+    //    }
+    //}
 
     // Update is called once per frame
     //void Update()

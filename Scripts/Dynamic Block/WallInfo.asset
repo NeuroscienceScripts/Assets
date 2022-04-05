@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40d18973b9048cc46b3adb01ef8663c8, type: 3}
+  m_Name: WallInfo
+  m_EditorClassIdentifier: 
+  directions: 01000000010000000000000000000000000000000100000001000000000000000000000000000000010000000100000000000000000000000000000000000000010000000000000000000000000000000100000001000000
+  positions:
+  - y: F
+    x: 1
+  - y: D
+    x: 1
+  - y: A
+    x: 1
+  - y: G
+    x: 2
+  - y: E
+    x: 2
+  - y: B
+    x: 2
+  - y: F
+    x: 3
+  - y: C
+    x: 3
+  - y: A
+    x: 3
+  - y: G
+    x: 4
+  - y: D
+    x: 4
+  - y: B
+    x: 4
+  - y: G
+    x: 5
+  - y: E
+    x: 5
+  - y: C
+    x: 5
+  - y: A
+    x: 5
+  - y: F
+    x: 6
+  - y: C
+    x: 6
+  - y: A
+    x: 6
+  - y: G
+    x: 7
+  - y: D
+    x: 7
+  - y: B
+    x: 7
