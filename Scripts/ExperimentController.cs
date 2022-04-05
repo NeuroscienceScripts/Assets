@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Classes;
@@ -38,7 +39,12 @@ public class ExperimentController : MonoBehaviour
     private int learningRedoRounds = 0; 
     
     [SerializeField] private int number_practice_trials = 3;
-   
+
+    #region StressVars
+    [SerializeField] private StressFactors stressFactors;
+    [SerializeField] private DynamicBlock dynamicBlock;
+    #endregion
+
     private int subjectNumber = 0;
 
     public int phase = 0;
@@ -159,7 +165,7 @@ public class ExperimentController : MonoBehaviour
         currentTrial = int.Parse(trialInput.GetComponent<TMP_InputField>().text);
         phase = phaseNumberStart;
         introCanvas.enabled = false; 
-        
+
         // ** Randomize trial order **
         Random.InitState(subjectNumber * 10); // Insures same path randomizations every run for same subject (in case the experiment needs restarted)
         trialOrder = new int[trialList.Length];
@@ -368,6 +374,7 @@ public class ExperimentController : MonoBehaviour
                 case 1: // Go to next start
                     if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger())
                     {
+                        dynamicBlock.enabled = true;
                         footprints.SetActive(false);
                         maze.SetActive(true);
                         stepInPhase++;
@@ -387,9 +394,9 @@ public class ExperimentController : MonoBehaviour
                 
                 case 3: // Walk to end
                     recordCameraAndNodes = true; 
-                    recordCameraAndNodes = true; 
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Target Object: " + GetTrialInfo().end.GetTarget();
+                    //Debug.Log("Walk to end");
                     if (GetTrigger())
                     {
                         if (ControllerCollider.Instance.controllerSelection.Contains("targ"))
@@ -406,7 +413,8 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 4: // Rate stress
-                    //todo Add Apurv's code
+                        //todo Add Apurv's code
+                    Destroy(GameObject.FindGameObjectWithTag("Wall"));
                     userText.GetComponent<TextMeshProUGUI>().text = ""; 
                     stressCanvas.enabled = true;
                     Debug.Log(stressCanvas.enabled);
@@ -424,8 +432,7 @@ public class ExperimentController : MonoBehaviour
                         foreach (var  painting in paintings.GetComponentsInChildren<MeshRenderer>())
                             painting.enabled = true;  
                     
-                        currentTrial++;
-                    
+                        currentTrial++;                        
                         Debug.Log("Current trial: " + currentTrial);
                     }
                     break;
@@ -487,13 +494,7 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     public Trial GetTrialInfo()
     {
-        //NOTE: this if-else statement is a temporary fix for errors, please remove once trialList&trialOrder is populated
-        if(trialOrder?.Length >= currentTrial-1)
-            return trialList[trialOrder[currentTrial]];
-        else
-        {
-            return trialList[0];
-        }
+        return trialList[trialOrder[currentTrial]];
     }
 
     public void SetTrialBlockedLocation(string letter, int num)

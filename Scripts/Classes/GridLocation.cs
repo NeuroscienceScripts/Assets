@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using System;
 
@@ -7,6 +6,7 @@ namespace Classes
     /// <summary>
     /// Internal container for GridLocation coordinates
     /// </summary>
+    [Serializable]
     public struct Coordinate
     {
         public int X { get; set; }
@@ -25,11 +25,11 @@ namespace Classes
         }
 
         /// <summary>
-        /// Casts Coordinate to Grid Location where (0,0) is the upper left corner A1
+        /// Casts Coordinate to Grid Location where (0,0) is the lower left corner A1
         /// </summary>
         public GridLocation ToGridLocation()
         {
-            return new GridLocation(Constants.LETTERS[Y], X+1);
+            return new GridLocation(Constants.LETTERS[Constants.GRID_LENGTH-1-Y], X+1);
         }
 
         /// <summary>
@@ -52,6 +52,7 @@ namespace Classes
     /// along with a function to check what object (by name) is located at each location. 
     ///  
     /// </summary>
+    [Serializable]
     public struct GridLocation
     {
         private Coordinate pos;
@@ -63,10 +64,33 @@ namespace Classes
             pos = new Coordinate
             {
                 X = x - (Constants.GRID_WIDTH / 2 + 1),
-                Y = Constants.GRID_LENGTH/2 - Array.IndexOf(Constants.LETTERS, y) + 1
+                Y = Constants.GRID_LENGTH/2 - Array.IndexOf(Constants.LETTERS, y)
             };
             this.y = y;
             this.x = x;
+        }
+
+        public GridLocation(int x, int y)
+        {
+            pos = new Coordinate
+            {
+                X = x,
+                Y = y
+            };
+            this.y = Constants.LETTERS[Constants.GRID_LENGTH/2 - y];
+            this.x = x + Constants.GRID_WIDTH/2 + 1;
+        }
+
+        public static bool operator ==(GridLocation a, GridLocation b) => a.GetX() == b.GetX() && a.GetY() == b.GetY();
+        public static bool operator !=(GridLocation a, GridLocation b) => a.GetX() != b.GetX() || a.GetY() != b.GetY();
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
 
         public int GetX()

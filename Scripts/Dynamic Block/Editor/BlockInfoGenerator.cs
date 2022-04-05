@@ -151,6 +151,11 @@ public class BlockInfoGenerator : EditorWindow
             }
         }
 
+        foreach (var item in blockInfo.paintingLocations)
+        {
+            Debug.Log(item.GridLocString());
+        }
+
         foreach (Coordinate location in blockInfo.paintingLocations)
         {
             GridLocation start = location.ToGridLocation();
