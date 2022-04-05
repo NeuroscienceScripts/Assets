@@ -135,6 +135,12 @@ public class ExperimentController : MonoBehaviour
         }
     }
 
+
+    private void Start()
+    {
+        trialOrder = new int[trialList.Length];
+    }
+
     /// <summary>
     /// Gets starting point/subject number and starts the experiment
     /// Which phase you're starting on is inputted by the buttons in the startup GUI, then trial# and session# are
