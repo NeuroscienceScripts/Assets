@@ -11,6 +11,7 @@ public class DynamicBlock : MonoBehaviour
 
     [SerializeField] private WallInfoObject wallInfo;
     public string collName;
+    private GameObject temp;
     //private string prevRow;
     //private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
 
@@ -26,6 +27,7 @@ public class DynamicBlock : MonoBehaviour
 
     private void OnEnable()
     {
+        temp = new GameObject();
         CreateWallTriggers();
     }
     //private void OnEnable()
@@ -114,7 +116,6 @@ public class DynamicBlock : MonoBehaviour
 
     private void CreateWallTriggers()
     {
-        GameObject temp;
         for (int i = 0; i < wallInfo.GetPositions().Count; i++)
         {
             WallDirection dir = wallInfo.GetDirections()[i];
@@ -123,22 +124,22 @@ public class DynamicBlock : MonoBehaviour
                 case WallDirection.Vertical:
                     temp = Instantiate(walls[2], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[2].transform.rotation) as GameObject;
                     temp.name = wallInfo.GetPositions()[i].GetString() + "E";
-                    //temp.GetComponent<MeshRenderer>().enabled = false;
-                    possWalls.Add(temp);
+                    temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+                    //possWalls.Add(temp);
                     temp = Instantiate(walls[3], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[3].transform.rotation) as GameObject;
-                    //temp.GetComponent<MeshRenderer>().enabled = false;
+                    temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
                     temp.name = wallInfo.GetPositions()[i].GetString() + "W";
-                    possWalls.Add(temp);
+                    //possWalls.Add(temp);
                     break;
                 case WallDirection.Horizontal:
                     temp = Instantiate(walls[0], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[0].transform.rotation) as GameObject;
                     temp.name = wallInfo.GetPositions()[i].GetString() + "N";
-                    //temp.GetComponent<MeshRenderer>().enabled = false;
-                    possWalls.Add(temp);
+                    temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+                    //possWalls.Add(temp);
                     temp = Instantiate(walls[1], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[1].transform.rotation) as GameObject;
                     temp.name = wallInfo.GetPositions()[i].GetString() + "S";
-                    //temp.GetComponent<MeshRenderer>().enabled = false;
-                    possWalls.Add(temp);
+                    temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+                    //possWalls.Add(temp);
                     break;
             }
         }
