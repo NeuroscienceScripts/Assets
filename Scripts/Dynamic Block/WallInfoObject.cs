@@ -11,8 +11,9 @@ public enum WallDirection
 
 public class WallInfoObject : ScriptableObject
 {
-    [SerializeField] public List<WallDirection> directions = new();
-    [SerializeField] public List<GridLocation> positions = new();
+    [SerializeField] private List<WallDirection> directions = new();
+    [SerializeField] private List<GridLocation> _positions = new();
+    public List<GridLocation> positions = new();
 
     public void Clear()
     {
@@ -23,6 +24,25 @@ public class WallInfoObject : ScriptableObject
     public void Add(WallDirection dir, GridLocation pos)
     {
         directions.Add(dir);
-        positions.Add(pos);
+        _positions.Add(pos);
+    }
+
+    public List<WallDirection> GetDirections()
+    {
+        List<WallDirection> list = new();
+        foreach (var dir in directions)
+        {
+            list.Add(dir);
+        }
+        return list;
+    }
+    public List<GridLocation> GetPositions()
+    {
+        positions = new();
+        foreach (var pos in _positions)
+        {
+            positions.Add(pos);
+        }
+        return positions;
     }
 }

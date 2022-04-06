@@ -64,13 +64,15 @@ public class WallInfoGenerator : EditorWindow
         {
             wallInfo = CreateInstance<WallInfoObject>();
             AssetDatabase.CreateAsset(wallInfo, $"Assets/Scripts/Dynamic Block/WallInfo.asset");
-            EditorUtility.SetDirty(wallInfo);
-            AssetDatabase.SaveAssetIfDirty(wallInfo);
+            
         }
         else
         {
             wallInfo.Clear();
         }
+
+        EditorUtility.SetDirty(wallInfo);
+        AssetDatabase.SaveAssetIfDirty(wallInfo);
 
         for (int x = 0; x < map.width; x++)
         {
@@ -93,7 +95,6 @@ public class WallInfoGenerator : EditorWindow
         down = y != 0 ? y - 1 : -5;
         left = x != 0 ? x-1 : -5;
         right = x + 1 != map.width ? x+1 : -5;
-        Debug.Log($"up: {up} down: {down} left: {left} right: {right}");
         Coordinate c = new Coordinate { X = x, Y = y };
         if (up != -5 && down != -5)
         {

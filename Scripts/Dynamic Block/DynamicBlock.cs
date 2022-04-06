@@ -9,6 +9,15 @@ public class DynamicBlock : MonoBehaviour
 {
     //private string prevRow;
     //private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
+    [SerializeField] private WallInfoObject info;
+
+    private void OnEnable()
+    {
+        foreach (var item in info.GetPositions())
+        {
+            Debug.Log(item);
+        }
+    }
 
     //[SerializeField] private GameObject[] walls; // 0 is north, 1 is south, 2 is east, 3 is west
     //[SerializeField] private BlockInfoObject blockInfo;
