@@ -374,7 +374,6 @@ public class ExperimentController : MonoBehaviour
                 case 1: // Go to next start
                     if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger())
                     {
-                        dynamicBlock.enabled = true;
                         footprints.SetActive(false);
                         maze.SetActive(true);
                         stepInPhase++;
@@ -386,6 +385,7 @@ public class ExperimentController : MonoBehaviour
                     break;
                 
                 case 2: // Wait for them to touch painting
+                    dynamicBlock.enabled = true;
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Touch the painting and pull the trigger to start trial";
                     if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(GetTrialInfo().start.GetString()))
