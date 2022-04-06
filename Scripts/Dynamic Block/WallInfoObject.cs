@@ -8,41 +8,44 @@ public enum WallDirection
     Vertical = 0,
     Horizontal = 1
 }
+[System.Serializable]
+public struct WallPosition
+{
+    public WallDirection direction;
+    public Coordinate position;
+}
 
 public class WallInfoObject : ScriptableObject
 {
-    [SerializeField] private List<WallDirection> directions = new();
-    [SerializeField] private List<GridLocation> _positions = new();
-    public List<GridLocation> positions = new();
+
+    public List<WallPosition> wallPositions = new();
 
     public void Clear()
     {
-        directions.Clear();
-        positions.Clear();
+        wallPositions.Clear();
     }
 
-    public void Add(WallDirection dir, GridLocation pos)
+    public void Add(WallDirection dir, Coordinate pos)
     {
-        directions.Add(dir);
-        _positions.Add(pos);
+        wallPositions.Add(new WallPosition { direction = dir, position = pos });
     }
 
     public List<WallDirection> GetDirections()
     {
         List<WallDirection> list = new();
-        foreach (var dir in directions)
+        foreach (var item in wallPositions)
         {
-            list.Add(dir);
+            list.Add(item.direction);
         }
         return list;
     }
     public List<GridLocation> GetPositions()
     {
-        positions = new();
-        foreach (var pos in _positions)
+        List<GridLocation> list = new();
+        foreach (var item in wallPositions)
         {
-            positions.Add(pos);
+            list.Add(item.position.ToGridLocation());
         }
-        return positions;
+        return list;
     }
 }

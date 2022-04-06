@@ -9,7 +9,10 @@ namespace Classes
     [Serializable]
     public struct Coordinate
     {
+
+        [field: SerializeField]
         public int X { get; set; }
+        [field: SerializeField]
         public int Y { get; set; }
 
         public static bool operator==(Coordinate a, Coordinate b) => a.X == b.X && a.Y == b.Y;
@@ -56,8 +59,8 @@ namespace Classes
     public struct GridLocation
     {
         private Coordinate pos;
-        [SerializeField] private string y;
-        [SerializeField] private int x;
+        private string y;
+        private int x;
 
         public GridLocation(string y, int x)
         {

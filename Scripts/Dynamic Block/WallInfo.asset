@@ -12,50 +12,92 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40d18973b9048cc46b3adb01ef8663c8, type: 3}
   m_Name: WallInfo
   m_EditorClassIdentifier: 
-  directions: 01000000010000000000000000000000000000000100000001000000000000000000000000000000010000000100000000000000000000000000000000000000010000000000000000000000000000000100000001000000
-  _positions:
-  - y: F
-    x: 1
-  - y: D
-    x: 1
-  - y: A
-    x: 1
-  - y: G
-    x: 2
-  - y: E
-    x: 2
-  - y: B
-    x: 2
-  - y: F
-    x: 3
-  - y: C
-    x: 3
-  - y: A
-    x: 3
-  - y: G
-    x: 4
-  - y: D
-    x: 4
-  - y: B
-    x: 4
-  - y: G
-    x: 5
-  - y: E
-    x: 5
-  - y: C
-    x: 5
-  - y: A
-    x: 5
-  - y: F
-    x: 6
-  - y: C
-    x: 6
-  - y: A
-    x: 6
-  - y: G
-    x: 7
-  - y: D
-    x: 7
-  - y: B
-    x: 7
-  positions: []
+  wallPositions:
+  - direction: 1
+    position:
+      <X>k__BackingField: 0
+      <Y>k__BackingField: 1
+  - direction: 1
+    position:
+      <X>k__BackingField: 0
+      <Y>k__BackingField: 3
+  - direction: 0
+    position:
+      <X>k__BackingField: 0
+      <Y>k__BackingField: 6
+  - direction: 0
+    position:
+      <X>k__BackingField: 1
+      <Y>k__BackingField: 0
+  - direction: 0
+    position:
+      <X>k__BackingField: 1
+      <Y>k__BackingField: 2
+  - direction: 1
+    position:
+      <X>k__BackingField: 1
+      <Y>k__BackingField: 5
+  - direction: 1
+    position:
+      <X>k__BackingField: 2
+      <Y>k__BackingField: 1
+  - direction: 0
+    position:
+      <X>k__BackingField: 2
+      <Y>k__BackingField: 4
+  - direction: 0
+    position:
+      <X>k__BackingField: 2
+      <Y>k__BackingField: 6
+  - direction: 0
+    position:
+      <X>k__BackingField: 3
+      <Y>k__BackingField: 0
+  - direction: 1
+    position:
+      <X>k__BackingField: 3
+      <Y>k__BackingField: 3
+  - direction: 1
+    position:
+      <X>k__BackingField: 3
+      <Y>k__BackingField: 5
+  - direction: 0
+    position:
+      <X>k__BackingField: 4
+      <Y>k__BackingField: 0
+  - direction: 0
+    position:
+      <X>k__BackingField: 4
+      <Y>k__BackingField: 2
+  - direction: 0
+    position:
+      <X>k__BackingField: 4
+      <Y>k__BackingField: 4
+  - direction: 0
+    position:
+      <X>k__BackingField: 4
+      <Y>k__BackingField: 6
+  - direction: 1
+    position:
+      <X>k__BackingField: 5
+      <Y>k__BackingField: 1
+  - direction: 0
+    position:
+      <X>k__BackingField: 5
+      <Y>k__BackingField: 4
+  - direction: 0
+    position:
+      <X>k__BackingField: 5
+      <Y>k__BackingField: 6
+  - direction: 0
+    position:
+      <X>k__BackingField: 6
+      <Y>k__BackingField: 0
+  - direction: 1
+    position:
+      <X>k__BackingField: 6
+      <Y>k__BackingField: 3
+  - direction: 1
+    position:
+      <X>k__BackingField: 6
+      <Y>k__BackingField: 5
