@@ -7,46 +7,20 @@ using DefaultNamespace;
 
 public class DynamicBlock : MonoBehaviour
 {
-    public static DynamicBlock Instance { get; private set; }
 
     [SerializeField] private WallInfoObject wallInfo;
     public string collName;
-    private GameObject temp;
-    //private string prevRow;
-    //private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
+    public GameObject temp;
 
     [SerializeField] private GameObject[] walls; // 0 is north, 1 is south, 2 is east, 3 is west
     private List<GameObject> possWalls;
-    //[SerializeField] private BlockInfoObject blockInfo;
-    //private Trial trial;
-    //private Dictionary<GridLocation, Dictionary<GridLocation, List<Coordinate>>> wallLocations = new();
-    //private List<GridLocation> blockLocations;
-    //private List<GridLocation> nodeTriggers;
-    //private WallDirection wallDirection;
-    //private GameObject wall;
 
     private void OnEnable()
     {
         temp = new GameObject();
+        //possWalls = new List<GameObject>();
         CreateWallTriggers();
     }
-    //private void OnEnable()
-    //{
-    //    blockLocations = new();
-    //    nodeTriggers = new();
-    //    blockInfo.MakeDict();
-    //    wallLocations = blockInfo.wallLocations;
-    //    trial = ExperimentController.Instance.GetTrialInfo();
-    //    if (trial.stressTrial)
-    //    {
-    //        foreach (Coordinate coordinate in wallLocations[trial.start][trial.end])
-    //        {
-    //            blockLocations.Add(coordinate.ToGridLocation());
-    //        }
-    //    }
-    //    CheckWallDirection();
-    //    CreateNodeTriggers();
-    //}
 
     //private void OnDisable()
     //{
@@ -125,60 +99,23 @@ public class DynamicBlock : MonoBehaviour
                     temp = Instantiate(walls[2], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[2].transform.rotation) as GameObject;
                     temp.name = wallInfo.GetPositions()[i].GetString() + "E";
                     temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
-                    //possWalls.Add(temp);
+                    //possWalls.Add(temp.transform.GetChild(0).gameObject);
                     temp = Instantiate(walls[3], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[3].transform.rotation) as GameObject;
                     temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
                     temp.name = wallInfo.GetPositions()[i].GetString() + "W";
-                    //possWalls.Add(temp);
+                    //possWalls.Add(temp.transform.GetChild(0).gameObject);
                     break;
                 case WallDirection.Horizontal:
                     temp = Instantiate(walls[0], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[0].transform.rotation) as GameObject;
                     temp.name = wallInfo.GetPositions()[i].GetString() + "N";
                     temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
-                    //possWalls.Add(temp);
+                    //possWalls.Add(temp.transform.GetChild(0).gameObject);
                     temp = Instantiate(walls[1], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[1].transform.rotation) as GameObject;
                     temp.name = wallInfo.GetPositions()[i].GetString() + "S";
                     temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
-                    //possWalls.Add(temp);
+                    //possWalls.Add(temp.transform.GetChild(0).gameObject);
                     break;
             }
-        }
-    }
-
-    //private void CreatewallInfo.positions[i]Triggers()
-    //{
-    //    foreach (GridLocation node in blockLocations)
-    //    {
-    //        switch (wallDirection)
-    //        {
-    //            case WallDirection.North:
-    //                nodeTriggers.Add(new GridLocation(node.GetX(), node.GetY()+1));
-    //                break;
-    //            case WallDirection.South:
-    //                nodeTriggers.Add(new GridLocation(node.GetX(), node.GetY() - 1));
-    //                break;
-    //            case WallDirection.East:
-    //                nodeTriggers.Add(new GridLocation(node.GetX() + 1, node.GetY()));
-    //                break;
-    //            case WallDirection.West:
-    //                nodeTriggers.Add(new GridLocation(node.GetX() - 1, node.GetY()));
-    //                break;
-    //            default:
-    //                break;
-    //        }
-    //    }
-    //}
-
-    void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
         }
     }
 }

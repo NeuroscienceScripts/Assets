@@ -18,6 +18,9 @@ namespace DefaultNamespace
         private FileHandler fileHandler = new FileHandler();
         private string lastNodePosition = "";
 
+        public bool wallActivated = false;
+        public string currWall = "";
+
         public void OnTriggerEnter(Collider other)
         {
             if (other.name.Length == 2 & lastNodePosition!=other.name & ExperimentController.Instance.recordCameraAndNodes)
@@ -30,6 +33,11 @@ namespace DefaultNamespace
             }
             else if(other.name.Length>2 & !other.name.Contains("Cube"))
                 controllerSelection = other.name;
+            if (other.transform.parent?.gameObject.name.Length == 3 && !(currentNode == ExperimentController.Instance.GetTrialInfo().start))
+            {
+                wallActivated = true;
+                currWall = other.transform.parent.gameObject.name;
+            }
         }
 
         public void OnTriggerExit(Collider other)
