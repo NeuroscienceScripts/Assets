@@ -374,6 +374,7 @@ public class ExperimentController : MonoBehaviour
                 case 1: // Go to next start
                     if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger())
                     {
+                        dynamicBlock.enabled = true;
                         footprints.SetActive(false);
                         maze.SetActive(true);
                         stepInPhase++;
@@ -385,7 +386,6 @@ public class ExperimentController : MonoBehaviour
                     break;
                 
                 case 2: // Wait for them to touch painting
-                    dynamicBlock.enabled = true;
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Touch the painting and pull the trigger to start trial";
                     if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(GetTrialInfo().start.GetString()))
@@ -406,7 +406,7 @@ public class ExperimentController : MonoBehaviour
                                 PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(2));
                             maze.SetActive(false);
                             
-                            stepInPhase++; 
+                            stepInPhase++;
                         }
                     }
 
@@ -414,12 +414,17 @@ public class ExperimentController : MonoBehaviour
 
                 case 4: // Rate stress
                         //todo Add Apurv's code
-                    Destroy(GameObject.FindGameObjectWithTag("Wall"));
+                    GameObject[] taggedObjects = GameObject.FindGameObjectsWithTag("Wall");
+                    foreach (GameObject object1 in taggedObjects) {
+                        //Debug.Log("foind");
+                        Destroy(object1);
+                    }
                     userText.GetComponent<TextMeshProUGUI>().text = ""; 
                     stressCanvas.enabled = true;
                     Debug.Log(stressCanvas.enabled);
                     recordCameraAndNodes = false; 
-                    recordCameraAndNodes = false; 
+                    recordCameraAndNodes = false;
+
                     // select stress, once selected disable stress UI and move phase forward
                     if (confirm)
                     {

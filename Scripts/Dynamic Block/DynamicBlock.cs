@@ -16,7 +16,7 @@ public class DynamicBlock : MonoBehaviour
 
     private void OnEnable()
     {
-        temp = new GameObject();
+        temp = new();
         possWalls = new();
         CreateWallTriggers();
     }
@@ -25,6 +25,8 @@ public class DynamicBlock : MonoBehaviour
     {
         possWalls = null;
         temp = null;
+        ControllerCollider.Instance.wallActivated = false;
+        ControllerCollider.Instance.currWall = "";
     }
 
     private void Update()
@@ -35,6 +37,7 @@ public class DynamicBlock : MonoBehaviour
             {
                 if(possWalls[i].name == ControllerCollider.Instance.currWall)
                 {
+                    Debug.Log(ControllerCollider.Instance.currWall);
                     if(possWalls[i].name.Contains("N"))
                     {
                         possWalls[i+1].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
@@ -52,7 +55,7 @@ public class DynamicBlock : MonoBehaviour
                         possWalls[i-1].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
                         enabled = false;
                     }
-
+                    break;
                 }
             }
         }
@@ -61,8 +64,8 @@ public class DynamicBlock : MonoBehaviour
     private void CreateWallTriggers()
     {
         //TODO: FIX THIS LINE IT IS A TEST FOR NOW
-        GridLocation startTrial = new GridLocation("A", 1);
-        //GridLocation startTrial = ExperimentController.Instance.GetTrialInfo().start;
+        //GridLocation startTrial = new GridLocation("A", 1);
+        GridLocation startTrial = ExperimentController.Instance.GetTrialInfo().start;
         for (int i = 0; i < wallInfo.GetPositions().Count; i++)
         {
             WallDirection dir = wallInfo.GetDirections()[i];
