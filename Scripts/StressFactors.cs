@@ -41,11 +41,7 @@ namespace DefaultNamespace
                         lastBeep = Time.realtimeSinceStartup;
                     }
                 */
-                pathBlockObject.transform.position = new Vector3(
-                        ExperimentController.Instance.GetTrialInfo().blockedLocation.GetX(),
-                        pathBlockObject.transform.position.y,
-                        ExperimentController.Instance.GetTrialInfo().blockedLocation.GetY());
-                pathBlockObject.SetActive(true);
+                
             }
 
                 else
