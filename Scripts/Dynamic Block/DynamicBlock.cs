@@ -52,7 +52,6 @@ public class DynamicBlock : MonoBehaviour
             {
                 if (possWalls[i].name == ControllerCollider.Instance.currWall)
                 {
-                    Debug.Log(ControllerCollider.Instance.currWall);
                     if (possWalls[i].name.Contains("N"))
                     {
                         possWalls[i + 1].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;

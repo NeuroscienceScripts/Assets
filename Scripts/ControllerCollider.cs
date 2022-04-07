@@ -35,7 +35,7 @@ namespace DefaultNamespace
                 controllerSelection = other.name;
             if (other.CompareTag("Wall"))
             {
-                if (other.GetComponent<BoxCollider>().enabled && wallActivated)
+                if (other.GetComponent<MeshRenderer>().enabled && wallActivated)
                 {
                     Debug.Log("reset trial");
                 }
