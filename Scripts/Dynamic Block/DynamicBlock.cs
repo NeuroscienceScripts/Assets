@@ -4,7 +4,6 @@ using UnityEngine;
 using Classes;
 using DefaultNamespace;
 
-
 public class DynamicBlock : MonoBehaviour
 {
 
@@ -13,6 +12,8 @@ public class DynamicBlock : MonoBehaviour
 
     [SerializeField] private GameObject[] walls; // 0 is north, 1 is south, 2 is east, 3 is west
     private List<GameObject> possWalls;
+    private List<MeshRenderer> renderers;
+    private List<BoxCollider> colliders;
 
     private void OnEnable()
     {
@@ -27,6 +28,8 @@ public class DynamicBlock : MonoBehaviour
     private void Awake()
     {
         possWalls = new();
+        renderers = new();
+        colliders = new();
         InstantiateWalls();
         DisableWalls();
         enabled = false;
@@ -54,26 +57,26 @@ public class DynamicBlock : MonoBehaviour
                 {
                     if (possWalls[i].name.Contains("N"))
                     {
-                        possWalls[i + 1].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-                        possWalls[i + 1].transform.GetChild(0).GetComponent<BoxCollider>().isTrigger = false;
+                        renderers[i + 1].enabled = true;
+                        colliders[i + 1].isTrigger = false;
                         enabled = false;
                     }
                     else if (possWalls[i].name.Contains("S"))
                     {
-                        possWalls[i - 1].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-                        possWalls[i - 1].transform.GetChild(0).GetComponent<BoxCollider>().isTrigger = false;
+                        renderers[i - 1].enabled = true;
+                        colliders[i - 1].isTrigger = false;
                         enabled = false;
                     }
                     else if (possWalls[i].name.Contains("E"))
                     {
-                        possWalls[i + 1].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-                        possWalls[i + 1].transform.GetChild(0).GetComponent<BoxCollider>().isTrigger = false;
+                        renderers[i + 1].enabled = true;
+                        colliders[i + 1].isTrigger = false;
                         enabled = false;
                     }
                     else if (possWalls[i].name.Contains("W"))
                     {
-                        possWalls[i - 1].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-                        possWalls[i - 1].transform.GetChild(0).GetComponent<BoxCollider>().isTrigger = false;
+                        renderers[i - 1].enabled = true;
+                        colliders[i - 1].isTrigger = false;
                         enabled = false;
                     }
                     break;
@@ -94,10 +97,14 @@ public class DynamicBlock : MonoBehaviour
                 temp.name = wp.position.ToGridLocation().GetString() + "E";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
+                renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
+                colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
                 temp = Instantiate(walls[3], new Vector3(wp.position.ToGridLocation().GetX(), 1, wp.position.ToGridLocation().GetY()), walls[3].transform.rotation);
                 temp.name = wp.position.ToGridLocation().GetString() + "W";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
+                renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
+                colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
             }
             else
             {
@@ -105,10 +112,14 @@ public class DynamicBlock : MonoBehaviour
                 temp.name = wp.position.ToGridLocation().GetString() + "N";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
+                renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
+                colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
                 temp = Instantiate(walls[1], new Vector3(wp.position.ToGridLocation().GetX(), 1, wp.position.ToGridLocation().GetY()), walls[1].transform.rotation);
                 temp.name = wp.position.ToGridLocation().GetString() + "S";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
+                renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
+                colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
             }
         }
     }
