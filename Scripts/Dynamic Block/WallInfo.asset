@@ -13,91 +13,91 @@ MonoBehaviour:
   m_Name: WallInfo
   m_EditorClassIdentifier: 
   wallPositions:
-  - direction: 1
+  - direction: 0
     position:
       <X>k__BackingField: 0
       <Y>k__BackingField: 1
-  - direction: 1
+  - direction: 0
     position:
       <X>k__BackingField: 0
       <Y>k__BackingField: 3
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 0
       <Y>k__BackingField: 6
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 1
       <Y>k__BackingField: 0
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 1
       <Y>k__BackingField: 2
-  - direction: 1
+  - direction: 0
     position:
       <X>k__BackingField: 1
       <Y>k__BackingField: 5
-  - direction: 1
+  - direction: 0
     position:
       <X>k__BackingField: 2
       <Y>k__BackingField: 1
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 2
       <Y>k__BackingField: 4
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 2
       <Y>k__BackingField: 6
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 3
       <Y>k__BackingField: 0
-  - direction: 1
+  - direction: 0
     position:
       <X>k__BackingField: 3
       <Y>k__BackingField: 3
-  - direction: 1
+  - direction: 0
     position:
       <X>k__BackingField: 3
       <Y>k__BackingField: 5
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 4
       <Y>k__BackingField: 0
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 4
       <Y>k__BackingField: 2
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 4
       <Y>k__BackingField: 4
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 4
       <Y>k__BackingField: 6
-  - direction: 1
+  - direction: 0
     position:
       <X>k__BackingField: 5
       <Y>k__BackingField: 1
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 5
       <Y>k__BackingField: 4
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 5
       <Y>k__BackingField: 6
-  - direction: 0
+  - direction: 1
     position:
       <X>k__BackingField: 6
       <Y>k__BackingField: 0
-  - direction: 1
+  - direction: 0
     position:
       <X>k__BackingField: 6
       <Y>k__BackingField: 3
-  - direction: 1
+  - direction: 0
     position:
       <X>k__BackingField: 6
       <Y>k__BackingField: 5

@@ -418,12 +418,7 @@ public class ExperimentController : MonoBehaviour
 
                 case 4: // Rate stress
                         //todo Add Apurv's code
-                    GameObject[] taggedObjects = GameObject.FindGameObjectsWithTag("Wall");
-                    foreach (GameObject object1 in taggedObjects)
-                    {
-                        //Debug.Log("foind");
-                        Destroy(object1);
-                    }
+                    dynamicBlock.DisableWalls();
                     userText.GetComponent<TextMeshProUGUI>().text = "";
                     stressCanvas.enabled = true;
                     Debug.Log(stressCanvas.enabled);

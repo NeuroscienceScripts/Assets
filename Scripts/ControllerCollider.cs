@@ -33,7 +33,7 @@ namespace DefaultNamespace
             }
             else if(other.name.Length>2 & !other.name.Contains("Cube"))
                 controllerSelection = other.name;
-            if (other.gameObject.tag == "Wall" & ExperimentController.Instance.stepInPhase == 3)
+            if (other.CompareTag("Wall"))
             {
                     wallActivated = true;
                     currWall = other.transform.parent.gameObject.name;
