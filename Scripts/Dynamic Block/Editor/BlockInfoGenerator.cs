@@ -25,7 +25,7 @@ public class BlockInfoGenerator : EditorWindow
     EditorCoroutine c2;
     #endregion
 
-    [MenuItem("Tools/BlockInfo Generator")]
+    //[MenuItem("Tools/BlockInfo Generator")]
     public static void ShowWindow()
     {
         GetWindow(typeof(BlockInfoGenerator));
