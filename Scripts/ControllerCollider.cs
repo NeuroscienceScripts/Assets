@@ -31,14 +31,19 @@ namespace DefaultNamespace
                 lastNodePosition = other.name;
                 ExperimentController.Instance.retraceNodes++;
             }
-            else if(other.name.Length>2 & !other.name.Contains("Cube"))
+            else if(other.name.Length>2 && !other.name.Contains("Cube") && !other.CompareTag("Wall"))
                 controllerSelection = other.name;
             if (other.CompareTag("Wall"))
             {
-                    wallActivated = true;
-                    currWall = other.transform.parent.gameObject.name;
+                if (other.GetComponent<BoxCollider>().enabled && wallActivated)
+                {
+                    Debug.Log("reset trial");
+                }
+                wallActivated = true;
+                currWall = other.transform.parent.gameObject.name;
             } else
             {
+                
                 wallActivated = false;
                 currWall = "";
             }
