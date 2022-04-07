@@ -29,12 +29,11 @@ namespace DefaultNamespace
                 {
                     firstPersonLook.enabled = true;
                     firstPersonMovement.enabled = true;
-                   
                 }
                 else
                  {
-                     cameraHelperVR.enabled = true;
-                 }
+                    cameraHelperVR.enabled = true;
+                }
             }
         }
     }

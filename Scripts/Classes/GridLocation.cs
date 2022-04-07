@@ -1,8 +1,47 @@
-using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 namespace Classes
 {
+    /// <summary>
+    /// Internal container for GridLocation coordinates
+    /// </summary>
+    [Serializable]
+    public struct Coordinate
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+
+        public static bool operator==(Coordinate a, Coordinate b) => a.X == b.X && a.Y == b.Y;
+        public static bool operator !=(Coordinate a, Coordinate b) => a.X != b.X || a.Y != b.Y;
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        /// <summary>
+        /// Casts Coordinate to Grid Location where (0,0) is the lower left corner A1
+        /// </summary>
+        public GridLocation ToGridLocation()
+        {
+            return new GridLocation(Constants.LETTERS[Constants.GRID_LENGTH-1-Y], X+1);
+        }
+
+        /// <summary>
+        /// String version of ToGridLocation
+        /// </summary>
+        /// <returns>string corresponding to GridLocation</returns>
+        public string GridLocString()
+        {
+            return ToGridLocation().GetString();
+        }
+    }
+
     /// <summary>
     /// Used to represent the scene as a 7x7 Grid Space.  Y-direction is represented
     /// with a letter, starting with 'A' at the top and moving to 'G' at the bottom.
@@ -13,62 +52,55 @@ namespace Classes
     /// along with a function to check what object (by name) is located at each location. 
     ///  
     /// </summary>
+    [Serializable]
     public struct GridLocation
     {
-        public string y;
-        public int x;
+        private Coordinate pos;
+        private string y;
+        private int x;
 
         public GridLocation(string y, int x)
         {
+            pos = new Coordinate
+            {
+                X = x - (Constants.GRID_WIDTH / 2 + 1),
+                Y = Constants.GRID_LENGTH/2 - Array.IndexOf(Constants.LETTERS, y)
+            };
             this.y = y;
-            this.x = x; 
+            this.x = x;
         }
 
-        public float GetX()
+        public GridLocation(int x, int y)
         {
-            switch (x)
+            pos = new Coordinate
             {
-                case 1:
-                    return -3;
-                case 2:
-                    return -2;
-                case 3:
-                    return -1;
-                case 4:
-                    return 0;
-                case 5:
-                    return 1;
-                case 6:
-                    return 2;
-                case 7:
-                    return 3;
-                default:
-                    return 100;
-            }
-
+                X = x,
+                Y = y
+            };
+            this.y = Constants.LETTERS[Constants.GRID_LENGTH/2 - y];
+            this.x = x + Constants.GRID_WIDTH/2 + 1;
         }
 
-        public float GetY()
+        public static bool operator ==(GridLocation a, GridLocation b) => a.GetX() == b.GetX() && a.GetY() == b.GetY();
+        public static bool operator !=(GridLocation a, GridLocation b) => a.GetX() != b.GetX() || a.GetY() != b.GetY();
+
+        public override bool Equals(object obj)
         {
-            switch (y)
-            {
-                case "A":
-                    return 3;
-                case "B":
-                    return 2;
-                case "C":
-                    return 1;
-                case "D":
-                    return 0;
-                case "E":
-                    return -1;
-                case "F":
-                    return -2;
-                case "G":
-                    return -3; 
-                default:
-                    return 100; 
-            }
+            return base.Equals(obj);
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public int GetX()
+        {
+            return pos.X;
+        }
+
+        public int GetY()
+        {
+            return pos.Y;
         }
 
         public string GetTarget() 
