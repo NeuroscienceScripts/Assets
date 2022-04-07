@@ -93,8 +93,7 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        DisplayDebugInfo(); 
-
+        DisplayDebugInfo();
         switch (phase)
         {
             case 0:
