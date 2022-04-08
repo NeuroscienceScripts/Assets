@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Classes;
 using DefaultNamespace;
 using TMPro;
 using UnityEngine;
+using Valve.VR;
 using Random = UnityEngine.Random;
 
+//TODO: Fix paintings to be on wall, fix footprints to rotate toward next target 
 /// <summary>
 /// On each frame, ExperimentController checks which phase you are in (learning, retracing, or testing).
 /// Within each phase, ExperimentController checks what step of the phase you are on and acts accordingly.
@@ -14,7 +17,7 @@ using Random = UnityEngine.Random;
 /// </summary>
 public class ExperimentController : MonoBehaviour
 {
-    public static ExperimentController  Instance { get; private set; }
+    public static ExperimentController Instance { get; private set; }
 
     [SerializeField] public Canvas introCanvas;
     [SerializeField] public Canvas stressCanvas;
@@ -22,34 +25,39 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject footprints;
     [SerializeField] private GameObject moveForwardArrow;
     [SerializeField] public GameObject stressLevel;
+    [SerializeField] public GameObject stressText; 
 
     [SerializeField] private GameObject subjectInput;
     [SerializeField] private GameObject trialInput;
     [SerializeField] private GameObject userText;
 
-    [SerializeField] public bool desktopMode = false; 
-    [SerializeField] private bool hidePaintingsDuringTesting = true; 
+    [SerializeField] public bool desktopMode = false;
+    [SerializeField] private bool hidePaintingsDuringTesting = true;
     [SerializeField] private GameObject paintings;
-    [SerializeField] private GameObject node; 
-    
-    
+    [SerializeField] private GameObject node;
+
     [SerializeField] private int learningRounds = 2;
     [SerializeField] private int retraceRounds = 2;
-    private int learningRedoRounds = 0; 
-    
+    private int learningRedoRounds = 0;
+
     [SerializeField] private int number_practice_trials = 3;
-   
+
+    #region StressVars
+    [SerializeField] private StressFactors stressFactors;
+    [SerializeField] private DynamicBlock dynamicBlock;
+    #endregion
+
     private int subjectNumber = 0;
 
     public int phase = 0;
-    public int stepInPhase = 0; 
+    public int stepInPhase = 0;
     public int currentTrial;
     public bool confirm = false;
-    public float trialStartTime = 0.0f; 
-    
+    public float trialStartTime = 0.0f;
+
     private FileHandler fileHandler = new FileHandler();
     public string subjectFile;
-    public bool recordCameraAndNodes = false; 
+    public bool recordCameraAndNodes = false;
 
     private Vector3[] arrowPath =
     {
@@ -59,46 +67,48 @@ public class ExperimentController : MonoBehaviour
         new Vector3(-3.0f, -3.0f, 270.0f),
         new Vector3(-3.0f, 1.0f, 0.0f),
         new Vector3(-2.0f, 1.0f, 270.0f),
-        new Vector3(-2.0f, 1.0f, 270.0f),
-        new Vector3(-2.0f, 2.0f, 180.0f),
+        //new Vector3(-2.0f, 1.0f, 235.0f),
+        new Vector3(-2.0f, 2.0f, 235.0f),
         new Vector3(-3.0f, 3.0f, 0.0f),
-        new Vector3(1.0f, 3.0f, 180.0f),
-        new Vector3(3.0f, 1.0f, 90.0f),
+        new Vector3(1.0f, 3.0f, 0.0f),
+        new Vector3(3.0f, 1.0f, 180.0f),
         new Vector3(0.0f, 1.0f, 90.0f),
         new Vector3(0f, -1.0f, 0.0f),
         new Vector3(2.0f, -1.0f, 90.0f),
-    }; 
+    };
 
     //todo Add trials to this list
     private Trial[] trialList =
     {
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 1)),
-        new Trial(new GridLocation("A", 1), new GridLocation("D", 1))
+        //G7 is just a placeholder, ideally Trial can be changed now so that this parameter is completely removed
+        new Trial(new GridLocation("A", 1), new GridLocation("F", 1), true, new GridLocation("G", 7)),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 1), true, new GridLocation("G", 7))
         // new Trial(new GridLocation("A", 1), new GridLocation("D", 1), true, new GridLocation("A", 1))  <- stress trial
     };
 
-    private string[] obstaclesList = {"B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7"};
+    private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
 
-    private int[] trialOrder; //Randomized at start
+    private int[] trialOrder = {0}; //Randomized at start
 
 
     /* Debug */
-    [SerializeField] bool debugActive = true; 
+    [SerializeField] bool debugActive = true;
     [SerializeField] private GameObject phaseDisplay;
-    [SerializeField] private GameObject stepDisplay; 
+    [SerializeField] private GameObject stepDisplay;
     [SerializeField] private GameObject trialDisplay;
-    
+
     /// <summary>
     /// Called every frame. Checks which phase of the experiment to run then calls the correct function
     /// </summary>
     void Update()
     {
         DisplayDebugInfo();
+
         switch (phase)
         {
             case 0:
                 stressCanvas.enabled = false;
-                userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase"; 
+                userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
                 break;
             case 1:
                 RunLearning();
@@ -106,7 +116,7 @@ public class ExperimentController : MonoBehaviour
             case 2:
                 RunRetrace();
                 break;
-            case 3: 
+            case 3:
                 RunTesting();
                 break;
             default:
@@ -124,7 +134,7 @@ public class ExperimentController : MonoBehaviour
         {
             phaseDisplay.GetComponent<TextMeshProUGUI>().text = "Phase: " + phase.ToString();
             stepDisplay.GetComponent<TextMeshProUGUI>().text = "Step: " + stepInPhase.ToString();
-            trialDisplay.GetComponent<TextMeshProUGUI>().text = "Trial: " + currentTrial; 
+            trialDisplay.GetComponent<TextMeshProUGUI>().text = "Trial: " + currentTrial;
         }
         else
         {
@@ -132,12 +142,6 @@ public class ExperimentController : MonoBehaviour
             stepDisplay.SetActive(false);
             trialDisplay.SetActive(false);
         }
-    }
-
-
-    private void Start()
-    {
-        trialOrder = new int[trialList.Length];
     }
 
     /// <summary>
@@ -149,27 +153,27 @@ public class ExperimentController : MonoBehaviour
     public void RunStartup(int phaseNumberStart)
     {
         subjectNumber = int.Parse(subjectInput.GetComponent<TMP_InputField>().text);
-        subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data"+ Path.DirectorySeparatorChar + subjectNumber + ".csv";
+        subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + ".csv";
         fileHandler.AppendLine(subjectFile,
             "trialID,timeInTrial,phase,trialNumber,stepInPhase," + DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" +
-            DateTime.Now.Minute); 
+            DateTime.Now.Minute);
         fileHandler.AppendLine(subjectFile.Replace(".csv", "_nodePath.csv"),
-            DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute); 
+            DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute);
         fileHandler.AppendLine(subjectFile.Replace(".csv", "_cameraRot.csv"),
-            "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xRot,yRot,zRot"); 
+            "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xRot,yRot,zRot");
         fileHandler.AppendLine(subjectFile.Replace(".csv", "_cameraPos.csv"),
-            "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xPos,yPos,zPos"); 
+            "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xPos,yPos,zPos");
 
         currentTrial = int.Parse(trialInput.GetComponent<TMP_InputField>().text);
         phase = phaseNumberStart;
-        introCanvas.enabled = false; 
-        
+        introCanvas.enabled = false;
+
         // ** Randomize trial order **
         Random.InitState(subjectNumber * 10); // Insures same path randomizations every run for same subject (in case the experiment needs restarted)
         trialOrder = new int[trialList.Length];
-        for(int i=0; i<trialOrder.Length; i++)
+        for (int i = 0; i < trialOrder.Length; i++)
             trialOrder[i] = i;
-        for(int t=number_practice_trials; t<trialOrder.Length; t++)
+        for (int t = number_practice_trials; t < trialOrder.Length; t++)
         {
             int tmp = trialOrder[t];
             int r = Random.Range(t, trialOrder.Length);
@@ -178,17 +182,17 @@ public class ExperimentController : MonoBehaviour
         }
 
         // Create a web of invisible node colliders to track position
-        string[] letters = {"A", "B", "C", "D", "E", "F", "G"};
-        int[] numbers = {1, 2, 3, 4, 5, 6, 7};
-        GameObject[] nodes = new GameObject[49]; 
-        for(int letter=0; letter<letters.Length; letter++)
+        string[] letters = { "A", "B", "C", "D", "E", "F", "G" };
+        int[] numbers = { 1, 2, 3, 4, 5, 6, 7 };
+        GameObject[] nodes = new GameObject[49];
+        for (int letter = 0; letter < letters.Length; letter++)
         {
-            for (int number=1; number<=7; number++)
+            for (int number = 1; number <= 7; number++)
             {
-                int currentPos = number-1  + letter * 7; 
+                int currentPos = number - 1 + letter * 7;
                 nodes[currentPos] = GameObject.Instantiate(node);
                 nodes[currentPos].name = letters[letter] + number;
-                
+
                 if (!obstaclesList.Contains(nodes[currentPos].name))
                 {
                     GridLocation nodeLocation = new GridLocation(letters[letter], number);
@@ -202,10 +206,10 @@ public class ExperimentController : MonoBehaviour
 
             }
         }
-        introCanvas.enabled = false; 
+        introCanvas.enabled = false;
     }
 
-    
+
     /// <summary>
     /// Requires participant to walk to starting point of learning phase and hit the trigger.
     /// Once started, the arrow moves along the path specified (at the start of this file) each
@@ -218,34 +222,39 @@ public class ExperimentController : MonoBehaviour
 
         if (stepInPhase == 0)
         {
-            userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button"; 
+            userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
             maze.SetActive(false);
             moveForwardArrow.SetActive(false);
             footprints.SetActive(true);
             footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
             if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
             {
-                recordCameraAndNodes = true; 
+                recordCameraAndNodes = true;
                 stepInPhase++;
             }
         }
         else if (stepInPhase < arrowPath.Length)
         {
-            userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow"; 
+            userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
             maze.SetActive(true);
             footprints.SetActive(false);
             moveForwardArrow.SetActive(true);
             moveForwardArrow.transform.position =
                                 new Vector3(arrowPath[stepInPhase].x, arrowHeight, arrowPath[stepInPhase].y);
             moveForwardArrow.transform.rotation = Quaternion.Euler(moveForwardArrow.transform.rotation.eulerAngles.x,
-                arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z); 
-            
+                arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
+
             if (ControllerCollider.Instance.controllerSelection.Contains(moveForwardArrow.name))
             {
                 stepInPhase++;
                 ControllerCollider.Instance.controllerSelection = "Not selected";
-                recordCameraAndNodes = false; 
+                recordCameraAndNodes = false;
             }
+        }
+
+        if (stepInPhase > 1)
+        {
+            userText.GetComponent<TextMeshProUGUI>().text = ""; 
         }
 
         if (currentTrial < learningRounds)
@@ -253,19 +262,19 @@ public class ExperimentController : MonoBehaviour
             if (stepInPhase >= arrowPath.Length)
             {
                 currentTrial++;
-                stepInPhase = 0; 
+                stepInPhase = 0;
             }
         }
         else
         {
             moveForwardArrow.SetActive(false);
-            currentTrial = 0; 
-            phase++; 
+            currentTrial = 0;
+            phase++;
         }
 
     }
 
-    public int retraceNodes = 0; 
+    public int retraceNodes = 0;
     /// <summary>
     /// Has participants retrace their learned route.  The arrow is invisible but still detecting collisions and moving
     /// like in RunLearning(). If the participant travels too many nodes before reaching a checkpoint, they fail and
@@ -273,11 +282,16 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void RunRetrace()
     {
+        if (stepInPhase > 1)
+        {
+            userText.GetComponent<TextMeshProUGUI>().text = ""; 
+        }
+        
         if (currentTrial < retraceRounds)
         {
             if (stepInPhase == 0)
             {
-                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button"; 
+                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
                 maze.SetActive(false);
                 moveForwardArrow.SetActive(false);
                 footprints.SetActive(true);
@@ -285,7 +299,7 @@ public class ExperimentController : MonoBehaviour
                 if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
                 {
                     stepInPhase++;
-                    recordCameraAndNodes = true; 
+                    recordCameraAndNodes = true;
                 }
             }
             else if (stepInPhase < arrowPath.Length)
@@ -295,9 +309,9 @@ public class ExperimentController : MonoBehaviour
                 moveForwardArrow.SetActive(true);
                 foreach (var arrowChild in moveForwardArrow.GetComponentsInChildren<MeshRenderer>())
                 {
-                    arrowChild.enabled = false; 
+                    arrowChild.enabled = false;
                 }
-                
+
                 moveForwardArrow.transform.position =
                     new Vector3(arrowPath[stepInPhase].x, moveForwardArrow.transform.position.y, arrowPath[stepInPhase].y);
                 if (ControllerCollider.Instance.controllerSelection.Contains(moveForwardArrow.name))
@@ -309,28 +323,28 @@ public class ExperimentController : MonoBehaviour
             else
             {
                 currentTrial++;
-                recordCameraAndNodes = false; 
+                recordCameraAndNodes = false;
                 retraceNodes = 0;
-                stepInPhase = 0; 
+                stepInPhase = 0;
             }
 
             if (retraceNodes > 6)
             {
-               
-                stepInPhase = 0; 
+
+                stepInPhase = 0;
                 phase--; // Need to relearn
                 retraceNodes = 0;
-                learningRedoRounds++; 
+                learningRedoRounds++;
             }
             //todo Count learning trials
         }
         else
         {
             fileHandler.AppendLine(subjectFile.Replace(".csv", "_numLearning.csv"), learningRedoRounds.ToString());
-            currentTrial = 0; 
+            currentTrial = 0;
             phase++;
             stepInPhase = 0;
-            moveForwardArrow.SetActive(false); 
+            moveForwardArrow.SetActive(false);
         }
     }
 
@@ -345,20 +359,19 @@ public class ExperimentController : MonoBehaviour
     {
         if (currentTrial < trialList.Length)
         {
-            foreach (var  painting in paintings.GetComponentsInChildren<MeshRenderer>())
-                if(hidePaintingsDuringTesting & !painting.name.Contains("frame"))
-                    if(stepInPhase > 2)
-                        painting.enabled = false;  // Hides all text/pictures in the paintings
-                    else if (!painting.name.Contains(GetTrialInfo().start.GetTarget()))
-                        painting.enabled = false; 
-            
+            // foreach (var painting in paintings.GetComponentsInChildren<MeshRenderer>())
+            //     if (hidePaintingsDuringTesting & !painting.name.Contains("frame"))
+            //         if (stepInPhase > 2)
+            //             painting.enabled = false;  // Hides all text/pictures in the paintings
+            //         else if (!painting.name.Contains(GetTrialInfo().start.GetTarget()))
+            //             painting.enabled = false;
             switch (stepInPhase)
             {
                 case 0: // Reorient
                     maze.SetActive(false);
                     footprints.SetActive(true);
 
-                    userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button"; 
+                    userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
                     if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger())
                     {
                         float nextX = GetTrialInfo().start.GetX();
@@ -372,68 +385,108 @@ public class ExperimentController : MonoBehaviour
                 case 1: // Go to next start
                     if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger())
                     {
+                        
                         footprints.SetActive(false);
                         maze.SetActive(true);
                         stepInPhase++;
                         fileHandler.AppendLine(
                             (ExperimentController.Instance.subjectFile).Replace(".csv", "_nodePath.csv"),
                             PrintStepInfo() + "," + GetTrialInfo().start.GetString() + "," + GetTrialInfo().end.GetString());
-                        trialStartTime = Time.realtimeSinceStartup; 
+                       
                     }
                     break;
-                
+
                 case 2: // Wait for them to touch painting
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Touch the painting and pull the trigger to start trial";
                     if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(GetTrialInfo().start.GetString()))
+                    {
+                        dynamicBlock.enabled = true;
                         stepInPhase++;
-                    break; 
-                
+                        trialStartTime = Time.realtimeSinceStartup;
+                    }
+                        
+                    break;
+
                 case 3: // Walk to end
-                    recordCameraAndNodes = true; 
-                    recordCameraAndNodes = true; 
+                    recordCameraAndNodes = true;
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Target Object: " + GetTrialInfo().end.GetTarget();
-                    if (GetTrigger())
+                    //Debug.Log("Walk to end");
+                    if ((GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains("targ")) || 
+                        (GetTrialInfo().stressTrial & Time.realtimeSinceStartup - trialStartTime >= 30))
                     {
-                        if (ControllerCollider.Instance.controllerSelection.Contains("targ"))
-                        {
-                            Debug.Log("Selected " + ControllerCollider.Instance.controllerSelection);
-                            fileHandler.AppendLine(subjectFile,
-                                PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(2));
-                            maze.SetActive(false);
-                            
-                            stepInPhase++; 
-                        }
+                        Debug.Log("Selected " + ControllerCollider.Instance.controllerSelection);
+                        fileHandler.AppendLine(subjectFile,
+                            PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(ControllerCollider.Instance.controllerSelection.Length > 2 ? 2 : 0));
+                        maze.SetActive(false);
+                        stressLevel.GetComponent<TextMeshProUGUI>().text = "3"; 
+
+                        stepInPhase++;
                     }
 
                     break;
 
                 case 4: // Rate stress
-                    //todo Add Apurv's code
-                    userText.GetComponent<TextMeshProUGUI>().text = ""; 
+                    
+                    if (SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any))
+                    {
+                        stressLevel.GetComponent<TextMeshProUGUI>().text =
+                            (int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text) - 1).ToString();
+                    }
+
+                    if (SteamVR_Actions._default.SnapTurnRight.GetStateDown(SteamVR_Input_Sources.Any))
+                    {
+                        stressLevel.GetComponent<TextMeshProUGUI>().text =
+                            (int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text) + 1).ToString();
+                    }
+
+                    stressLevel.GetComponent<TextMeshProUGUI>().text =
+                        Math.Clamp(int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text), 1, 5).ToString(); 
+
+                    GameObject[] taggedObjects = GameObject.FindGameObjectsWithTag("Wall");
+                    foreach (GameObject object1 in taggedObjects)
+                    {
+                        //Debug.Log("foind");
+                        Destroy(object1);
+                    }
+                    userText.GetComponent<TextMeshProUGUI>().text = "";
                     stressCanvas.enabled = true;
-                    Debug.Log(stressCanvas.enabled);
-                    recordCameraAndNodes = false; 
-                    recordCameraAndNodes = false; 
+
+                    recordCameraAndNodes = false;
+                    recordCameraAndNodes = false;
+
                     // select stress, once selected disable stress UI and move phase forward
-                    if (confirm)
+                    if (GetTrigger() )
+                    {
+                        stressText.GetComponent<TextMeshProUGUI>().text = "Confirm?"; 
+                        stepInPhase++; 
+                    }
+                    break;
+                case 5:
+                    if (GetTrigger())
                     {
                         //move forward
+                        stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level"; 
                         stressCanvas.enabled = false;
                         stepInPhase = 0;
                         footprints.transform.position = new Vector3(Random.Range(-4, 4), footprints.transform.position.y,
                             Random.Range(-4, 4));
-                    
-                        foreach (var  painting in paintings.GetComponentsInChildren<MeshRenderer>())
-                            painting.enabled = true;  
-                    
+                        
+                        
+                        fileHandler.AppendLine(subjectFile.Replace(".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text );
+
                         currentTrial++;
-                    
                         Debug.Log("Current trial: " + currentTrial);
                     }
-                    break;
-                    
+                    else if (SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
+                    {
+                        stepInPhase--; 
+                        stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level"; 
+                    }
+
+                    break; 
+
 
                 default:
                     Debug.Log("Unexpected stepInPhase during RunTesting()");
@@ -442,10 +495,10 @@ public class ExperimentController : MonoBehaviour
         }
         else
         {
-            phase++; 
+            phase++;
         }
     }
-    
+
     public void UpdateStressOnClick(string stressValue)
     {
         stressLevel.GetComponent<TextMeshProUGUI>().text = stressValue;
@@ -467,7 +520,7 @@ public class ExperimentController : MonoBehaviour
         //TODO update for VR (have a screenSpace canvas and worldSpace canvas)
     }
 
-        
+
     private float triggerTimer = 0;
     /// <summary>
     /// Checks if the trigger (or spacebar) is pressed, has a half second delay before it will read a subsequent
@@ -476,14 +529,14 @@ public class ExperimentController : MonoBehaviour
     /// <returns> if(trigger & >.5 seconds since last press){return true};</returns>
     private bool GetTrigger()
     {
-        if ((Input.GetAxis("Submit") > 0.25 || Input.GetKeyDown(KeyCode.Space)) &
-            Time.realtimeSinceStartup - triggerTimer > .5)
+        if ((SteamVR_Actions._default.InteractUI.GetStateDown(SteamVR_Input_Sources.Any) || Input.GetKeyDown(KeyCode.Space)) &
+            Time.realtimeSinceStartup - triggerTimer > 1)
         {
-            triggerTimer = Time.realtimeSinceStartup; 
+            triggerTimer = Time.realtimeSinceStartup;
             return true;
         }
 
-        return false; 
+        return false;
     }
 
     /// <summary>
@@ -491,7 +544,18 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     public Trial GetTrialInfo()
     {
-        return trialList[trialOrder[currentTrial]]; 
+        return trialList[trialOrder[currentTrial]];
+    }
+
+    public void SetTrialBlockedLocation(string letter, int num)
+    {
+        //NOTE: this if-else statement is a temporary fix for errors, please remove once trialList&trialOrder is populated
+        if (trialOrder?.Length >= currentTrial - 1)
+            trialList[trialOrder[currentTrial]].blockedLocation = new GridLocation(letter, num);
+        else
+        {
+            trialList[0].blockedLocation = new GridLocation(letter, num);
+        }
     }
 
     /// <summary>
@@ -500,9 +564,9 @@ public class ExperimentController : MonoBehaviour
     /// <returns></returns>
     public string PrintStepInfo()
     {
-        return trialOrder[currentTrial] + "," + (Time.realtimeSinceStartup-trialStartTime) + "," + phase + "," + currentTrial + "," + stepInPhase; 
+        return trialOrder[currentTrial] + "," + (Time.realtimeSinceStartup - trialStartTime) + "," + phase + "," + currentTrial + "," + stepInPhase;
     }
-    
+
     // The following code will make instance of ExperimentController persist between scenes and destroy subsequent instances
     void Awake()
     {
@@ -513,7 +577,7 @@ public class ExperimentController : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject); 
+            Destroy(gameObject);
         }
     }
 }
