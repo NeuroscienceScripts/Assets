@@ -9,6 +9,7 @@ using UnityEngine;
 using Valve.VR;
 using Random = UnityEngine.Random;
 
+//TODO: Fix paintings to be on wall, fix footprints to rotate toward next target 
 /// <summary>
 /// On each frame, ExperimentController checks which phase you are in (learning, retracing, or testing).
 /// Within each phase, ExperimentController checks what step of the phase you are on and acts accordingly.
@@ -251,6 +252,11 @@ public class ExperimentController : MonoBehaviour
             }
         }
 
+        if (stepInPhase > 1)
+        {
+            userText.GetComponent<TextMeshProUGUI>().text = ""; 
+        }
+
         if (currentTrial < learningRounds)
         {
             if (stepInPhase >= arrowPath.Length)
@@ -276,6 +282,11 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void RunRetrace()
     {
+        if (stepInPhase > 1)
+        {
+            userText.GetComponent<TextMeshProUGUI>().text = ""; 
+        }
+        
         if (currentTrial < retraceRounds)
         {
             if (stepInPhase == 0)
