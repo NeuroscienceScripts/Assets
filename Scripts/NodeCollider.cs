@@ -8,9 +8,9 @@ namespace DefaultNamespace
     /// Detects what object the participant/controller is in contact with,
     /// needs to be attached to the controller object 
     /// </summary>
-    public class ControllerCollider : MonoBehaviour
+    public class NodeCollider : MonoBehaviour
     {
-        public static ControllerCollider Instance { get; private set; }
+        public static NodeCollider Instance { get; private set; }
 
         public string controllerSelection;
         public GridLocation currentNode; 
@@ -23,7 +23,7 @@ namespace DefaultNamespace
 
         public void OnTriggerEnter(Collider other)
         {
-            if (other.name.Length == 2 & lastNodePosition!=other.name & ExperimentController.Instance.recordCameraAndNodes )
+            if (other.name.Length == 2 & lastNodePosition!=other.name & ExperimentController.Instance.recordCameraAndNodes)
             {
                 currentNode = new GridLocation("" + other.name[0], int.Parse("" + other.name[1]));
                 fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(".csv", "_nodePath.csv"),
@@ -31,24 +31,22 @@ namespace DefaultNamespace
                 lastNodePosition = other.name;
                 ExperimentController.Instance.retraceNodes++;
             }
-            else if(other.name.Length>2 & !other.name.Contains("Cube") & !other.tag.Contains("Wall"))
-                controllerSelection = other.name;
-            
-            
-            if (other.gameObject.tag == "Wall" & ExperimentController.Instance.stepInPhase == 3)
-            {
-                    wallActivated = true;
-                    currWall = other.transform.parent.gameObject.name;
-            } else
-            {
-                wallActivated = false;
-                currWall = "";
-            }
+            // else if(other.name.Length>2 & !other.name.Contains("Cube"))
+            //     controllerSelection = other.name;
+            // if (other.gameObject.tag == "Wall" & ExperimentController.Instance.stepInPhase == 3)
+            // {
+            //         wallActivated = true;
+            //         currWall = other.transform.parent.gameObject.name;
+            // } else
+            // {
+            //     wallActivated = false;
+            //     currWall = "";
+            // }
         }
 
         public void OnTriggerExit(Collider other)
         {
-            if(other.name.Length>2 & !other.name.Contains("Cube") & !other.tag.Contains("Wall"))
+            if(other.name.Length>2 & !other.name.Contains("Cube"))
                 controllerSelection = "Not_Selected"; 
         }
 

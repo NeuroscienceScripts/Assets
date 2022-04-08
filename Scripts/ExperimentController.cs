@@ -6,6 +6,7 @@ using Classes;
 using DefaultNamespace;
 using TMPro;
 using UnityEngine;
+using Valve.VR;
 using Random = UnityEngine.Random;
 
 /// <summary>
@@ -23,6 +24,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject footprints;
     [SerializeField] private GameObject moveForwardArrow;
     [SerializeField] public GameObject stressLevel;
+    [SerializeField] public GameObject stressText; 
 
     [SerializeField] private GameObject subjectInput;
     [SerializeField] private GameObject trialInput;
@@ -32,7 +34,6 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private bool hidePaintingsDuringTesting = true;
     [SerializeField] private GameObject paintings;
     [SerializeField] private GameObject node;
-
 
     [SerializeField] private int learningRounds = 2;
     [SerializeField] private int retraceRounds = 2;
@@ -65,11 +66,11 @@ public class ExperimentController : MonoBehaviour
         new Vector3(-3.0f, -3.0f, 270.0f),
         new Vector3(-3.0f, 1.0f, 0.0f),
         new Vector3(-2.0f, 1.0f, 270.0f),
-        new Vector3(-2.0f, 1.0f, 270.0f),
-        new Vector3(-2.0f, 2.0f, 180.0f),
+        //new Vector3(-2.0f, 1.0f, 235.0f),
+        new Vector3(-2.0f, 2.0f, 235.0f),
         new Vector3(-3.0f, 3.0f, 0.0f),
-        new Vector3(1.0f, 3.0f, 180.0f),
-        new Vector3(3.0f, 1.0f, 90.0f),
+        new Vector3(1.0f, 3.0f, 0.0f),
+        new Vector3(3.0f, 1.0f, 180.0f),
         new Vector3(0.0f, 1.0f, 90.0f),
         new Vector3(0f, -1.0f, 0.0f),
         new Vector3(2.0f, -1.0f, 90.0f),
@@ -86,7 +87,7 @@ public class ExperimentController : MonoBehaviour
 
     private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
 
-    private int[] trialOrder; //Randomized at start
+    private int[] trialOrder = {0}; //Randomized at start
 
 
     /* Debug */
@@ -347,13 +348,12 @@ public class ExperimentController : MonoBehaviour
     {
         if (currentTrial < trialList.Length)
         {
-            foreach (var painting in paintings.GetComponentsInChildren<MeshRenderer>())
-                if (hidePaintingsDuringTesting & !painting.name.Contains("frame"))
-                    if (stepInPhase > 2)
-                        painting.enabled = false;  // Hides all text/pictures in the paintings
-                    else if (!painting.name.Contains(GetTrialInfo().start.GetTarget()))
-                        painting.enabled = false;
-
+            // foreach (var painting in paintings.GetComponentsInChildren<MeshRenderer>())
+            //     if (hidePaintingsDuringTesting & !painting.name.Contains("frame"))
+            //         if (stepInPhase > 2)
+            //             painting.enabled = false;  // Hides all text/pictures in the paintings
+            //         else if (!painting.name.Contains(GetTrialInfo().start.GetTarget()))
+            //             painting.enabled = false;
             switch (stepInPhase)
             {
                 case 0: // Reorient
@@ -381,7 +381,7 @@ public class ExperimentController : MonoBehaviour
                         fileHandler.AppendLine(
                             (ExperimentController.Instance.subjectFile).Replace(".csv", "_nodePath.csv"),
                             PrintStepInfo() + "," + GetTrialInfo().start.GetString() + "," + GetTrialInfo().end.GetString());
-                        trialStartTime = Time.realtimeSinceStartup;
+                       
                     }
                     break;
 
@@ -392,6 +392,7 @@ public class ExperimentController : MonoBehaviour
                     {
                         dynamicBlock.enabled = true;
                         stepInPhase++;
+                        trialStartTime = Time.realtimeSinceStartup;
                     }
                         
                     break;
@@ -401,23 +402,37 @@ public class ExperimentController : MonoBehaviour
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Target Object: " + GetTrialInfo().end.GetTarget();
                     //Debug.Log("Walk to end");
-                    if (GetTrigger())
+                    if ((GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains("targ")) || 
+                        (GetTrialInfo().stressTrial & Time.realtimeSinceStartup - trialStartTime >= 30))
                     {
-                        if (ControllerCollider.Instance.controllerSelection.Contains("targ"))
-                        {
-                            Debug.Log("Selected " + ControllerCollider.Instance.controllerSelection);
-                            fileHandler.AppendLine(subjectFile,
-                                PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(2));
-                            maze.SetActive(false);
+                        Debug.Log("Selected " + ControllerCollider.Instance.controllerSelection);
+                        fileHandler.AppendLine(subjectFile,
+                            PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(ControllerCollider.Instance.controllerSelection.Length > 2 ? 2 : 0));
+                        maze.SetActive(false);
+                        stressLevel.GetComponent<TextMeshProUGUI>().text = "3"; 
 
-                            stepInPhase++;
-                        }
+                        stepInPhase++;
                     }
 
                     break;
 
                 case 4: // Rate stress
-                        //todo Add Apurv's code
+                    
+                    if (SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any))
+                    {
+                        stressLevel.GetComponent<TextMeshProUGUI>().text =
+                            (int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text) - 1).ToString();
+                    }
+
+                    if (SteamVR_Actions._default.SnapTurnRight.GetStateDown(SteamVR_Input_Sources.Any))
+                    {
+                        stressLevel.GetComponent<TextMeshProUGUI>().text =
+                            (int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text) + 1).ToString();
+                    }
+
+                    stressLevel.GetComponent<TextMeshProUGUI>().text =
+                        Math.Clamp(int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text), 1, 5).ToString(); 
+
                     GameObject[] taggedObjects = GameObject.FindGameObjectsWithTag("Wall");
                     foreach (GameObject object1 in taggedObjects)
                     {
@@ -426,26 +441,40 @@ public class ExperimentController : MonoBehaviour
                     }
                     userText.GetComponent<TextMeshProUGUI>().text = "";
                     stressCanvas.enabled = true;
-                    Debug.Log(stressCanvas.enabled);
+
                     recordCameraAndNodes = false;
                     recordCameraAndNodes = false;
 
                     // select stress, once selected disable stress UI and move phase forward
-                    if (confirm)
+                    if (GetTrigger() )
+                    {
+                        stressText.GetComponent<TextMeshProUGUI>().text = "Confirm?"; 
+                        stepInPhase++; 
+                    }
+                    break;
+                case 5:
+                    if (GetTrigger())
                     {
                         //move forward
+                        stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level"; 
                         stressCanvas.enabled = false;
                         stepInPhase = 0;
                         footprints.transform.position = new Vector3(Random.Range(-4, 4), footprints.transform.position.y,
                             Random.Range(-4, 4));
-
-                        foreach (var painting in paintings.GetComponentsInChildren<MeshRenderer>())
-                            painting.enabled = true;
+                        
+                        
+                        fileHandler.AppendLine(subjectFile.Replace(".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text );
 
                         currentTrial++;
                         Debug.Log("Current trial: " + currentTrial);
                     }
-                    break;
+                    else if (SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
+                    {
+                        stepInPhase--; 
+                        stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level"; 
+                    }
+
+                    break; 
 
 
                 default:
@@ -489,8 +518,8 @@ public class ExperimentController : MonoBehaviour
     /// <returns> if(trigger & >.5 seconds since last press){return true};</returns>
     private bool GetTrigger()
     {
-        if ((Input.GetAxis("Submit") > 0.25 || Input.GetKeyDown(KeyCode.Space)) &
-            Time.realtimeSinceStartup - triggerTimer > .5)
+        if ((SteamVR_Actions._default.InteractUI.GetStateDown(SteamVR_Input_Sources.Any) || Input.GetKeyDown(KeyCode.Space)) &
+            Time.realtimeSinceStartup - triggerTimer > 1)
         {
             triggerTimer = Time.realtimeSinceStartup;
             return true;

@@ -10,7 +10,7 @@ namespace DefaultNamespace
         [SerializeField] private AudioSource stressSound;
         [SerializeField] private AudioSource nonStressSound;
         [SerializeField] private AudioSource stressBeep; 
-        [SerializeField] private GameObject pathBlockObject;
+        //[SerializeField] private GameObject pathBlockObject;
         [SerializeField] private GameObject stressTimer;
         [SerializeField] private float stressTime = 30.0f;
         
@@ -19,20 +19,24 @@ namespace DefaultNamespace
         
         private void Update()
         {
-            //TODO: since this function will not work unless there audio sources and an actual game object added, I have just temporarily comment blocked 
-            //the current code not involving the dynamic blocking
+            if (ExperimentController.Instance.phase == 3 & ExperimentController.Instance.stepInPhase == 3)
+            {
+                //TODO: since this function will not work unless there audio sources and an actual game object added, I have just temporarily comment blocked 
+                //the current code not involving the dynamic blocking
                 if (ExperimentController.Instance.GetTrialInfo().stressTrial)
                 {
-                /*
+
                     nonStressSound.Stop();
-                    stressSound.Play();
+                    if(!stressSound.isPlaying)
+                        stressSound.Play();
 
                     stressTimer.GetComponent<TextMeshProUGUI>().text = stressTime -
                         (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime) + " Seconds";
                     stressTimer.SetActive(true);
-                    
+
                     // Beep plays every 5 seconds until less than 10 seconds left, then a beep a second until 5 seconds left, then two beeps a second
-                    float nextBeep = Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime > (stressTime - 10)
+                    float nextBeep = Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime >
+                                     (stressTime - 10)
                         ? (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime > 5 ? 0.5f : 1.0f)
                         : 5.0f;
                     if (Time.realtimeSinceStartup - lastBeep > nextBeep)
@@ -40,22 +44,25 @@ namespace DefaultNamespace
                         stressBeep.Play();
                         lastBeep = Time.realtimeSinceStartup;
                     }
-                */
-                pathBlockObject.transform.position = new Vector3(
-                        ExperimentController.Instance.GetTrialInfo().blockedLocation.GetX(),
-                        pathBlockObject.transform.position.y,
-                        ExperimentController.Instance.GetTrialInfo().blockedLocation.GetY());
-                pathBlockObject.SetActive(true);
-            }
 
-                else
-                {
-                    /*stressSound.Stop();
-                    nonStressSound.Play();
-                    stressTimer.SetActive(false);*/
-                    pathBlockObject.SetActive(false);
-
+                    // pathBlockObject.transform.position = new Vector3(
+                    //         ExperimentController.Instance.GetTrialInfo().blockedLocation.GetX(),
+                    //         pathBlockObject.transform.position.y,
+                    //         ExperimentController.Instance.GetTrialInfo().blockedLocation.GetY());
+                    // pathBlockObject.SetActive(true);
                 }
+
+              
+            }  
+            else
+             {
+                 stressSound.Stop();
+                 if(!nonStressSound.isPlaying & !ExperimentController.Instance.GetTrialInfo().stressTrial)
+                     nonStressSound.Play();
+                 stressTimer.SetActive(false);
+                 // pathBlockObject.SetActive(false);
+
+             }
         }
     }
 }
