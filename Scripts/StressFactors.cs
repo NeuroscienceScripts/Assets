@@ -13,7 +13,8 @@ namespace DefaultNamespace
         //[SerializeField] private GameObject pathBlockObject;
         [SerializeField] private GameObject stressTimer;
         [SerializeField] private float stressTime = 30.0f;
-        
+        [SerializeField] private float startFog = 1.0f; 
+        [SerializeField] private float endFog = 2.5f; 
         private float lastBeep = 0.0f; 
         
         
@@ -21,11 +22,13 @@ namespace DefaultNamespace
         {
             if (ExperimentController.Instance.phase == 3 & ExperimentController.Instance.stepInPhase == 3)
             {
-                //TODO: since this function will not work unless there audio sources and an actual game object added, I have just temporarily comment blocked 
-                //the current code not involving the dynamic blocking
                 if (ExperimentController.Instance.GetTrialInfo().stressTrial)
                 {
-
+                    RenderSettings.fogMode = FogMode.Linear;
+                    RenderSettings.fogStartDistance = startFog;
+                    RenderSettings.fogEndDistance = endFog; 
+                    RenderSettings.fogColor = Color.black;
+                    RenderSettings.fog = true; 
                     nonStressSound.Stop();
                     if(!stressSound.isPlaying)
                         stressSound.Play();
@@ -44,15 +47,8 @@ namespace DefaultNamespace
                         stressBeep.Play();
                         lastBeep = Time.realtimeSinceStartup;
                     }
-
-                    // pathBlockObject.transform.position = new Vector3(
-                    //         ExperimentController.Instance.GetTrialInfo().blockedLocation.GetX(),
-                    //         pathBlockObject.transform.position.y,
-                    //         ExperimentController.Instance.GetTrialInfo().blockedLocation.GetY());
-                    // pathBlockObject.SetActive(true);
                 }
-
-              
+                
             }  
             else
              {
@@ -60,8 +56,6 @@ namespace DefaultNamespace
                  if(!nonStressSound.isPlaying & !ExperimentController.Instance.GetTrialInfo().stressTrial)
                      nonStressSound.Play();
                  stressTimer.SetActive(false);
-                 // pathBlockObject.SetActive(false);
-
              }
         }
     }

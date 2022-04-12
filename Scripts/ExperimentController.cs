@@ -40,7 +40,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private int retraceRounds = 2;
     private int learningRedoRounds = 0;
 
-    [SerializeField] private int number_practice_trials = 3;
+    [SerializeField] private int number_practice_trials = 2;
 
     #region StressVars
     [SerializeField] private StressFactors stressFactors;
@@ -76,14 +76,22 @@ public class ExperimentController : MonoBehaviour
         new Vector3(0f, -1.0f, 0.0f),
         new Vector3(2.0f, -1.0f, 90.0f),
     };
-
-    //todo Add trials to this list
+    
     private Trial[] trialList =
     {
-        //G7 is just a placeholder, ideally Trial can be changed now so that this parameter is completely removed
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 1), true, new GridLocation("G", 7)),
-        new Trial(new GridLocation("A", 1), new GridLocation("D", 1), true, new GridLocation("G", 7))
-        // new Trial(new GridLocation("A", 1), new GridLocation("D", 1), true, new GridLocation("A", 1))  <- stress trial
+        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
+        new Trial(new GridLocation("G", 2), new GridLocation("G", 5), true),
+        
+        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true),
+        new Trial(new GridLocation("A", 6), new GridLocation("E", 6), true),
+        new Trial(new GridLocation("B", 2), new GridLocation("G", 5), true),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
+        new Trial(new GridLocation("C", 6), new GridLocation("F", 1), true),
+        new Trial(new GridLocation("C", 7), new GridLocation("D", 1), true),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), false),
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), false),
+        new Trial(new GridLocation("B", 2), new GridLocation("C", 6), false),
+        new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
     };
 
     private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
@@ -296,6 +304,7 @@ public class ExperimentController : MonoBehaviour
                 moveForwardArrow.SetActive(false);
                 footprints.SetActive(true);
                 footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
+                
                 if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
                 {
                     stepInPhase++;
@@ -357,6 +366,11 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void RunTesting()
     {
+        foreach (var textMesh in paintings.GetComponentsInChildren<TextMeshPro>())
+        {
+            textMesh.enabled = false; 
+        }
+       
         if (currentTrial < trialList.Length)
         {
             // foreach (var painting in paintings.GetComponentsInChildren<MeshRenderer>())
@@ -370,19 +384,24 @@ public class ExperimentController : MonoBehaviour
                 case 0: // Reorient
                     maze.SetActive(false);
                     footprints.SetActive(true);
-
+                    footprints.GetComponent<MeshRenderer>().enabled =false;
+                    
                     userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
                     if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger())
                     {
                         float nextX = GetTrialInfo().start.GetX();
                         float nextY = GetTrialInfo().start.GetY();
+                        Vector3 rot = new Vector3(0, GetFootprintDir()-90, 0);
+
                         footprints.transform.position = new Vector3(nextX, footprints.transform.position.y, nextY);
+                        footprints.transform.eulerAngles = rot;
                         stepInPhase++;
                     }
 
                     break;
 
                 case 1: // Go to next start
+                    footprints.GetComponent<MeshRenderer>().enabled = true; 
                     if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger())
                     {
                         
@@ -442,7 +461,7 @@ public class ExperimentController : MonoBehaviour
                     }
 
                     stressLevel.GetComponent<TextMeshProUGUI>().text =
-                        Math.Clamp(int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text), 1, 5).ToString(); 
+                        Math.Clamp(int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text), 1, 7).ToString(); 
 
                     GameObject[] taggedObjects = GameObject.FindGameObjectsWithTag("Wall");
                     foreach (GameObject object1 in taggedObjects)
@@ -519,6 +538,56 @@ public class ExperimentController : MonoBehaviour
         userText.GetComponent<TextMeshProUGUI>().text = "THE END\nThanks for participating!!";
         //TODO update for VR (have a screenSpace canvas and worldSpace canvas)
     }
+    
+    float GetFootprintDir()
+    {
+        string loc = GetTrialInfo().start.GetString();
+        switch (loc[0])
+        {
+            case 'A':
+                if (loc[1] == '1')
+                    return 180f;
+                else if (loc[1] == '6')
+                    return 90f;
+                break;
+            case 'B':
+                if (loc[1] == '2')
+                    return 0f;
+                break;
+            case 'C':
+                if (loc[1] == '6')
+                    return 90f;
+                else if (loc[1] == '7')
+                    return 0f;
+                break;
+            case 'D':
+                if (loc[1] == '1')
+                    return 0f;
+                else if (loc[1] == '4')
+                    return 180f;
+                break;
+            case 'E':
+                if (loc[1] == '6')
+                    return 270f;
+                break;
+            case 'F':
+                if (loc[1] == '1')
+                    return 180f;
+                else if (loc[1] == '6')
+                    return 0f;
+                break;
+            case 'G':
+                if (loc[1] == '2')
+                    return 270f;
+                else if (loc[1] == '6')
+                    return 270f;
+                break;
+            default:
+                Debug.Log(">>Invalid Painting Loc");
+                break;
+        }
+        return 43f; //garbage value, should be obvious if it fails
+    }
 
 
     private float triggerTimer = 0;
@@ -546,17 +615,7 @@ public class ExperimentController : MonoBehaviour
     {
         return trialList[trialOrder[currentTrial]];
     }
-
-    public void SetTrialBlockedLocation(string letter, int num)
-    {
-        //NOTE: this if-else statement is a temporary fix for errors, please remove once trialList&trialOrder is populated
-        if (trialOrder?.Length >= currentTrial - 1)
-            trialList[trialOrder[currentTrial]].blockedLocation = new GridLocation(letter, num);
-        else
-        {
-            trialList[0].blockedLocation = new GridLocation(letter, num);
-        }
-    }
+    
 
     /// <summary>
     /// Returns trial ID, time in trial, phase, trial number, step in phase
