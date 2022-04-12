@@ -81,7 +81,7 @@ public class ExperimentController : MonoBehaviour
     private Trial[] trialList =
     {
         //G7 is just a placeholder, ideally Trial can be changed now so that this parameter is completely removed
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 1), true, new GridLocation("G", 7)),
+        new Trial(new GridLocation("A", 6), new GridLocation("F", 1), true, new GridLocation("G", 7)),
         new Trial(new GridLocation("A", 1), new GridLocation("D", 1), true, new GridLocation("G", 7))
         // new Trial(new GridLocation("A", 1), new GridLocation("D", 1), true, new GridLocation("A", 1))  <- stress trial
     };
@@ -376,7 +376,10 @@ public class ExperimentController : MonoBehaviour
                     {
                         float nextX = GetTrialInfo().start.GetX();
                         float nextY = GetTrialInfo().start.GetY();
+                        Vector3 rot = new Vector3(0, GetFootprintDir()-90, 0);
+                        //Debug.Log(GetFootprintDir());
                         footprints.transform.position = new Vector3(nextX, footprints.transform.position.y, nextY);
+                        footprints.transform.eulerAngles = rot;
                         stepInPhase++;
                     }
 
@@ -497,6 +500,56 @@ public class ExperimentController : MonoBehaviour
         {
             phase++;
         }
+    }
+
+    float GetFootprintDir()
+    {
+        string loc = GetTrialInfo().start.GetString();
+        switch (loc[0])
+        {
+            case 'A':
+                if (loc[1] == '1')
+                    return 180f;
+                else if (loc[1] == '6')
+                    return 90f;
+                break;
+            case 'B':
+                if (loc[1] == '2')
+                    return 0f;
+                break;
+            case 'C':
+                if (loc[1] == '6')
+                    return 90f;
+                else if (loc[1] == '7')
+                    return 0f;
+                break;
+            case 'D':
+                if (loc[1] == '1')
+                    return 0f;
+                else if (loc[1] == '4')
+                    return 180f;
+                break;
+            case 'E':
+                if (loc[1] == '6')
+                    return 270f;
+                break;
+            case 'F':
+                if (loc[1] == '1')
+                    return 180f;
+                else if (loc[1] == '6')
+                    return 0f;
+                break;
+            case 'G':
+                if (loc[1] == '2')
+                    return 270f;
+                else if (loc[1] == '6')
+                    return 270f;
+                break;
+            default:
+                Debug.Log(">>Invalid Painting Loc");
+                break;
+        }
+        return 43f; //garbage value, should be obvious if it fails
     }
 
     public void UpdateStressOnClick(string stressValue)
