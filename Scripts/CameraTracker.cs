@@ -16,7 +16,7 @@ public class CameraTracker : MonoBehaviour
     {
         if (Time.time - recordHeadTimer > timeInterval & ExperimentController.Instance.recordCameraAndNodes)
         {
-            fileHandler.AppendLine( ExperimentController.Instance.subjectFile.Replace(".csv", "_camera_Rot.csv"),
+            fileHandler.AppendLine( ExperimentController.Instance.subjectFile.Replace(".csv", "_cameraRot.csv"),
                        ExperimentController.Instance.PrintStepInfo() + "," + 
                        ExperimentController.Instance.GetTrialInfo().ToString()+ ","+ gameObject.transform.rotation.eulerAngles.x.ToString() +"," +
                        gameObject.transform.rotation.eulerAngles.y.ToString() + "," + gameObject.transform.rotation.eulerAngles.z.ToString() );

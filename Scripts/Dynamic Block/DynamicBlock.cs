@@ -33,6 +33,8 @@ public class DynamicBlock : MonoBehaviour
     {
         if(ControllerCollider.Instance.wallActivated)
         {
+            ExperimentController.Instance.fileHandler.AppendLine(ExperimentController.Instance.subjectFile.Replace(".csv", 
+                "_wall_triggers.csv"), ExperimentController.Instance.PrintStepInfo() + ControllerCollider.Instance.currentNode.GetString());
             for(int i = 0; i < possWalls.Count; i++)
             {
                 if(possWalls[i].name == ControllerCollider.Instance.currWall)
