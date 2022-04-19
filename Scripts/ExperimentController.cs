@@ -21,7 +21,7 @@ public class ExperimentController : MonoBehaviour
 {
     public static ExperimentController Instance { get; private set; }
 
-    [SerializeField] public Canvas introCanvas;
+    //[SerializeField] public Canvas introCanvas;
     [SerializeField] public Canvas stressCanvas;
     [SerializeField] private GameObject maze;
     [SerializeField] private GameObject footprints;
@@ -29,8 +29,8 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] public GameObject stressLevel;
     [SerializeField] public GameObject stressText; 
 
-    [SerializeField] private GameObject subjectInput;
-    [SerializeField] private GameObject trialInput;
+    //[SerializeField] private GameObject subjectInput;
+    //[SerializeField] private GameObject trialInput;
     [SerializeField] private GameObject userText;
     [SerializeField] private RawImage redScreen;
 
@@ -90,8 +90,7 @@ public class ExperimentController : MonoBehaviour
     private Trial[] trialList =
     {
         // Practice trials
-        //new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
-        new Trial(new GridLocation("D", 1), new GridLocation("D", 4), true),
+        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
         new Trial(new GridLocation("G", 2), new GridLocation("B", 2), true),
         
         // Stress trials
@@ -139,15 +138,15 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (Time.realtimeSinceStartup - redFlashTimer > redFlashTimeLimit)
+        if (Time.time - redFlashTimer > redFlashTimeLimit)
             redScreen.enabled = false; 
         DisplayDebugInfo();
 
         switch (phase)
         {
             case 0:
-                stressCanvas.enabled = false;
-                userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
+                // stressCanvas.enabled = false;
+                // userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
                 break;
             case 1:
                 RunLearning();
@@ -191,7 +190,7 @@ public class ExperimentController : MonoBehaviour
     /// <param name="phaseNumberStart"> int value attached to GUI button which calls RunStartup()</param> 
     public void RunStartup(int phaseNumberStart)
     {
-        subjectNumber = int.Parse(subjectInput.GetComponent<TMP_InputField>().text);
+        //subjectNumber = int.Parse(subjectInput.GetComponent<TMP_InputField>().text);
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + ".csv";
         fileHandler.AppendLine(subjectFile,
             "trialID,timeInTrial,phase,trialNumber,stepInPhase," + DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" +
@@ -203,9 +202,9 @@ public class ExperimentController : MonoBehaviour
         fileHandler.AppendLine(subjectFile.Replace(".csv", "_cameraPos.csv"),
             "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xPos,yPos,zPos");
 
-        currentTrial = int.Parse(trialInput.GetComponent<TMP_InputField>().text);
-        phase = phaseNumberStart;
-        introCanvas.enabled = false;
+        //currentTrial = int.Parse(trialInput.GetComponent<TMP_InputField>().text);
+        //phase = phaseNumberStart;
+        //introCanvas.enabled = false;
 
         // Blocking
         trialOrder = new int[trialList.Length];
@@ -246,6 +245,7 @@ public class ExperimentController : MonoBehaviour
         }
         else
         {
+            Debug.Log(nonStress[0]);
             for (int i = 0; i < nonStress.Count; i++)
             {
                 trialOrder[number_practice_trials + i] = nonStress[i];
@@ -281,7 +281,7 @@ public class ExperimentController : MonoBehaviour
 
             }
         }
-        introCanvas.enabled = false;
+        //introCanvas.enabled = false;
     }
 
 
@@ -388,7 +388,7 @@ public class ExperimentController : MonoBehaviour
                     Debug.Log("Start retracing phase"); 
                     fileHandler.AppendLine(subjectFile.Replace(".csv", "_nodePath.csv"), "Start_retrace");
                     recordCameraAndNodes = true;
-                    retraceTimer = Time.realtimeSinceStartup;
+                    retraceTimer = Time.time;
                 }
             }
             else if (stepInPhase < arrowPath.Length)
@@ -410,9 +410,9 @@ public class ExperimentController : MonoBehaviour
                     stepInPhase++;
                     ControllerCollider.Instance.controllerSelection = "Not selected";
                     retraceNodes = 0;
-                    retraceTimer = Time.realtimeSinceStartup; 
+                    retraceTimer = Time.time; 
                 }
-                if(Time.realtimeSinceStartup - retraceTimer > retraceTimeLimit) //if (retraceNodes > 4)
+                if(Time.time - retraceTimer > retraceTimeLimit) //if (retraceNodes > 4)
                 {
                     stepInPhase = 0;
                     phase--; // Need to relearn
@@ -509,7 +509,7 @@ public class ExperimentController : MonoBehaviour
                     {
                         dynamicBlock.enabled = true;
                         stepInPhase++;
-                        trialStartTime = Time.realtimeSinceStartup;
+                        trialStartTime = Time.time;
                         fileHandler.AppendLine(subjectFile.Replace(".csv", "_nodePath.csv"), "Start_Testing");
                         recordCameraAndNodes = true; 
                     }
@@ -522,8 +522,8 @@ public class ExperimentController : MonoBehaviour
                         "Target Object: " + GetTrialInfo().end.GetTarget();
                     //Debug.Log("Walk to end");
                     if ((GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains("targ")) || 
-                        (GetTrialInfo().stressTrial & Time.realtimeSinceStartup - trialStartTime >= stressTimeLimit) ||
-                        Time.realtimeSinceStartup - trialStartTime >= nonStressTimeLimit)
+                        (GetTrialInfo().stressTrial & Time.time - trialStartTime >= stressTimeLimit) ||
+                        Time.time - trialStartTime >= nonStressTimeLimit)
                     {
                         Debug.Log("Selected " + ControllerCollider.Instance.controllerSelection);
                         fileHandler.AppendLine(subjectFile,
@@ -684,11 +684,11 @@ public class ExperimentController : MonoBehaviour
     private bool GetTrigger()
     {
         if ((SteamVR_Actions._default.InteractUI.GetStateDown(SteamVR_Input_Sources.Any) || Input.GetKeyDown(KeyCode.Space)) &
-            Time.realtimeSinceStartup - triggerTimer > 1)
+            Time.time - triggerTimer > 1)
         {
             redScreen.enabled = true;
-            redFlashTimer = Time.realtimeSinceStartup; 
-            triggerTimer = Time.realtimeSinceStartup;
+            redFlashTimer = Time.time; 
+            triggerTimer = Time.time;
             return true;
         }
         
@@ -711,7 +711,7 @@ public class ExperimentController : MonoBehaviour
     /// <returns></returns>
     public string PrintStepInfo()
     {
-        return trialOrder[currentTrial] + "," + (Time.realtimeSinceStartup - trialStartTime) + "," + phase + "," + currentTrial + "," + stepInPhase;
+        return trialOrder[currentTrial] + "," + (Time.time - trialStartTime) + "," + phase + "," + currentTrial + "," + stepInPhase;
     }
 
     public void ChangeBlockingOrder()
@@ -753,5 +753,16 @@ public class ExperimentController : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void OnEnable()
+    {
+        StartData startData = GameObject.FindGameObjectWithTag("StartData").GetComponent<StartData>();
+        stressFirst = startData.stressFirst;
+        subjectNumber = startData.subjNum;
+        currentTrial = startData.trialNum;
+        phase = (int) startData.phase;
+        stressCanvas.enabled = false;
+        RunStartup(phase);
     }
 }
