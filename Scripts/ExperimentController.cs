@@ -5,7 +5,7 @@ using System.Linq;
 using Classes;
 using DefaultNamespace;
 using TMPro;
-using UnityEditorInternal;
+//using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.VR;
@@ -47,7 +47,8 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private float nonStressTimeLimit = 30.0f;
 
     [SerializeField] private int number_practice_trials = 2;
-
+    private int numTrials = 24;
+    [SerializeField] private bool stressFirst = false;
     #region StressVars
     [SerializeField] private StressFactors stressFactors;
     [SerializeField] private DynamicBlock dynamicBlock;
@@ -89,7 +90,8 @@ public class ExperimentController : MonoBehaviour
     private Trial[] trialList =
     {
         // Practice trials
-        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
+        //new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
+        new Trial(new GridLocation("D", 1), new GridLocation("D", 4), true),
         new Trial(new GridLocation("G", 2), new GridLocation("B", 2), true),
         
         // Stress trials
@@ -123,7 +125,7 @@ public class ExperimentController : MonoBehaviour
 
     private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
 
-    private int[] trialOrder = {0}; //Randomized at start
+    [SerializeField] private int[] trialOrder = {0}; //Randomized at start
 
 
     /* Debug */
@@ -205,22 +207,53 @@ public class ExperimentController : MonoBehaviour
         phase = phaseNumberStart;
         introCanvas.enabled = false;
 
-        // ** Randomize trial order **
-        Random.InitState(subjectNumber * 10); // Insures same path randomizations every run for same subject (in case the experiment needs restarted)
+        // Blocking
         trialOrder = new int[trialList.Length];
-        for (int i = 0; i < trialOrder.Length; i++)
+        for (int i = 0; i < number_practice_trials; i++)
         {
             trialOrder[i] = i;
-            Debug.Log(trialOrder[i]); 
         }
 
-        for (int t = number_practice_trials; t < trialOrder.Length; t++)
+        List<int> stress = new();
+        List<int> nonStress = new();
+        for (int i = number_practice_trials; i < trialList.Length; i++)
         {
-            int tmp = trialOrder[t];
-            int r = Random.Range(t, trialOrder.Length);
-            trialOrder[t] = trialOrder[r];
-            trialOrder[r] = tmp;
-            Debug.Log(trialOrder[t]); 
+            if (trialList[i].stressTrial)
+            {
+                stress.Add(i);
+            }
+            else
+            {
+                nonStress.Add(i);
+            }
+        }
+
+        System.Random random = new System.Random();
+
+        stress = stress.ToArray().OrderBy(x => random.Next()).ToList();
+        nonStress = nonStress.ToArray().OrderBy(x => random.Next()).ToList();
+        
+        if (stressFirst)
+        {
+            for (int i = 0; i < stress.Count; i++)
+            {
+                trialOrder[number_practice_trials + i] = stress[i];
+            }
+            for (int i = 0; i < nonStress.Count; i++)
+            {
+                trialOrder[number_practice_trials + stress.Count + i] = nonStress[i];
+            }
+        }
+        else
+        {
+            for (int i = 0; i < nonStress.Count; i++)
+            {
+                trialOrder[number_practice_trials + i] = nonStress[i];
+            }
+            for (int i = 0; i < stress.Count; i++)
+            {
+                trialOrder[number_practice_trials + nonStress.Count + i] = stress[i];
+            }
         }
 
         // Create a web of invisible node colliders to track position
@@ -520,12 +553,7 @@ public class ExperimentController : MonoBehaviour
                     stressLevel.GetComponent<TextMeshProUGUI>().text =
                         Math.Clamp(int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text), 1, 7).ToString(); 
 
-                    GameObject[] taggedObjects = GameObject.FindGameObjectsWithTag("Wall");
-                    foreach (GameObject object1 in taggedObjects)
-                    {
-                        //Debug.Log("foind");
-                        Destroy(object1);
-                    }
+                    dynamicBlock.DisableWalls();
                     userText.GetComponent<TextMeshProUGUI>().text = "";
                     stressCanvas.enabled = true;
 
@@ -684,6 +712,33 @@ public class ExperimentController : MonoBehaviour
     public string PrintStepInfo()
     {
         return trialOrder[currentTrial] + "," + (Time.realtimeSinceStartup - trialStartTime) + "," + phase + "," + currentTrial + "," + stepInPhase;
+    }
+
+    public void ChangeBlockingOrder()
+    {
+        stressFirst = !stressFirst;
+
+    }
+
+    void RandomizeTrialOrder()
+    {
+        // ** Randomize trial order **
+        Random.InitState(subjectNumber * 10); // Insures same path randomizations every run for same subject (in case the experiment needs restarted)
+        trialOrder = new int[trialList.Length];
+        for (int i = 0; i < trialOrder.Length; i++)
+        {
+            trialOrder[i] = i;
+            Debug.Log(trialOrder[i]); 
+        }
+
+        for (int t = number_practice_trials; t < trialOrder.Length; t++)
+        {
+            int tmp = trialOrder[t];
+            int r = Random.Range(t, trialOrder.Length);
+            trialOrder[t] = trialOrder[r];
+            trialOrder[r] = tmp;
+            Debug.Log(trialOrder[t]); 
+        }
     }
 
     // The following code will make instance of ExperimentController persist between scenes and destroy subsequent instances

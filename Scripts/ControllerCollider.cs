@@ -36,14 +36,18 @@ namespace DefaultNamespace
                 lastNodePosition = other.name;
                 ExperimentController.Instance.retraceNodes++;
             }
-            else if(other.name.Length>2 & !other.name.Contains("Cube") & !other.tag.Contains("Wall"))
+            else if(other.name.Length>2 & !other.name.Contains("Cube") & !other.CompareTag("Wall") & !other.name.Contains("Floor"))
                 controllerSelection = other.name;
             
             
-            if (other.gameObject.tag == "Wall" & ExperimentController.Instance.stepInPhase == 3)
+            if (other.CompareTag("Wall"))
             {
-                    wallActivated = true;
-                    currWall = other.transform.parent.gameObject.name;
+                if (other.GetComponent<MeshRenderer>().enabled & wallActivated)
+                {
+                    // Ran into wall
+                }
+                wallActivated = true;
+                currWall = other.transform.parent.gameObject.name;
             } else
             {
                 wallActivated = false;
