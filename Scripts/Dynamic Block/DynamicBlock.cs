@@ -16,7 +16,6 @@ public class DynamicBlock : MonoBehaviour
     [SerializeField] private List<BoxCollider> colliders;
 
     [SerializeField] private AudioSource wallSound;
-    private Coroutine soundCoroutine;
     private bool playedSound = false;
 
     private void OnEnable()
@@ -57,7 +56,7 @@ public class DynamicBlock : MonoBehaviour
         {
             if (!wallSound.isPlaying & !playedSound)
             {
-                soundCoroutine = StartCoroutine(playSound());
+                wallSound.Play();
                 playedSound = true;
             }
             for (int i = 0; i < possWalls.Count; i++)
@@ -94,13 +93,7 @@ public class DynamicBlock : MonoBehaviour
             }
         }
     }
-
-    private IEnumerator playSound()
-    {
-        wallSound.Play();
-        yield return new WaitForSeconds(1f);
-        wallSound.Stop();
-    }
+    
 
     private void InstantiateWalls()
     {

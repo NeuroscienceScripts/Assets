@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using TMPro;
 //using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR;
 using Valve.VR;
 using Random = UnityEngine.Random;
 
@@ -39,7 +41,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject paintings;
     [SerializeField] private GameObject node;
 
-    [SerializeField] private int learningRounds = 2;
+    [SerializeField] private int learningRounds = 5;
     [SerializeField] private int retraceRounds = 1; 
     private int learningRedoRounds = 0;
     [SerializeField] private float retraceTimeLimit = 10.0f;
@@ -64,9 +66,11 @@ public class ExperimentController : MonoBehaviour
     private float redFlashTimer = 0.0f; 
     [SerializeField] private float redFlashTimeLimit = .5f;
     
+    
     public FileHandler fileHandler = new FileHandler();
     public string subjectFile;
     public bool recordCameraAndNodes = false;
+    
 
     private Vector3[] arrowPath =
     {
@@ -92,7 +96,7 @@ public class ExperimentController : MonoBehaviour
         // Practice trials
         new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
         new Trial(new GridLocation("G", 2), new GridLocation("B", 2), true),
-        
+
         // Stress trials
         new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true),
         new Trial(new GridLocation("A", 6), new GridLocation("E", 6), true),
@@ -132,12 +136,27 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject phaseDisplay;
     [SerializeField] private GameObject stepDisplay;
     [SerializeField] private GameObject trialDisplay;
+    [SerializeField] private GameObject pause;
 
     /// <summary>
     /// Called every frame. Checks which phase of the experiment to run then calls the correct function
     /// </summary>
     void Update()
     {
+        if (SteamVR.calibrating)
+        {
+            pause.SetActive(true);
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            if (Time.timeScale == 0f)
+            {
+                pause.SetActive(false);
+                Time.timeScale = 1f;
+            }
+        }
+
         if (Time.time - redFlashTimer > redFlashTimeLimit)
             redScreen.enabled = false; 
         DisplayDebugInfo();
@@ -159,8 +178,15 @@ public class ExperimentController : MonoBehaviour
                 break;
             default:
                 FinishExperiment();
+                StartCoroutine(WaitCoroutine());
+                Application.Quit();
                 break;
         }
+    }
+
+    IEnumerator WaitCoroutine()
+    {
+        yield return new WaitForSeconds(5);
     }
 
     /// <summary>
@@ -227,10 +253,10 @@ public class ExperimentController : MonoBehaviour
             }
         }
 
-        System.Random random = new System.Random();
+        Random.InitState(subjectNumber * 10);
 
-        stress = stress.ToArray().OrderBy(x => random.Next()).ToList();
-        nonStress = nonStress.ToArray().OrderBy(x => random.Next()).ToList();
+        stress = stress.ToArray().OrderBy(x => Random.Range(0,stress.Count)).ToList();
+        nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0,nonStress.Count)).ToList();
         
         if (stressFirst)
         {
@@ -245,7 +271,6 @@ public class ExperimentController : MonoBehaviour
         }
         else
         {
-            Debug.Log(nonStress[0]);
             for (int i = 0; i < nonStress.Count; i++)
             {
                 trialOrder[number_practice_trials + i] = nonStress[i];
@@ -664,7 +689,7 @@ public class ExperimentController : MonoBehaviour
             case 'G':
                 if (loc[1] == '2')
                     return 270f;
-                else if (loc[1] == '6')
+                else if (loc[1] == '5')
                     return 270f;
                 break;
             default:

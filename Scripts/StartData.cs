@@ -1,10 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
-using Unity.XR;
-using UnityEngine.XR;
+using UnityEngine;
+using UnityEngine.UI;
 
 public enum Phase
 {
@@ -22,8 +21,8 @@ public class StartData : MonoBehaviour
     public int subjNum = 0;
     public int trialNum = 0;
     public Phase phase = Phase.Default;
-    [SerializeField] private TextMeshProUGUI subjNumText;
-    [SerializeField] private TextMeshProUGUI trialNumText;
+    [SerializeField] private TMP_InputField subjNumText;
+    [SerializeField] private TMP_InputField trialNumText;
 
     private void Awake()
     {
@@ -35,13 +34,22 @@ public class StartData : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        
+
         DontDestroyOnLoad(gameObject);
     }
+    
 
-    private void OnEnable()
+    private void Update()
     {
-        XRSettings.enabled = false;
+        if (subjNumText.text == "")
+        {
+            subjNumText.text = "0";
+        }
+
+        if (trialNumText.text == "")
+        {
+            trialNumText.text = "0";
+        }
     }
 
     public void ChangeStress()
@@ -69,15 +77,15 @@ public class StartData : MonoBehaviour
     {
         var subjText = subjNumText.text;
         var trialText = trialNumText.text;
-        SetSubjNum(0);
-        SetTrialNum(0);
+        Debug.Log($"subject: {subjText} , trial: {trialText}");
+        SetSubjNum(int.Parse(subjText));
+        SetTrialNum(int.Parse(trialText));
 
         for (int i = 0; i < transform.childCount; i++)
         {
             transform.GetChild(i).gameObject.SetActive(false);
         }
 
-        XRSettings.enabled = true;
 
     }
 }

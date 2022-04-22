@@ -46,22 +46,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20cf987c9083f9dc2aa5e8bd9402cbfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  introCanvas: {fileID: 0}
   stressCanvas: {fileID: 0}
   maze: {fileID: 0}
   footprints: {fileID: 0}
   moveForwardArrow: {fileID: 0}
   stressLevel: {fileID: 0}
   stressText: {fileID: 0}
-  subjectInput: {fileID: 0}
-  trialInput: {fileID: 0}
   userText: {fileID: 0}
   redScreen: {fileID: 0}
   desktopMode: 0
   hidePaintingsDuringTesting: 0
   paintings: {fileID: 0}
   node: {fileID: 0}
-  learningRounds: 2
+  learningRounds: 5
   retraceRounds: 1
   retraceTimeLimit: 10
   stressTimeLimit: 20
