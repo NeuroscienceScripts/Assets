@@ -26,7 +26,7 @@ namespace DefaultNamespace
             if (other.name.Length == 2 & lastNodePosition!=other.name & ExperimentController.Instance.recordCameraAndNodes)
             {
                 currentNode = new GridLocation("" + other.name[0], int.Parse("" + other.name[1]));
-                fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(".csv", "_nodePath.csv"),
+                fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(ExperimentController.Instance.Date_time+".csv", "_nodePath.csv"),
                     other.name);
                 lastNodePosition = other.name;
                 ExperimentController.Instance.retraceNodes++;

@@ -146,6 +146,7 @@ public class DynamicBlock : MonoBehaviour
 
     private void ActivateWalls()
     {
+        playedSound = false;
         GridLocation startLocation = ExperimentController.Instance.GetTrialInfo().start;
 
         foreach (GameObject go in possWalls)

@@ -69,6 +69,7 @@ public class ExperimentController : MonoBehaviour
     
     public FileHandler fileHandler = new FileHandler();
     public string subjectFile;
+    public string Date_time;
     public bool recordCameraAndNodes = false;
     
 
@@ -217,16 +218,18 @@ public class ExperimentController : MonoBehaviour
     public void RunStartup(int phaseNumberStart)
     {
         //subjectNumber = int.Parse(subjectInput.GetComponent<TMP_InputField>().text);
-        subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + ".csv";
-        fileHandler.AppendLine(subjectFile,
-            "trialID,timeInTrial,phase,trialNumber,stepInPhase," + DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" +
-            DateTime.Now.Minute);
-        fileHandler.AppendLine(subjectFile.Replace(".csv", "_nodePath.csv"),
+        Date_time = "_" + DateTime.Today.Month + "_" + DateTime.Today.Day + "-" + DateTime.Now.Hour + "_" + DateTime.Now.Minute;
+        subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + Date_time +".csv";
+        Debug.Log(subjectFile);
+        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase");
+        fileHandler.AppendLine(subjectFile.Replace(Date_time +".csv", "_nodePath.csv"),
             DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute);
-        fileHandler.AppendLine(subjectFile.Replace(".csv", "_cameraRot.csv"),
+        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraRot.csv"),
             "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xRot,yRot,zRot");
-        fileHandler.AppendLine(subjectFile.Replace(".csv", "_cameraPos.csv"),
+        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraPos.csv"),
             "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xPos,yPos,zPos");
+        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_stress.csv"),
+            "start,end,stress_level");
 
         //currentTrial = int.Parse(trialInput.GetComponent<TMP_InputField>().text);
         //phase = phaseNumberStart;
@@ -340,7 +343,7 @@ public class ExperimentController : MonoBehaviour
                 if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
                 {
                     recordCameraAndNodes = true;
-                    fileHandler.AppendLine(subjectFile.Replace(".csv", "_nodePath.csv"), "Learning Phase"); 
+                    fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_nodePath.csv"), "Learning Phase"); 
                     stepInPhase++;
                 }
             }
@@ -411,7 +414,7 @@ public class ExperimentController : MonoBehaviour
                     retraceNodes = 0;
                     footprints.SetActive(false);
                     Debug.Log("Start retracing phase"); 
-                    fileHandler.AppendLine(subjectFile.Replace(".csv", "_nodePath.csv"), "Start_retrace");
+                    fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_nodePath.csv"), "Start_retrace");
                     recordCameraAndNodes = true;
                     retraceTimer = Time.time;
                 }
@@ -461,7 +464,7 @@ public class ExperimentController : MonoBehaviour
         }
         if(phase == 2 & currentTrial >= retraceRounds)
         {
-            fileHandler.AppendLine(subjectFile.Replace(".csv", "_numLearning.csv"), learningRedoRounds.ToString());
+            fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_numLearning.csv"), learningRedoRounds.ToString());
             currentTrial = 0;
             phase++;
             stepInPhase = 0;
@@ -521,7 +524,7 @@ public class ExperimentController : MonoBehaviour
                         maze.SetActive(true);
                         stepInPhase++;
                         fileHandler.AppendLine(
-                            (ExperimentController.Instance.subjectFile).Replace(".csv", "_nodePath.csv"),
+                            (ExperimentController.Instance.subjectFile).Replace(Date_time+".csv", "_nodePath.csv"),
                             PrintStepInfo() + "," + GetTrialInfo().start.GetString() + "," + GetTrialInfo().end.GetString());
                        
                     }
@@ -535,7 +538,7 @@ public class ExperimentController : MonoBehaviour
                         dynamicBlock.enabled = true;
                         stepInPhase++;
                         trialStartTime = Time.time;
-                        fileHandler.AppendLine(subjectFile.Replace(".csv", "_nodePath.csv"), "Start_Testing");
+                        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_nodePath.csv"), "Start_Testing");
                         recordCameraAndNodes = true; 
                     }
                         
@@ -554,7 +557,7 @@ public class ExperimentController : MonoBehaviour
                         fileHandler.AppendLine(subjectFile,
                             PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(ControllerCollider.Instance.controllerSelection.Length > 2 ? 2 : 0));
                         maze.SetActive(false);
-                        stressLevel.GetComponent<TextMeshProUGUI>().text = "3"; 
+                        stressLevel.GetComponent<TextMeshProUGUI>().text = "4"; 
 
                         stepInPhase++;
                     }
@@ -603,7 +606,7 @@ public class ExperimentController : MonoBehaviour
                             Random.Range(-3, 3));
                         
                         
-                        fileHandler.AppendLine(subjectFile.Replace(".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text );
+                        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text );
 
                         currentTrial++;
                         Debug.Log("Current trial: " + currentTrial);
