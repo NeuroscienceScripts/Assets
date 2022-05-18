@@ -14,6 +14,8 @@ namespace DefaultNamespace
     {
         public static ControllerCollider Instance { get; private set; }
 
+        [SerializeField] private Transform controller;
+
         public string controllerSelection;
         public GridLocation currentNode; 
 
@@ -22,19 +24,23 @@ namespace DefaultNamespace
 
         public bool wallActivated = false;
         public string currWall = "";
+        
+        private float cooldownTime = 0.25f;
+        private float previousTime = 0f;
 
         public void OnTriggerEnter(Collider other)
         {
             if (other.name.Length == 2 & lastNodePosition == "")
                 lastNodePosition = other.name; 
                 
-            if (other.name.Length == 2 & !lastNodePosition.Equals(other.name) & ExperimentController.Instance.recordCameraAndNodes )
+            if (other.name.Length == 2 & !lastNodePosition.Equals(other.name) & ExperimentController.Instance.recordCameraAndNodes & Time.realtimeSinceStartup - previousTime >= cooldownTime)
             {
                 currentNode = new GridLocation("" + other.name[0], int.Parse("" + other.name[1]));
-                fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(".csv", "_nodePath.csv"),
+                fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(ExperimentController.Instance.Date_time+".csv", "_nodePath.csv"),
                     other.name);
                 lastNodePosition = other.name;
                 ExperimentController.Instance.retraceNodes++;
+                previousTime = Time.realtimeSinceStartup;
             }
             else if(other.name.Length>2 & !other.name.Contains("Cube") & !other.CompareTag("Wall") & !other.name.Contains("Floor"))
                 controllerSelection = other.name;
@@ -45,6 +51,7 @@ namespace DefaultNamespace
                 if (other.GetComponent<MeshRenderer>().enabled & wallActivated)
                 {
                     // Ran into wall
+                    // add variable that will be true if this occurs, and check on Line 560 of ExperimentController for this and print to file
                 }
                 wallActivated = true;
                 currWall = other.transform.parent.gameObject.name;
@@ -88,6 +95,19 @@ namespace DefaultNamespace
             }
 
             return false; 
+        }
+
+        public bool PaintingCheck()
+        {
+            Collider[] collisions = Physics.OverlapSphere(controller.position, 0.15f);
+            foreach (var c in collisions)
+            {
+                if (!c.CompareTag("Painting")) continue;
+                controllerSelection = c.name;
+                return true;
+            }
+
+            return false;
         }
 
         //Following code will make instance of ControllerCollider persist between scenes

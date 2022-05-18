@@ -20,7 +20,9 @@ public class DynamicBlock : MonoBehaviour
 
     private void OnEnable()
     {
-        if (!ExperimentController.Instance.GetTrialInfo().stressTrial)
+        int num = ExperimentController.Instance.subjectNumber % 2;
+        Trial t = ExperimentController.Instance.GetTrialInfo();
+        if (!t.stressTrial || (num != 0 && t.isWallTrial) || (num == 0 && !t.isWallTrial))
         {
             enabled = false;
             return;
@@ -66,24 +68,28 @@ public class DynamicBlock : MonoBehaviour
                     
                     if (possWalls[i].name.Contains("North"))
                     {
+                        ExperimentController.Instance.blockedWall = possWalls[i + 1].name;
                         renderers[i + 1].enabled = true;
                         colliders[i + 1].isTrigger = false;
                         enabled = false;
                     }
                     else if (possWalls[i].name.Contains("South"))
                     {
+                        ExperimentController.Instance.blockedWall = possWalls[i - 1].name;
                         renderers[i - 1].enabled = true;
                         colliders[i - 1].isTrigger = false;
                         enabled = false;
                     }
                     else if (possWalls[i].name.Contains("East"))
                     {
+                        ExperimentController.Instance.blockedWall = possWalls[i + 1].name;
                         renderers[i + 1].enabled = true;
                         colliders[i + 1].isTrigger = false;
                         enabled = false;
                     }
                     else if (possWalls[i].name.Contains("West"))
                     {
+                        ExperimentController.Instance.blockedWall = possWalls[i - 1].name;
                         renderers[i - 1].enabled = true;
                         colliders[i - 1].isTrigger = false;
                         enabled = false;

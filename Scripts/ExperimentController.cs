@@ -51,12 +51,13 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private int number_practice_trials = 2;
     private int numTrials = 24;
     [SerializeField] private bool stressFirst = false;
+    
     #region StressVars
     [SerializeField] private StressFactors stressFactors;
     [SerializeField] private DynamicBlock dynamicBlock;
     #endregion
 
-    private int subjectNumber = 0;
+    public int subjectNumber = 0;
 
     public int phase = 0;
     public int stepInPhase = 0;
@@ -71,6 +72,7 @@ public class ExperimentController : MonoBehaviour
     public string subjectFile;
     public string Date_time;
     public bool recordCameraAndNodes = false;
+    public string blockedWall = "";
     
 
     private Vector3[] arrowPath =
@@ -96,21 +98,23 @@ public class ExperimentController : MonoBehaviour
     {
         // Practice trials
         new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
-        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), true),
+        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
 
         // Stress trials
+        // blockedList = {7,6,5,11,3,9};
+        // IsWallTrial = true --> odd id participants will have these trials blocked, even will be opposite
         new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true),
         new Trial(new GridLocation("A", 6), new GridLocation("E", 6), true),
         new Trial(new GridLocation("B", 2), new GridLocation("G", 5), true),
-        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
         new Trial(new GridLocation("C", 6), new GridLocation("F", 1), true),
-        new Trial(new GridLocation("C", 7), new GridLocation("D", 1), true),
-        new Trial(new GridLocation("D", 1), new GridLocation("D", 4), true),
-        new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true),
+        new Trial(new GridLocation("C", 7), new GridLocation("D", 1), true, true),
+        new Trial(new GridLocation("D", 1), new GridLocation("D", 4), true, true),
+        new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
         new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true),
-        new Trial(new GridLocation("F", 6), new GridLocation("B", 2), true),
+        new Trial(new GridLocation("F", 6), new GridLocation("B", 2), true, true),
         new Trial(new GridLocation("G", 2), new GridLocation("C", 6), true),
-        new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true),
+        new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
         
         // Non-stress trials 
         new Trial(new GridLocation("A", 1), new GridLocation("D", 4), false),
@@ -221,7 +225,7 @@ public class ExperimentController : MonoBehaviour
         Date_time = "_" + DateTime.Today.Month + "_" + DateTime.Today.Day + "-" + DateTime.Now.Hour + "_" + DateTime.Now.Minute;
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + Date_time +".csv";
         Debug.Log(subjectFile);
-        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase");
+        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,goal,selected,blockedWall,isStressTrial");
         fileHandler.AppendLine(subjectFile.Replace(Date_time +".csv", "_nodePath.csv"),
             DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute);
         fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraRot.csv"),
@@ -257,9 +261,11 @@ public class ExperimentController : MonoBehaviour
         }
 
         Random.InitState(subjectNumber * 10);
-
         stress = stress.ToArray().OrderBy(x => Random.Range(0,stress.Count)).ToList();
+        
         nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0,nonStress.Count)).ToList();
+
+        
         
         if (stressFirst)
         {
@@ -340,7 +346,7 @@ public class ExperimentController : MonoBehaviour
                 footprints.SetActive(true);
                 footprints.transform.position =
                     new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
-                if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
+                if (GetTrigger(false) & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
                 {
                     recordCameraAndNodes = true;
                     fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_nodePath.csv"), "Learning Phase"); 
@@ -407,7 +413,7 @@ public class ExperimentController : MonoBehaviour
                 footprints.SetActive(true);
                 footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
                 
-                if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
+                if (GetTrigger(false) & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
                 {
                     stepInPhase++;
                     recordCameraAndNodes = true;
@@ -502,7 +508,7 @@ public class ExperimentController : MonoBehaviour
                     footprints.GetComponent<MeshRenderer>().enabled =false;
                     
                     userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
-                    if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger())
+                    if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger(false))
                     {
                         float nextX = GetTrialInfo().start.GetX();
                         float nextY = GetTrialInfo().start.GetY();
@@ -517,7 +523,7 @@ public class ExperimentController : MonoBehaviour
 
                 case 1: // Go to next start
                     footprints.GetComponent<MeshRenderer>().enabled = true; 
-                    if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger())
+                    if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger(false))
                     {
                         
                         footprints.SetActive(false);
@@ -533,7 +539,7 @@ public class ExperimentController : MonoBehaviour
                 case 2: // Wait for them to touch painting
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Touch the painting and pull the trigger to start trial";
-                    if (GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains(GetTrialInfo().start.GetString()))
+                    if (GetTrigger(true) & ControllerCollider.Instance.controllerSelection.Contains(GetTrialInfo().start.GetString()))
                     {
                         dynamicBlock.enabled = true;
                         stepInPhase++;
@@ -549,13 +555,15 @@ public class ExperimentController : MonoBehaviour
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Target Object: " + GetTrialInfo().end.GetTarget();
                     //Debug.Log("Walk to end");
-                    if ((GetTrigger() & ControllerCollider.Instance.controllerSelection.Contains("targ")) || 
+                    if ((GetTrigger(true) & ControllerCollider.Instance.controllerSelection.Contains("targ")) || 
                         (GetTrialInfo().stressTrial & Time.time - trialStartTime >= stressTimeLimit) ||
                         Time.time - trialStartTime >= nonStressTimeLimit)
                     {
+                        if (!GetTrialInfo().stressTrial || (subjectNumber%2 != 0 && GetTrialInfo().isWallTrial) || (subjectNumber%2 == 0 && !GetTrialInfo().isWallTrial))
+                            blockedWall = "N/A";
                         Debug.Log("Selected " + ControllerCollider.Instance.controllerSelection);
                         fileHandler.AppendLine(subjectFile,
-                            PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(ControllerCollider.Instance.controllerSelection.Length > 2 ? 2 : 0));
+                            PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(ControllerCollider.Instance.controllerSelection.Length > 2 ? 2 : 0) + "," + blockedWall + "," + GetTrialInfo().stressTrial);
                         maze.SetActive(false);
                         stressLevel.GetComponent<TextMeshProUGUI>().text = "4"; 
 
@@ -589,14 +597,14 @@ public class ExperimentController : MonoBehaviour
                     recordCameraAndNodes = false;
 
                     // select stress, once selected disable stress UI and move phase forward
-                    if (GetTrigger() )
+                    if (GetTrigger(false) )
                     {
                         stressText.GetComponent<TextMeshProUGUI>().text = "Confirm?"; 
                         stepInPhase++; 
                     }
                     break;
                 case 5:
-                    if (GetTrigger())
+                    if (GetTrigger(false))
                     {
                         //move forward
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level"; 
@@ -709,7 +717,7 @@ public class ExperimentController : MonoBehaviour
     /// trigger press.
     /// </summary>
     /// <returns> if(trigger & >.5 seconds since last press){return true};</returns>
-    private bool GetTrigger()
+    private bool GetTrigger(bool forPainting)
     {
         if ((SteamVR_Actions._default.InteractUI.GetStateDown(SteamVR_Input_Sources.Any) || Input.GetKeyDown(KeyCode.Space)) &
             Time.time - triggerTimer > 1)
@@ -717,6 +725,7 @@ public class ExperimentController : MonoBehaviour
             redScreen.enabled = true;
             redFlashTimer = Time.time; 
             triggerTimer = Time.time;
+            if (forPainting) return ControllerCollider.Instance.PaintingCheck();
             return true;
         }
         
@@ -772,6 +781,9 @@ public class ExperimentController : MonoBehaviour
     // The following code will make instance of ExperimentController persist between scenes and destroy subsequent instances
     void Awake()
     {
+        QualitySettings.vSyncCount = 2;
+        Application.targetFrameRate = 45;
+        Debug.Log(Application.targetFrameRate); 
         if (Instance == null)
         {
             Instance = this;
