@@ -1,19 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using System.IO;
+using TMPro;
 
-public class PositionReplay : MonoBehaviour
+public class RotationReplay : MonoBehaviour
 {
     private StreamReader sr;
 
     [SerializeField] private TMP_InputField fileInput;
     [SerializeField] private TMP_InputField subjectInput;
-    [SerializeField] private GameObject startCanvas;
     private string defaultPath;
     private string filePath;
-    private string camPos = "cameraPos.csv";
+    private string camRot = "camera_Rot.csv";
 
     private int subjectNum = 0;
 
@@ -22,23 +21,24 @@ public class PositionReplay : MonoBehaviour
     [SerializeField] private List<long> positions;
     [SerializeField] private int currentPos;
     private bool processing;
-    
+
 
     private void Awake()
     {
         positions = new();
         defaultPath = Application.dataPath + @"\Data\";
-        camPos = "cameraPos.csv";
+        camRot = "camera_Rot.csv";
     }
 
     public void StartReplay()
     {
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         subjectNum = int.Parse(subjectInput.text);
-        camPos = filePath + subjectNum + "_" + camPos;
-        if (!File.Exists(camPos)) {
+        camRot = filePath + subjectNum + "_" + camRot;
+        if (!File.Exists(camRot))
+        {
             filePath = defaultPath;
-            Debug.LogError("Invalid File Path or Missing Critical File: cameraPos.csv"); 
+            Debug.LogError("Invalid File Path or Missing Critical File: camera_Rot.csv");
         }
         else StartCoroutine(Replay());
     }
@@ -47,9 +47,7 @@ public class PositionReplay : MonoBehaviour
     {
         currentPos = 0;
         processing = false;
-        startCanvas.SetActive(false);
-        sr = new StreamReader(camPos);
-        sr.ReadLine();
+        sr = new StreamReader(camRot);
         positions.Add(sr.GetPosition());
         string[] line = sr.ReadLine().Split(',');
         currentPos++;
@@ -59,7 +57,7 @@ public class PositionReplay : MonoBehaviour
         {
             while (paused) yield return null;
             currentPos++;
-            if(currentPos >= positions.Count) positions.Add(sr.GetPosition());
+            if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
             line = sr.ReadLine().Split(',');
             if (!int.TryParse(line[0], out int x)) break;
             processing = true;
@@ -67,39 +65,38 @@ public class PositionReplay : MonoBehaviour
             prevTime = float.Parse(line[1]);
         }
         yield return null;
-        startCanvas.SetActive(true);
-        camPos = "cameraPos.csv";
+        camRot = "camera_Rot.csv";
         positions.Clear();
     }
 
     private void Process(string[] line)
     {
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
-        transform.position = newPos;
+        transform.rotation = Quaternion.Euler(newPos);
     }
 
 
     private IEnumerator ProcessLine(float time, string[] line)
     {
         float timeElapsed = 0;
-        Vector3 startPos = transform.position;
-        Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
-        while(timeElapsed <= time)
+        Quaternion startPos = transform.rotation;
+        Quaternion newPos = Quaternion.Euler(new Vector3(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9])));
+        while (timeElapsed <= time)
         {
             if (!processing)
             {
-                transform.position = newPos;
+                transform.rotation = newPos;
                 yield break;
             }
-            while (paused) 
+            while (paused)
             {
-                yield return null; 
+                yield return null;
             }
-            transform.position = Vector3.Lerp(startPos, newPos, timeElapsed/time);
+            transform.rotation = Quaternion.Lerp(startPos, newPos, timeElapsed / time);
             timeElapsed += Time.deltaTime;
             yield return null;
         }
-        transform.position = newPos;
+        transform.rotation = newPos;
         processing = false;
     }
 
@@ -135,7 +132,7 @@ public class PositionReplay : MonoBehaviour
         paused = true;
         processing = false;
         sr.ReadLine();
-        if(currentPos >= positions.Count) positions.Add(sr.GetPosition());
+        if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
         currentPos++;
         Process(sr.ReadLine().Split(','));
     }
