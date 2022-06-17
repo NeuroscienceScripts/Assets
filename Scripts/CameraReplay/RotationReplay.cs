@@ -47,6 +47,7 @@ public class RotationReplay : MonoBehaviour
     {
         currentPos = 0;
         processing = false;
+        paused = false;
         sr = new StreamReader(camRot);
         positions.Add(sr.GetPosition());
         string[] line = sr.ReadLine().Split(',');
@@ -65,8 +66,7 @@ public class RotationReplay : MonoBehaviour
             prevTime = float.Parse(line[1]);
         }
         yield return null;
-        camRot = "camera_Rot.csv";
-        positions.Clear();
+        Stop();
     }
 
     private void Process(string[] line)
@@ -119,6 +119,10 @@ public class RotationReplay : MonoBehaviour
         {
             StepForward();
         }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Stop();
+        }
     }
 
     private void StepBackward()
@@ -139,5 +143,15 @@ public class RotationReplay : MonoBehaviour
         if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
         currentPos++;
         Process(sr.ReadLine().Split(','));
+    }
+
+    private void Stop()
+    {
+        StopAllCoroutines();
+        camRot = "camera_Rot.csv";
+        positions.Clear();
+        processing = false;
+        paused = false;
+        currentPos = 0;
     }
 }

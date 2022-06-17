@@ -47,6 +47,7 @@ public class PositionReplay : MonoBehaviour
     {
         currentPos = 0;
         processing = false;
+        paused = false;
         startCanvas.SetActive(false);
         sr = new StreamReader(camPos);
         sr.ReadLine();
@@ -67,10 +68,7 @@ public class PositionReplay : MonoBehaviour
             prevTime = float.Parse(line[1]);
         }
         yield return null;
-        startCanvas.SetActive(true);
-        camPos = "cameraPos.csv";
-        positions.Clear();
-        transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        
     }
 
     private void Process(string[] line)
@@ -122,6 +120,10 @@ public class PositionReplay : MonoBehaviour
         {
             StepForward();
         }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Stop();
+        }
     }
 
     private void StepBackward()
@@ -142,5 +144,17 @@ public class PositionReplay : MonoBehaviour
         if(currentPos >= positions.Count) positions.Add(sr.GetPosition());
         currentPos++;
         Process(sr.ReadLine().Split(','));
+    }
+
+    private void Stop()
+    {
+        StopAllCoroutines();
+        startCanvas.SetActive(true);
+        camPos = "cameraPos.csv";
+        positions.Clear();
+        processing = false;
+        paused = false;
+        currentPos = 0;
+        transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
 }
