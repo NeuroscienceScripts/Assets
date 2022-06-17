@@ -70,10 +70,12 @@ public class PositionReplay : MonoBehaviour
         startCanvas.SetActive(true);
         camPos = "cameraPos.csv";
         positions.Clear();
+        transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
 
     private void Process(string[] line)
     {
+        if (!int.TryParse(line[0], out int x)) return;
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
         transform.position = newPos;
     }
@@ -81,25 +83,28 @@ public class PositionReplay : MonoBehaviour
 
     private IEnumerator ProcessLine(float time, string[] line)
     {
-        float timeElapsed = 0;
-        Vector3 startPos = transform.position;
-        Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
-        while(timeElapsed <= time)
+        if (int.TryParse(line[0], out int x))
         {
-            if (!processing)
+            float timeElapsed = 0;
+            Vector3 startPos = transform.position;
+            Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
+            while (timeElapsed <= time)
             {
-                transform.position = newPos;
-                yield break;
+                if (!processing)
+                {
+                    transform.position = newPos;
+                    yield break;
+                }
+                while (paused)
+                {
+                    yield return null;
+                }
+                transform.position = Vector3.Lerp(startPos, newPos, timeElapsed / time);
+                timeElapsed += Time.deltaTime;
+                yield return null;
             }
-            while (paused) 
-            {
-                yield return null; 
-            }
-            transform.position = Vector3.Lerp(startPos, newPos, timeElapsed/time);
-            timeElapsed += Time.deltaTime;
-            yield return null;
+            transform.position = newPos;
         }
-        transform.position = newPos;
         processing = false;
     }
 
@@ -134,7 +139,6 @@ public class PositionReplay : MonoBehaviour
         if (sr.EndOfStream) return;
         paused = true;
         processing = false;
-        sr.ReadLine();
         if(currentPos >= positions.Count) positions.Add(sr.GetPosition());
         currentPos++;
         Process(sr.ReadLine().Split(','));

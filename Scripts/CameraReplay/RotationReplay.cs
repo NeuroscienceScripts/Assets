@@ -71,6 +71,7 @@ public class RotationReplay : MonoBehaviour
 
     private void Process(string[] line)
     {
+        if (!int.TryParse(line[0], out int x)) return;
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
         transform.rotation = Quaternion.Euler(newPos);
     }
@@ -78,25 +79,29 @@ public class RotationReplay : MonoBehaviour
 
     private IEnumerator ProcessLine(float time, string[] line)
     {
-        float timeElapsed = 0;
-        Quaternion startPos = transform.rotation;
-        Quaternion newPos = Quaternion.Euler(new Vector3(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9])));
-        while (timeElapsed <= time)
+        if (int.TryParse(line[0], out int x))
         {
-            if (!processing)
+            float timeElapsed = 0;
+            Quaternion startPos = transform.rotation;
+            Quaternion newPos = Quaternion.Euler(new Vector3(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9])));
+            while (timeElapsed <= time)
             {
-                transform.rotation = newPos;
-                yield break;
-            }
-            while (paused)
-            {
+                if (!processing)
+                {
+                    transform.rotation = newPos;
+                    yield break;
+                }
+                while (paused)
+                {
+                    yield return null;
+                }
+                transform.rotation = Quaternion.Lerp(startPos, newPos, timeElapsed / time);
+                timeElapsed += Time.deltaTime;
                 yield return null;
             }
-            transform.rotation = Quaternion.Lerp(startPos, newPos, timeElapsed / time);
-            timeElapsed += Time.deltaTime;
-            yield return null;
+            transform.rotation = newPos;
         }
-        transform.rotation = newPos;
+        
         processing = false;
     }
 
@@ -131,7 +136,6 @@ public class RotationReplay : MonoBehaviour
         if (sr.EndOfStream) return;
         paused = true;
         processing = false;
-        sr.ReadLine();
         if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
         currentPos++;
         Process(sr.ReadLine().Split(','));
