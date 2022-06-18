@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.IO;
+using Classes;
 
 public class PositionReplay : MonoBehaviour
 {
@@ -19,16 +20,29 @@ public class PositionReplay : MonoBehaviour
 
     private bool paused;
 
-    [SerializeField] private List<long> positions;
-    [SerializeField] private int currentPos;
+    private List<long> positions;
+    private int currentPos;
     private bool processing;
-    
+
+    private string[][] wallPositions;
+    [SerializeField] private Transform[] walls;
+    private Vector3[] wallDirections;
+    [SerializeField] private GameObject wall;
+    private bool hidden;
+    private Dictionary<int, int> wallSpawns;
 
     private void Awake()
     {
         positions = new();
+        hidden = false;
         defaultPath = Application.dataPath + @"\Data\";
         camPos = "cameraPos.csv";
+        wallDirections = new Vector3[4];
+        for(int i = 0; i < 4; ++i)
+        {
+            wallDirections[i] = walls[i].GetChild(0).transform.position;
+        }
+        HideWall();
     }
 
     public void StartReplay()
@@ -36,11 +50,31 @@ public class PositionReplay : MonoBehaviour
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         subjectNum = int.Parse(subjectInput.text);
         camPos = filePath + subjectNum + "_" + camPos;
-        if (!File.Exists(camPos)) {
-            filePath = defaultPath;
-            Debug.LogError("Invalid File Path or Missing Critical File: cameraPos.csv"); 
+        if (!File.Exists(camPos))
+        {
+            Stop();
+            Debug.LogError("Invalid File Path or Missing Critical File: cameraPos.csv");
         }
-        else StartCoroutine(Replay());
+        else
+        {
+            GetWallPositions();
+            StartCoroutine(Replay());
+        }
+    }
+
+    private void GetWallPositions()
+    {
+        wallPositions = new string[Constants.NUM_OF_TRIALS][];
+        sr = new StreamReader(filePath + subjectNum + ".csv");
+        sr.ReadLine();
+        while (!sr.EndOfStream)
+        {
+            string[] line = sr.ReadLine().Split(',');
+            int trialNum = int.Parse(line[0]);
+            string[] pos = line[8] != "N/A" ? new string[] { line[8].Substring(0, 2), line[8][2..] } : new string[] { "N/A", "N/A" };
+            wallPositions[trialNum] = pos;
+        }
+        sr.Close();
     }
 
     private IEnumerator Replay()
@@ -68,7 +102,45 @@ public class PositionReplay : MonoBehaviour
             prevTime = float.Parse(line[1]);
         }
         yield return null;
-        
+        Stop();
+    }
+
+    private void ShowWall(int trialNum)
+    {
+        if (!hidden) return;
+        wall.SetActive(true);
+        hidden = false;
+        switch (wallPositions[trialNum][1])
+        {
+            case "North":
+                wall.transform.position = wallDirections[0];
+                wall.transform.localScale = new Vector3(1.5f, 10f, 0.1f);
+                break;
+            case "South":
+                wall.transform.position = wallDirections[1];
+                wall.transform.localScale = new Vector3(1.5f, 10f, 0.1f);
+                break;
+            case "East":
+                wall.transform.position = wallDirections[2];
+                wall.transform.localScale = new Vector3(0.1f, 10f, 1.5f);
+                break;
+            case "West":
+                wall.transform.position = wallDirections[3];
+                wall.transform.localScale = new Vector3(0.1f, 10f, 1.5f);
+                break;
+            default:
+                HideWall();
+                break;
+        }
+        GridLocation gl = new(wallPositions[trialNum][0][0].ToString(), int.Parse(wallPositions[trialNum][0][1].ToString()) );
+        wall.transform.position = new Vector3(wall.transform.position.x + gl.GetX(), wall.transform.position.y, wall.transform.position.z + gl.GetY());
+    }
+
+    private void HideWall()
+    {
+        if (hidden) return;
+        wall.SetActive(false);
+        hidden = true;
     }
 
     private void Process(string[] line)
@@ -76,8 +148,8 @@ public class PositionReplay : MonoBehaviour
         if (!int.TryParse(line[0], out int x)) return;
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
         transform.position = newPos;
+        CheckWall(x);
     }
-
 
     private IEnumerator ProcessLine(float time, string[] line)
     {
@@ -102,8 +174,31 @@ public class PositionReplay : MonoBehaviour
                 yield return null;
             }
             transform.position = newPos;
+            CheckWall(x);
         }
         processing = false;
+    }
+
+    private void CheckWall(int trialNum)
+    {
+        if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), wallDirections[trialNum]) <= 0.3f)
+        {
+            ShowWall(trialNum);
+            if (!wallSpawns.ContainsKey(trialNum))
+            {
+                wallSpawns.Add(trialNum, currentPos);
+            }
+
+        }
+        if (!wallSpawns.ContainsKey(trialNum))
+        {
+            HideWall();
+            return;
+        }
+        if(currentPos < wallSpawns[trialNum])
+        {
+            HideWall();
+        }
     }
 
     private void Update()
@@ -149,9 +244,13 @@ public class PositionReplay : MonoBehaviour
     private void Stop()
     {
         StopAllCoroutines();
+        sr.Close();
+        HideWall();
+        filePath = @defaultPath;
         startCanvas.SetActive(true);
         camPos = "cameraPos.csv";
         positions.Clear();
+        wallSpawns.Clear();
         processing = false;
         paused = false;
         currentPos = 0;

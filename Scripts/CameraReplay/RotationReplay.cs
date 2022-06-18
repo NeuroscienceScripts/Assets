@@ -18,8 +18,8 @@ public class RotationReplay : MonoBehaviour
 
     private bool paused;
 
-    [SerializeField] private List<long> positions;
-    [SerializeField] private int currentPos;
+    private List<long> positions;
+    private int currentPos;
     private bool processing;
 
 
@@ -37,7 +37,7 @@ public class RotationReplay : MonoBehaviour
         camRot = filePath + subjectNum + "_" + camRot;
         if (!File.Exists(camRot))
         {
-            filePath = defaultPath;
+            Stop();
             Debug.LogError("Invalid File Path or Missing Critical File: camera_Rot.csv");
         }
         else StartCoroutine(Replay());
@@ -148,6 +148,8 @@ public class RotationReplay : MonoBehaviour
     private void Stop()
     {
         StopAllCoroutines();
+        sr.Close();
+        filePath = @defaultPath;
         camRot = "camera_Rot.csv";
         positions.Clear();
         processing = false;
