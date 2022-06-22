@@ -22,6 +22,8 @@ public class RotationReplay : MonoBehaviour
     private int currentPos;
     private bool processing;
 
+    float prevTime;
+
 
     private void Awake()
     {
@@ -53,18 +55,21 @@ public class RotationReplay : MonoBehaviour
         processing = false;
         paused = false;
         sr = new StreamReader(camRot);
-        positions.Add(sr.GetPosition());
-        string[] line = sr.ReadLine().Split(',');
-        currentPos++;
-        Process(line);
-        float prevTime = float.Parse(line[1]);
+        string[] line;
+        prevTime = 0;
+        int prevTrialNum = -1;
         while (!sr.EndOfStream)
         {
-            while (paused) yield return null;
+            //while (paused) yield return null;
             currentPos++;
             if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
             line = sr.ReadLine().Split(',');
             if (!int.TryParse(line[0], out int x)) break;
+            if(prevTrialNum != x)
+            {
+                yield return new WaitForSeconds(1f);
+                prevTrialNum = x;
+            }
             processing = true;
             yield return ProcessLine(float.Parse(line[1]) - prevTime, line);
             prevTime = float.Parse(line[1]);
@@ -78,6 +83,7 @@ public class RotationReplay : MonoBehaviour
         if (!int.TryParse(line[0], out int x)) return;
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
         transform.rotation = Quaternion.Euler(newPos);
+        prevTime = float.Parse(line[1]);
     }
 
 
@@ -90,14 +96,14 @@ public class RotationReplay : MonoBehaviour
             Quaternion newPos = Quaternion.Euler(new Vector3(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9])));
             while (timeElapsed <= time)
             {
+                while (paused)
+                {
+                    yield return null;
+                }
                 if (!processing)
                 {
                     transform.rotation = newPos;
                     yield break;
-                }
-                while (paused)
-                {
-                    yield return null;
                 }
                 transform.rotation = Quaternion.Lerp(startPos, newPos, timeElapsed / time);
                 timeElapsed += Time.deltaTime;

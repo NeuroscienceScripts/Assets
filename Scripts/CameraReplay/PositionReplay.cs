@@ -12,6 +12,7 @@ public class PositionReplay : MonoBehaviour
     [SerializeField] private TMP_InputField fileInput;
     [SerializeField] private TMP_InputField subjectInput;
     [SerializeField] private GameObject startCanvas;
+    [SerializeField] private TextMeshProUGUI trialDisplay;
     private string defaultPath;
     private string filePath;
     private string camPos = "cameraPos.csv";
@@ -23,6 +24,9 @@ public class PositionReplay : MonoBehaviour
     private List<long> positions;
     private int currentPos;
     private bool processing;
+
+    float prevTime;
+    int prevTrialNum;
 
     private string[][] wallPositions;
     [SerializeField] private Transform[] walls;
@@ -43,6 +47,7 @@ public class PositionReplay : MonoBehaviour
         {
             wallDirections[i] = walls[i].GetChild(0).transform.position;
         }
+        trialDisplay.text = "Trial: 0";
         HideWall();
     }
 
@@ -94,19 +99,22 @@ public class PositionReplay : MonoBehaviour
         paused = false;
         startCanvas.SetActive(false);
         sr = new StreamReader(camPos);
-        //sr.ReadLine();
-        positions.Add(sr.GetPosition());
-        string[] line = sr.ReadLine().Split(',');
-        currentPos++;
-        Process(line);
-        float prevTime = float.Parse(line[1]);
+        string[] line;
+        prevTime = 0;
+        prevTrialNum = -1;
         while (!sr.EndOfStream)
         {
-            while (paused) yield return null;
+            //while (paused) yield return null;
             currentPos++;
             if(currentPos >= positions.Count) positions.Add(sr.GetPosition());
             line = sr.ReadLine().Split(',');
             if (!int.TryParse(line[0], out int x)) break;
+            if (prevTrialNum != x)
+            {
+                yield return new WaitForSeconds(1f);
+                trialDisplay.text = $"Trial: {x}";
+                prevTrialNum = x;
+            }
             processing = true;
             yield return ProcessLine(float.Parse(line[1]) - prevTime, line);
             prevTime = float.Parse(line[1]);
@@ -142,7 +150,7 @@ public class PositionReplay : MonoBehaviour
                 HideWall();
                 break;
         }
-        GridLocation gl = new(wallPositions[trialNum][0][0].ToString(), int.Parse(wallPositions[trialNum][0][1].ToString()) );
+        GridLocation gl = new( wallPositions[trialNum][0][0].ToString(), int.Parse(wallPositions[trialNum][0][1].ToString()) );
         wall.transform.position = new Vector3(wall.transform.position.x + gl.GetX(), wall.transform.position.y, wall.transform.position.z + gl.GetY());
     }
 
@@ -156,8 +164,14 @@ public class PositionReplay : MonoBehaviour
     private void Process(string[] line)
     {
         if (!int.TryParse(line[0], out int x)) return;
+        if(x != prevTrialNum)
+        {
+            prevTrialNum = x;
+            trialDisplay.text = $"Trial: {prevTrialNum}";
+        }
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
         transform.position = newPos;
+        prevTime = float.Parse(line[1]);
         CheckWall(x);
     }
 
@@ -168,16 +182,16 @@ public class PositionReplay : MonoBehaviour
             float timeElapsed = 0;
             Vector3 startPos = transform.position;
             Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
-            while (timeElapsed <= time)
+            while (timeElapsed <= time && time != 0)
             {
+                while (paused)
+                {
+                    yield return null;
+                }
                 if (!processing)
                 {
                     transform.position = newPos;
                     yield break;
-                }
-                while (paused)
-                {
-                    yield return null;
                 }
                 transform.position = Vector3.Lerp(startPos, newPos, timeElapsed / time);
                 timeElapsed += Time.deltaTime;
@@ -191,7 +205,11 @@ public class PositionReplay : MonoBehaviour
 
     private void CheckWall(int trialNum)
     {
-        if (wallPositions[trialNum][1].Contains("N/A")) return;
+        if (wallPositions[trialNum][1].Contains("N/A"))
+        {
+            HideWall();
+            return;
+        }
         GridLocation gl = new(wallPositions[trialNum][0][0].ToString(), int.Parse(wallPositions[trialNum][0][1].ToString()));
         if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(gl.GetX(), gl.GetY())) <= 0.3f)
         {
@@ -210,6 +228,10 @@ public class PositionReplay : MonoBehaviour
         if(currentPos < wallSpawns[trialNum])
         {
             HideWall();
+        }
+        else
+        {
+            ShowWall(trialNum);
         }
     }
 
