@@ -24,8 +24,9 @@ public class PositionReplay : MonoBehaviour
     private List<long> positions;
     private int currentPos;
     private bool processing;
+    private bool stepped;
 
-    float prevTime;
+    [SerializeField] float prevTime;
     int prevTrialNum;
 
     private string[][] wallPositions;
@@ -40,6 +41,7 @@ public class PositionReplay : MonoBehaviour
         positions = new();
         wallSpawns = new();
         hidden = false;
+        stepped = false;
         defaultPath = Application.dataPath + @"\Data\";
         camPos = "cameraPos.csv";
         wallDirections = new Vector3[26];
@@ -104,20 +106,26 @@ public class PositionReplay : MonoBehaviour
         prevTrialNum = -1;
         while (!sr.EndOfStream)
         {
-            //while (paused) yield return null;
             currentPos++;
             if(currentPos >= positions.Count) positions.Add(sr.GetPosition());
             line = sr.ReadLine().Split(',');
             if (!int.TryParse(line[0], out int x)) break;
             if (prevTrialNum != x)
             {
-                yield return new WaitForSeconds(1f);
+                float timeElapsed = 0f;
+                while (timeElapsed <= 1f)
+                {
+                    yield return null;
+                    timeElapsed += Time.deltaTime;
+                    if (paused || !processing) break;
+                }
                 trialDisplay.text = $"Trial: {x}";
                 prevTrialNum = x;
+                prevTime = 0f;
             }
             processing = true;
             yield return ProcessLine(float.Parse(line[1]) - prevTime, line);
-            prevTime = float.Parse(line[1]);
+            while (paused) yield return null;
         }
         yield return null;
         Stop();
@@ -186,11 +194,17 @@ public class PositionReplay : MonoBehaviour
             {
                 while (paused)
                 {
+                    if (!processing)
+                    {
+                        yield break;
+                    }
                     yield return null;
                 }
                 if (!processing)
                 {
                     transform.position = newPos;
+                    if (stepped) StepBackward();
+                    stepped = false;
                     yield break;
                 }
                 transform.position = Vector3.Lerp(startPos, newPos, timeElapsed / time);
@@ -199,6 +213,10 @@ public class PositionReplay : MonoBehaviour
             }
             transform.position = newPos;
             CheckWall(x);
+            if (Mathf.Abs(float.Parse(line[1]) - prevTime) <= time * 1.1f)
+            {
+                prevTime = float.Parse(line[1]);
+            }
         }
         processing = false;
     }
@@ -263,6 +281,7 @@ public class PositionReplay : MonoBehaviour
         sr.SetPosition(positions[currentPos - 1]);
         currentPos--;
         Process(sr.ReadLine().Split(','));
+        stepped = true;
     }
 
     private void StepForward()
@@ -288,6 +307,9 @@ public class PositionReplay : MonoBehaviour
         processing = false;
         paused = false;
         currentPos = 0;
+        prevTime = 0f;
+        prevTrialNum = -1;
+        stepped = false;
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
 }

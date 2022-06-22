@@ -21,8 +21,10 @@ public class RotationReplay : MonoBehaviour
     private List<long> positions;
     private int currentPos;
     private bool processing;
+    private bool stepped;
 
     float prevTime;
+    int prevTrialNum;
 
 
     private void Awake()
@@ -57,22 +59,28 @@ public class RotationReplay : MonoBehaviour
         sr = new StreamReader(camRot);
         string[] line;
         prevTime = 0;
-        int prevTrialNum = -1;
+        prevTrialNum = -1;
         while (!sr.EndOfStream)
         {
-            //while (paused) yield return null;
             currentPos++;
             if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
             line = sr.ReadLine().Split(',');
             if (!int.TryParse(line[0], out int x)) break;
             if(prevTrialNum != x)
             {
-                yield return new WaitForSeconds(1f);
+                float timeElapsed  = 0f;
+                while (timeElapsed <= 1f)
+                {
+                    yield return null;
+                    timeElapsed += Time.deltaTime;
+                    if (paused || !processing) break;
+                }
                 prevTrialNum = x;
+                prevTime = 0f;
             }
             processing = true;
             yield return ProcessLine(float.Parse(line[1]) - prevTime, line);
-            prevTime = float.Parse(line[1]);
+            while (paused) yield return null;
         }
         yield return null;
         Stop();
@@ -81,6 +89,10 @@ public class RotationReplay : MonoBehaviour
     private void Process(string[] line)
     {
         if (!int.TryParse(line[0], out int x)) return;
+        if (x != prevTrialNum)
+        {
+            prevTrialNum = x;
+        }
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
         transform.rotation = Quaternion.Euler(newPos);
         prevTime = float.Parse(line[1]);
@@ -98,11 +110,17 @@ public class RotationReplay : MonoBehaviour
             {
                 while (paused)
                 {
+                    if (!processing)
+                    {
+                        yield break;
+                    }
                     yield return null;
                 }
                 if (!processing)
                 {
                     transform.rotation = newPos;
+                    if (stepped) StepBackward();
+                    stepped = false;
                     yield break;
                 }
                 transform.rotation = Quaternion.Lerp(startPos, newPos, timeElapsed / time);
@@ -110,6 +128,10 @@ public class RotationReplay : MonoBehaviour
                 yield return null;
             }
             transform.rotation = newPos;
+            if (Mathf.Abs(float.Parse(line[1]) - prevTime) <= time * 1.1f)
+            {
+                prevTime = float.Parse(line[1]);
+            }
         }
         
         processing = false;
@@ -143,6 +165,7 @@ public class RotationReplay : MonoBehaviour
         sr.SetPosition(positions[currentPos - 1]);
         currentPos--;
         Process(sr.ReadLine().Split(','));
+        stepped = true;
     }
 
     private void StepForward()
@@ -163,7 +186,10 @@ public class RotationReplay : MonoBehaviour
         camRot = "camera_Rot.csv";
         positions.Clear();
         processing = false;
+        stepped = false;
         paused = false;
         currentPos = 0;
+        prevTime = 0f;
+        prevTrialNum = -1;
     }
 }
