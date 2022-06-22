@@ -33,6 +33,10 @@ public class RotationReplay : MonoBehaviour
     public void StartReplay()
     {
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
+        if (filePath[^1] != '/')
+        {
+            filePath += @"/";
+        }
         subjectNum = int.Parse(subjectInput.text);
         camRot = filePath + subjectNum + "_" + camRot;
         if (!File.Exists(camRot))
@@ -148,7 +152,7 @@ public class RotationReplay : MonoBehaviour
     private void Stop()
     {
         StopAllCoroutines();
-        sr.Close();
+        if(sr != null) sr.Close();
         filePath = @defaultPath;
         camRot = "camera_Rot.csv";
         positions.Clear();

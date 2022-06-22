@@ -34,10 +34,11 @@ public class PositionReplay : MonoBehaviour
     private void Awake()
     {
         positions = new();
+        wallSpawns = new();
         hidden = false;
         defaultPath = Application.dataPath + @"\Data\";
         camPos = "cameraPos.csv";
-        wallDirections = new Vector3[4];
+        wallDirections = new Vector3[26];
         for(int i = 0; i < 4; ++i)
         {
             wallDirections[i] = walls[i].GetChild(0).transform.position;
@@ -48,12 +49,21 @@ public class PositionReplay : MonoBehaviour
     public void StartReplay()
     {
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
+        if (filePath[^1] != '/')
+        {
+            filePath += @"/";
+        }
         subjectNum = int.Parse(subjectInput.text);
         camPos = filePath + subjectNum + "_" + camPos;
         if (!File.Exists(camPos))
         {
             Stop();
             Debug.LogError("Invalid File Path or Missing Critical File: cameraPos.csv");
+        }
+        else if (!File.Exists(filePath + subjectNum + ".csv"))
+        {
+            Stop();
+            Debug.LogError($"Invalid File Path or Missing Critical File: {subjectNum}.csv");
         }
         else
         {
@@ -66,12 +76,12 @@ public class PositionReplay : MonoBehaviour
     {
         wallPositions = new string[Constants.NUM_OF_TRIALS][];
         sr = new StreamReader(filePath + subjectNum + ".csv");
-        sr.ReadLine();
+        string s = sr.ReadLine();
         while (!sr.EndOfStream)
         {
             string[] line = sr.ReadLine().Split(',');
             int trialNum = int.Parse(line[0]);
-            string[] pos = line[8] != "N/A" ? new string[] { line[8].Substring(0, 2), line[8][2..] } : new string[] { "N/A", "N/A" };
+            string[] pos = !line[8].Contains("N/A") ? new string[] { line[8].Substring(0, 2), line[8][2..] } : new string[] { "N/A", "N/A" };
             wallPositions[trialNum] = pos;
         }
         sr.Close();
@@ -84,7 +94,7 @@ public class PositionReplay : MonoBehaviour
         paused = false;
         startCanvas.SetActive(false);
         sr = new StreamReader(camPos);
-        sr.ReadLine();
+        //sr.ReadLine();
         positions.Add(sr.GetPosition());
         string[] line = sr.ReadLine().Split(',');
         currentPos++;
@@ -181,7 +191,9 @@ public class PositionReplay : MonoBehaviour
 
     private void CheckWall(int trialNum)
     {
-        if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), wallDirections[trialNum]) <= 0.3f)
+        if (wallPositions[trialNum][1].Contains("N/A")) return;
+        GridLocation gl = new(wallPositions[trialNum][0][0].ToString(), int.Parse(wallPositions[trialNum][0][1].ToString()));
+        if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(gl.GetX(), gl.GetY())) <= 0.3f)
         {
             ShowWall(trialNum);
             if (!wallSpawns.ContainsKey(trialNum))
@@ -244,7 +256,7 @@ public class PositionReplay : MonoBehaviour
     private void Stop()
     {
         StopAllCoroutines();
-        sr.Close();
+        if(sr != null) sr.Close();
         HideWall();
         filePath = @defaultPath;
         startCanvas.SetActive(true);
