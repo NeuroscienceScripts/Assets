@@ -13,6 +13,9 @@ public class PositionReplay : MonoBehaviour
     [SerializeField] private TMP_InputField subjectInput;
     [SerializeField] private GameObject startCanvas;
     [SerializeField] private TextMeshProUGUI trialDisplay;
+    [SerializeField] private TextMeshProUGUI timeDisplay;
+    [SerializeField] private GameObject infoCanvas;
+
     private string defaultPath;
     private string filePath;
     private string camPos = "cameraPos.csv";
@@ -26,7 +29,7 @@ public class PositionReplay : MonoBehaviour
     private bool processing;
     private bool stepped;
 
-    [SerializeField] float prevTime;
+    float prevTime;
     int prevTrialNum;
 
     private string[][] wallPositions;
@@ -50,6 +53,7 @@ public class PositionReplay : MonoBehaviour
             wallDirections[i] = walls[i].GetChild(0).transform.position;
         }
         trialDisplay.text = "Trial: 0";
+        infoCanvas.SetActive(false);
         HideWall();
     }
 
@@ -100,6 +104,7 @@ public class PositionReplay : MonoBehaviour
         processing = false;
         paused = false;
         startCanvas.SetActive(false);
+        infoCanvas.SetActive(true);
         sr = new StreamReader(camPos);
         string[] line;
         prevTime = 0;
@@ -124,7 +129,8 @@ public class PositionReplay : MonoBehaviour
                 prevTime = 0f;
             }
             processing = true;
-            yield return ProcessLine(float.Parse(line[1]) - prevTime, line);
+            float currentTime = float.Parse(line[1]);
+            yield return ProcessLine(currentTime - prevTime, line);
             while (paused) yield return null;
         }
         yield return null;
@@ -261,6 +267,7 @@ public class PositionReplay : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
+            if (!paused) StepBackward();
             StepBackward();
         }
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -271,6 +278,11 @@ public class PositionReplay : MonoBehaviour
         {
             Stop();
         }
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            infoCanvas.SetActive(!infoCanvas.activeInHierarchy);
+        }
+        timeDisplay.text = $"Time: {prevTime:0.000}";
     }
 
     private void StepBackward()

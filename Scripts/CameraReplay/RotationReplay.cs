@@ -145,6 +145,7 @@ public class RotationReplay : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
+            if (!paused) StepBackward();
             StepBackward();
         }
         if (Input.GetKeyDown(KeyCode.RightArrow))
