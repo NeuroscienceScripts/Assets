@@ -148,44 +148,81 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (SteamVR.calibrating)
+        if (!StartData.instance.replayMode)
         {
-            pause.SetActive(true);
-            Time.timeScale = 0f;
-        }
-        else
-        {
-            if (Time.timeScale == 0f)
+            if (SteamVR.calibrating)
             {
-                pause.SetActive(false);
-                Time.timeScale = 1f;
+                pause.SetActive(true);
+                Time.timeScale = 0f;
+            }
+            else
+            {
+                if (Time.timeScale == 0f)
+                {
+                    pause.SetActive(false);
+                    Time.timeScale = 1f;
+                }
+            }
+
+            if (Time.time - redFlashTimer > redFlashTimeLimit)
+                redScreen.enabled = false;
+            DisplayDebugInfo();
+
+            switch (phase)
+            {
+                case 0:
+                    // stressCanvas.enabled = false;
+                    // userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
+                    break;
+                case 1:
+                    RunLearning();
+                    break;
+                case 2:
+                    RunRetrace();
+                    break;
+                case 3:
+                    RunTesting();
+                    break;
+                default:
+                    FinishExperiment();
+                    StartCoroutine(WaitCoroutine());
+                    Application.Quit();
+                    break;
             }
         }
+    }
 
-        if (Time.time - redFlashTimer > redFlashTimeLimit)
-            redScreen.enabled = false; 
-        DisplayDebugInfo();
+    private StreamReader sr;
+    private string[][] split_lines; 
 
-        switch (phase)
+    private void Start()
+    {
+        if (StartData.instance.replayMode)
         {
-            case 0:
-                // stressCanvas.enabled = false;
-                // userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
-                break;
-            case 1:
-                RunLearning();
-                break;
-            case 2:
-                RunRetrace();
-                break;
-            case 3:
-                RunTesting();
-                break;
-            default:
-                FinishExperiment();
-                StartCoroutine(WaitCoroutine());
-                Application.Quit();
-                break;
+           /* "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
+                "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ" */
+            split_lines = new string[System.IO.File.ReadAllLines(StartData.instance.replayFile).Length][];
+            int count = 0; 
+            sr = new StreamReader(StartData.instance.replayFile);
+            
+            while (!sr.EndOfStream)
+            {
+                // Should input every line split into the array
+                split_lines[count] = sr.ReadLine().Split(',');
+            }
+        }
+    }
+
+    private int currentFrame = 0;
+    [SerializeField] private GameObject camera;
+    private void OnRenderImage(RenderTexture src, RenderTexture dest)
+    {
+        if (StartData.instance.replayMode)
+        {
+            camera.transform.position = new Vector3(float.Parse(split_lines[currentFrame][10]),
+                float.Parse(split_lines[currentFrame][11]), float.Parse(split_lines[currentFrame][12]));
+            
+            Graphics.Blit(src, dest);
         }
     }
 

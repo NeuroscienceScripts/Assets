@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,6 +25,9 @@ public class StartData : MonoBehaviour
     [SerializeField] private TMP_InputField subjNumText;
     [SerializeField] private TMP_InputField trialNumText;
 
+    public bool replayMode; 
+    public string replayFile; 
+    
     private void Awake()
     {
         if (instance == null)
@@ -85,7 +89,12 @@ public class StartData : MonoBehaviour
         {
             transform.GetChild(i).gameObject.SetActive(false);
         }
-
-
     }
+
+    public void ReplayMode()
+    {
+       replayFile = EditorUtility.OpenFilePanel("Select Directory", "", "");
+       replayMode = true; 
+    }
+    
 }
