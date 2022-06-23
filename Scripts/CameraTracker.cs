@@ -16,7 +16,15 @@ public class CameraTracker : MonoBehaviour
     public Camera vrCamera;
     public float smoothMove = 80; 
     private Vector3 _lastGazeDirection;
-    
+
+    private void Start()
+    {
+        fileHandler.AppendLine(
+            ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
+                "_camera_tracker.csv"), "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
+                       "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ");
+    }
+
     private void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
         if (Time.time - recordHeadTimer > timeInterval & ExperimentController.Instance.recordCameraAndNodes)
@@ -36,15 +44,12 @@ public class CameraTracker : MonoBehaviour
             float gazeX = screenPos.x / src.width;
             float gazeY = screenPos.y / src.height;
             
-            fileHandler.AppendLine( ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time+".csv", "_camera_Rot.csv"),
-                ExperimentController.Instance.PrintStepInfo() + "," + 
-                ExperimentController.Instance.GetTrialInfo().ToString()+ ","+ gameObject.transform.rotation.eulerAngles.x.ToString() +"," +
-                gameObject.transform.rotation.eulerAngles.y.ToString() + "," + gameObject.transform.rotation.eulerAngles.z.ToString() );
-            fileHandler.AppendLine(ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time+ ".csv", "_cameraPos.csv"),
-                ExperimentController.Instance.PrintStepInfo() + "," + ExperimentController.Instance.GetTrialInfo().ToString()+ ","+
-                gameObject.transform.position.x.ToString() +"," + gameObject.transform.position.y.ToString() + "," + gameObject.transform.position.z.ToString() );
-            fileHandler.AppendLine(ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time+".csv", "_gazeInfo.csv"), 
-                ExperimentController.Instance.PrintStepInfo() + gazeX + "," + gazeY);
+            fileHandler.AppendLine( ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time+".csv", "_camera_tracker.csv"),
+                ExperimentController.Instance.PrintStepInfo() + "," + ExperimentController.Instance.GetTrialInfo().ToString()+ 
+                ","+ gameObject.transform.rotation.eulerAngles.x.ToString() + "," + gameObject.transform.rotation.eulerAngles.y.ToString() + 
+                "," + gameObject.transform.rotation.eulerAngles.z.ToString() + gameObject.transform.position.x.ToString() +"," + 
+                gameObject.transform.position.y.ToString() + "," + gameObject.transform.position.z.ToString() +
+                gazeX + "," + gazeY + "," + usedDirection.x + "," + usedDirection.y + "," + usedDirection.z);
             recordHeadTimer = Time.time; 
             
         }
