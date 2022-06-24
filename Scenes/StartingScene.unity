@@ -3719,6 +3719,8 @@ MonoBehaviour:
   phase: 0
   subjNumText: {fileID: 4428181963572543808}
   trialNumText: {fileID: 4428181962671831581}
+  replayMode: 0
+  replayFile: 
 --- !u!222 &4428181964315147632
 CanvasRenderer:
   m_ObjectHideFlags: 0

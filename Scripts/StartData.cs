@@ -93,7 +93,7 @@ public class StartData : MonoBehaviour
 
     public void ReplayMode()
     {
-       replayFile = EditorUtility.OpenFilePanel("Select Directory", "", "");
+    //   replayFile = EditorUtility.OpenFilePanel("Select Directory", "", "");
        replayMode = true; 
     }
     
