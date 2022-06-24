@@ -16,6 +16,9 @@ public class PositionReplay : MonoBehaviour
     [SerializeField] private TextMeshProUGUI timeDisplay;
     [SerializeField] private GameObject infoCanvas;
 
+    [SerializeField] private FogReplay fog;
+    [SerializeField] private bool fogToggle;
+
     private string defaultPath;
     private string filePath;
     private string camPos = "cameraPos.csv";
@@ -38,11 +41,13 @@ public class PositionReplay : MonoBehaviour
     [SerializeField] private GameObject wall;
     private bool hidden;
     private Dictionary<int, int> wallSpawns;
+    private Dictionary<int, string> stressTrials;
 
     private void Awake()
     {
         positions = new();
         wallSpawns = new();
+        stressTrials = new();
         hidden = false;
         stepped = false;
         defaultPath = Application.dataPath + @"\Data\";
@@ -54,6 +59,7 @@ public class PositionReplay : MonoBehaviour
         }
         trialDisplay.text = "Trial: 0";
         infoCanvas.SetActive(false);
+        fog.Off();
         HideWall();
     }
 
@@ -94,6 +100,14 @@ public class PositionReplay : MonoBehaviour
             int trialNum = int.Parse(line[0]);
             string[] pos = !line[8].Contains("N/A") ? new string[] { line[8].Substring(0, 2), line[8][2..] } : new string[] { "N/A", "N/A" };
             wallPositions[trialNum] = pos;
+            if(line.Length > 9)
+            {
+                stressTrials[trialNum] = line[9];
+            }
+            else
+            {
+                stressTrials[trialNum] = "False";
+            }
         }
         sr.Close();
     }
@@ -127,6 +141,14 @@ public class PositionReplay : MonoBehaviour
                 trialDisplay.text = $"Trial: {x}";
                 prevTrialNum = x;
                 prevTime = 0f;
+                if(stressTrials[x] == "True" && fogToggle)
+                {
+                    fog.On();
+                }
+                else
+                {
+                    fog.Off();
+                }
             }
             processing = true;
             float currentTime = float.Parse(line[1]);
@@ -182,6 +204,14 @@ public class PositionReplay : MonoBehaviour
         {
             prevTrialNum = x;
             trialDisplay.text = $"Trial: {prevTrialNum}";
+            if (stressTrials[x] == "True" && fogToggle)
+            {
+                fog.On();
+            }
+            else
+            {
+                fog.Off();
+            }
         }
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
         transform.position = newPos;
@@ -282,6 +312,10 @@ public class PositionReplay : MonoBehaviour
         {
             infoCanvas.SetActive(!infoCanvas.activeInHierarchy);
         }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            fogToggle = !fogToggle;
+        }
         timeDisplay.text = $"Time: {prevTime:0.000}";
     }
 
@@ -316,6 +350,7 @@ public class PositionReplay : MonoBehaviour
         camPos = "cameraPos.csv";
         positions.Clear();
         wallSpawns.Clear();
+        stressTrials.Clear();
         processing = false;
         paused = false;
         currentPos = 0;
