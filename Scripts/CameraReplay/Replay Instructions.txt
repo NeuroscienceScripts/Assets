@@ -1,0 +1,15 @@
+How to use Camera Replay:
+	- Switch Scene: CameraReplay
+  Data Folder Path:
+	- Download "ICB-camera-replay" from Google Drive
+	- Unzip and copy paste directory into Data Folder Path
+  Subject Number: 
+	- The number of the subject you wish to replay
+
+
+  After Start:
+	- Spacebar => Pause/Unpause
+	- Left/Right Arrow Key => Step backward/forward by one time step
+	- F => Show/Hide Fog on Stress Trial
+	- H => Hide UI
+	- Esc => Quit (go back to main menu)
