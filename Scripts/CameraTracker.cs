@@ -47,8 +47,8 @@ public class CameraTracker : MonoBehaviour
             fileHandler.AppendLine( ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time+".csv", "_camera_tracker.csv"),
                 ExperimentController.Instance.PrintStepInfo() + "," + ExperimentController.Instance.GetTrialInfo().ToString()+ 
                 ","+ gameObject.transform.rotation.eulerAngles.x.ToString() + "," + gameObject.transform.rotation.eulerAngles.y.ToString() + 
-                "," + gameObject.transform.rotation.eulerAngles.z.ToString() + gameObject.transform.position.x.ToString() +"," + 
-                gameObject.transform.position.y.ToString() + "," + gameObject.transform.position.z.ToString() +
+                "," + gameObject.transform.rotation.eulerAngles.z.ToString() + "," + gameObject.transform.position.x.ToString() +"," + 
+                gameObject.transform.position.y.ToString() + "," + gameObject.transform.position.z.ToString() + "," +
                 gazeX + "," + gazeY + "," + usedDirection.x + "," + usedDirection.y + "," + usedDirection.z);
             recordHeadTimer = Time.time; 
             
