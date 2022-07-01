@@ -375,19 +375,21 @@ public class NewReplay : MonoBehaviour
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
 
-    //private void OnRenderImage(RenderTexture src, RenderTexture dest)
-    //{
-    //    if (!started) Graphics.Blit(src, dest);
-    //    Vector3 usedDirection = gazeVector; //  <----------  Make this the gaze vector
+    private void OnRenderImage(RenderTexture src, RenderTexture dest)
+    {
+        if (!started) Graphics.Blit(src, dest);
+        Vector3 usedDirection = gazeVector; //  <----------  Make this the gaze vector
 
-    //    float aspectRatio = (float)src.height / src.width;
-    //    float convertToUnitSphere = (float)Mathf.Sqrt(1.0f / usedDirection.z);
+        float aspectRatio = (float)src.height / src.width;
+        float convertToUnitSphere = (float)Mathf.Sqrt(1.0f / usedDirection.z);
 
-    //    shiftShaderMaterial.SetFloat("gazeY", (usedDirection.y * convertToUnitSphere) + 0.5f);
-    //    shiftShaderMaterial.SetFloat("gazeX", (usedDirection.x * convertToUnitSphere * aspectRatio) + 0.5f);
-    //    shiftShaderMaterial.SetFloat("aspectRatio", aspectRatio);
+        shiftShaderMaterial.SetFloat("gazeY", (usedDirection.y * convertToUnitSphere) + 0.5f);
+        shiftShaderMaterial.SetFloat("gazeX", (usedDirection.x * convertToUnitSphere * aspectRatio) + 0.5f);
+        shiftShaderMaterial.SetFloat("aspectRatio", aspectRatio);
 
-    //    Graphics.Blit(src, dest, shiftShaderMaterial);
+        RenderTexture temp = src;
+        Graphics.Blit(src, temp, shiftShaderMaterial);
+        Graphics.Blit(temp, dest);
 
-    //}
+    }
 }
