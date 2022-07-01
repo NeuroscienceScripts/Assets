@@ -19,6 +19,10 @@ public class PositionReplay : MonoBehaviour
     [SerializeField] private FogReplay fog;
     [SerializeField] private bool fogToggle;
 
+    [SerializeField] private Material shiftShaderMaterial;
+    private Vector3 gazeVector;
+    private bool started;
+
     private string defaultPath;
     private string filePath;
     private string camPos = "cameraPos.csv";
@@ -45,6 +49,7 @@ public class PositionReplay : MonoBehaviour
 
     private void Awake()
     {
+        started = false;
         positions = new();
         wallSpawns = new();
         stressTrials = new();
@@ -120,6 +125,7 @@ public class PositionReplay : MonoBehaviour
         startCanvas.SetActive(false);
         infoCanvas.SetActive(true);
         sr = new StreamReader(camPos);
+        started = true;
         string[] line;
         prevTime = 0;
         prevTrialNum = -1;
@@ -343,6 +349,7 @@ public class PositionReplay : MonoBehaviour
     private void Stop()
     {
         StopAllCoroutines();
+        started = false;
         if(sr != null) sr.Close();
         HideWall();
         filePath = @defaultPath;
@@ -358,5 +365,22 @@ public class PositionReplay : MonoBehaviour
         prevTrialNum = -1;
         stepped = false;
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+    }
+
+    private void OnRenderImage(RenderTexture src, RenderTexture dest)
+    {
+        if (!started) Graphics.Blit(src, dest);
+        Vector3 usedDirection = gazeVector; //  <----------  Make this the gaze vector
+
+        float aspectRatio = (float)src.height / src.width;
+        float convertToUnitSphere = (float)Mathf.Sqrt(1.0f / usedDirection.z);
+
+        shiftShaderMaterial.SetFloat("gazeY", (usedDirection.y * convertToUnitSphere) + 0.5f);
+        shiftShaderMaterial.SetFloat("gazeX", (usedDirection.x * convertToUnitSphere * aspectRatio) + 0.5f);
+        shiftShaderMaterial.SetFloat("aspectRatio", aspectRatio);
+
+        //RenderTexture temp = src;
+        Graphics.Blit(src, dest, shiftShaderMaterial);
+        //Graphics.Blit(temp, dest); 
     }
 }

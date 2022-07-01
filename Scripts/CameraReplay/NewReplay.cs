@@ -19,6 +19,10 @@ public class NewReplay : MonoBehaviour
     [SerializeField] private FogReplay fog;
     [SerializeField] private bool fogToggle;
 
+    [SerializeField] private Material shiftShaderMaterial;
+    private Vector3 gazeVector;
+    private bool started;
+
     private string defaultPath;
     private string filePath;
     private string camInfo = "camera_tracker.csv";
@@ -48,6 +52,7 @@ public class NewReplay : MonoBehaviour
         positions = new();
         wallSpawns = new();
         stressTrials = new();
+        started = false;
         hidden = false;
         stepped = false;
         defaultPath = Application.dataPath + @"\Data\";
@@ -125,13 +130,10 @@ public class NewReplay : MonoBehaviour
         prevTrialNum = -1;
         while (!sr.EndOfStream)
         {
+            started = true;
             currentPos++;
             if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
             line = sr.ReadLine().Split(',');
-            foreach (var s in line)
-            {
-                Debug.Log(s);
-            }
             if (!int.TryParse(line[0], out int x)) break;
             if (prevTrialNum != x)
             {
@@ -219,8 +221,9 @@ public class NewReplay : MonoBehaviour
         }
         Quaternion newRot = Quaternion.Euler(new Vector3(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9])));
         Vector3 newPos = new(float.Parse(line[10]), float.Parse(line[11]), float.Parse(line[12]));
-        transform.position = newPos;
-        transform.rotation = newRot;
+        Vector3 gaze = new(float.Parse(line[15]), float.Parse(line[16]), float.Parse(line[17]));
+        transform.SetPositionAndRotation(newPos, newRot);
+        gazeVector = gaze;
         prevTime = float.Parse(line[1]);
         CheckWall(x);
     }
@@ -234,6 +237,7 @@ public class NewReplay : MonoBehaviour
             Quaternion newRot = Quaternion.Euler(new Vector3(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9])));
             Vector3 startPos = transform.position;
             Vector3 newPos = new(float.Parse(line[10]), float.Parse(line[11]), float.Parse(line[12]));
+            Vector3 gaze = new(float.Parse(line[15]), float.Parse(line[16]), float.Parse(line[17]));
             while (timeElapsed <= time && time != 0)
             {
                 while (paused)
@@ -252,13 +256,12 @@ public class NewReplay : MonoBehaviour
                     stepped = false;
                     yield break;
                 }
-                transform.position = Vector3.Lerp(startPos, newPos, timeElapsed / time);
-                transform.rotation = Quaternion.Lerp(startRot, newRot, timeElapsed / time);
+                transform.SetPositionAndRotation(Vector3.Lerp(startPos, newPos, timeElapsed / time), Quaternion.Lerp(startRot, newRot, timeElapsed / time));
                 timeElapsed += Time.deltaTime;
+                gazeVector = Vector3.Lerp(gazeVector, gaze, timeElapsed / time);
                 yield return null;
             }
-            transform.position = newPos;
-            transform.rotation = newRot;
+            transform.SetPositionAndRotation(newPos, newRot);
             CheckWall(x);
             if (Mathf.Abs(float.Parse(line[1]) - prevTime) <= time * 1.1f)
             {
@@ -368,6 +371,23 @@ public class NewReplay : MonoBehaviour
         prevTime = 0f;
         prevTrialNum = -1;
         stepped = false;
+        started = false;
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
+
+    //private void OnRenderImage(RenderTexture src, RenderTexture dest)
+    //{
+    //    if (!started) Graphics.Blit(src, dest);
+    //    Vector3 usedDirection = gazeVector; //  <----------  Make this the gaze vector
+
+    //    float aspectRatio = (float)src.height / src.width;
+    //    float convertToUnitSphere = (float)Mathf.Sqrt(1.0f / usedDirection.z);
+
+    //    shiftShaderMaterial.SetFloat("gazeY", (usedDirection.y * convertToUnitSphere) + 0.5f);
+    //    shiftShaderMaterial.SetFloat("gazeX", (usedDirection.x * convertToUnitSphere * aspectRatio) + 0.5f);
+    //    shiftShaderMaterial.SetFloat("aspectRatio", aspectRatio);
+
+    //    Graphics.Blit(src, dest, shiftShaderMaterial);
+
+    //}
 }
