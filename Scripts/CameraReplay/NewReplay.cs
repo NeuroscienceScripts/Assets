@@ -306,6 +306,10 @@ public class NewReplay : MonoBehaviour
 
     private void Update()
     {
+        if (!started)
+        {
+            return;
+        }
         if (Input.GetKeyDown(KeyCode.Space))
         {
             paused = !paused;

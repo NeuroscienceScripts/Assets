@@ -20,8 +20,9 @@ public class PositionReplay : MonoBehaviour
     [SerializeField] private bool fogToggle;
 
     [SerializeField] private Material shiftShaderMaterial;
-    private Vector3 gazeVector;
+    [SerializeField] private Vector3 gazeVector;
     private bool started;
+    [SerializeField, Range(0.001f, 0.05f)] private float scotomaSize;
 
     private string defaultPath;
     private string filePath;
@@ -125,12 +126,12 @@ public class PositionReplay : MonoBehaviour
         startCanvas.SetActive(false);
         infoCanvas.SetActive(true);
         sr = new StreamReader(camPos);
-        started = true;
         string[] line;
         prevTime = 0;
         prevTrialNum = -1;
         while (!sr.EndOfStream)
         {
+            started = true;
             currentPos++;
             if(currentPos >= positions.Count) positions.Add(sr.GetPosition());
             line = sr.ReadLine().Split(',');
@@ -367,20 +368,22 @@ public class PositionReplay : MonoBehaviour
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
 
-    private void OnRenderImage(RenderTexture src, RenderTexture dest)
-    {
-        if (!started) Graphics.Blit(src, dest);
-        Vector3 usedDirection = gazeVector; //  <----------  Make this the gaze vector
+    //private void OnRenderImage(RenderTexture src, RenderTexture dest)
+    //{
+    //    if (!started) Graphics.Blit(src, dest);
+    //    Vector3 usedDirection = gazeVector; //  <----------  Make this the gaze vector
 
-        float aspectRatio = (float)src.height / src.width;
-        float convertToUnitSphere = (float)Mathf.Sqrt(1.0f / usedDirection.z);
+    //    float aspectRatio = (float)src.height / src.width;
+    //    float convertToUnitSphere = (float)Mathf.Sqrt(1.0f / usedDirection.z);
 
-        shiftShaderMaterial.SetFloat("gazeY", (usedDirection.y * convertToUnitSphere) + 0.5f);
-        shiftShaderMaterial.SetFloat("gazeX", (usedDirection.x * convertToUnitSphere * aspectRatio) + 0.5f);
-        shiftShaderMaterial.SetFloat("aspectRatio", aspectRatio);
+    //    shiftShaderMaterial.SetFloat("gazeY", (usedDirection.y * convertToUnitSphere) + 0.5f);
+    //    shiftShaderMaterial.SetFloat("gazeX", (usedDirection.x * convertToUnitSphere * aspectRatio) + 0.5f);
+    //    shiftShaderMaterial.SetFloat("aspectRatio", aspectRatio);
+    //    shiftShaderMaterial.SetFloat("scotomaSize", scotomaSize);
 
-        //RenderTexture temp = src;
-        Graphics.Blit(src, dest, shiftShaderMaterial);
-        //Graphics.Blit(temp, dest); 
-    }
+    //    RenderTexture temp = src;
+    //    Graphics.Blit(src, temp, shiftShaderMaterial);
+    //    Graphics.Blit(temp, dest);
+
+    //}
 }
