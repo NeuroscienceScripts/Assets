@@ -20,8 +20,9 @@ public class NewReplay : MonoBehaviour
     [SerializeField] private bool fogToggle;
 
     [SerializeField] private Material shiftShaderMaterial;
-    private Vector3 gazeVector;
+    [SerializeField] private Vector3 gazeVector;
     private bool started;
+    [SerializeField, Range(0.001f, 0.05f)] private float scotomaSize;
 
     private string defaultPath;
     private string filePath;
@@ -386,6 +387,7 @@ public class NewReplay : MonoBehaviour
         shiftShaderMaterial.SetFloat("gazeY", (usedDirection.y * convertToUnitSphere) + 0.5f);
         shiftShaderMaterial.SetFloat("gazeX", (usedDirection.x * convertToUnitSphere * aspectRatio) + 0.5f);
         shiftShaderMaterial.SetFloat("aspectRatio", aspectRatio);
+        shiftShaderMaterial.SetFloat("scotomaSize", scotomaSize);
 
         RenderTexture temp = src;
         Graphics.Blit(src, temp, shiftShaderMaterial);
