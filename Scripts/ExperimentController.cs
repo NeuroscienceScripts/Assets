@@ -265,10 +265,10 @@ public class ExperimentController : MonoBehaviour
         fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,goal,selected,blockedWall,isStressTrial");
         fileHandler.AppendLine(subjectFile.Replace(Date_time +".csv", "_nodePath.csv"),
             DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute);
-        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraRot.csv"),
-            "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xRot,yRot,zRot");
-        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraPos.csv"),
-            "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xPos,yPos,zPos");
+        // fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraRot.csv"),
+        //     "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xRot,yRot,zRot");
+        // fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraPos.csv"),
+        //     "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xPos,yPos,zPos");
         fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_stress.csv"),
             "start,end,stress_level");
 
