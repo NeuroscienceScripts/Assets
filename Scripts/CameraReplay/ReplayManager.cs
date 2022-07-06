@@ -23,11 +23,14 @@ public class ReplayManager : MonoBehaviour
         if(replayOptions.value == 0)
         {
             newReplay.StartReplay();
+            posReplay.enabled = false;
+            rotReplay.enabled = false;
         }
         else
         {
             posReplay.StartReplay();
             rotReplay.StartReplay();
+            newReplay.enabled = false;
         }
     }
 }

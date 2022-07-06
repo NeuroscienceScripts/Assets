@@ -20,9 +20,8 @@ public class PositionReplay : MonoBehaviour
     [SerializeField] private bool fogToggle;
 
     [SerializeField] private Material shiftShaderMaterial;
-    [SerializeField] private Vector3 gazeVector;
+    private Vector3 gazeVector;
     private bool started;
-    [SerializeField, Range(0.001f, 0.05f)] private float scotomaSize;
 
     private string defaultPath;
     private string filePath;
@@ -47,6 +46,8 @@ public class PositionReplay : MonoBehaviour
     private bool hidden;
     private Dictionary<int, int> wallSpawns;
     private Dictionary<int, string> stressTrials;
+
+    [SerializeField] private GameObject playerModel;
 
     private void Awake()
     {
@@ -222,6 +223,8 @@ public class PositionReplay : MonoBehaviour
         }
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
         transform.position = newPos;
+        playerModel.transform.localScale = new Vector3(0.3f, float.Parse(line[8]), 0.3f);
+        playerModel.transform.localPosition = new Vector3(0, float.Parse(line[8])/ -2f, 0);
         prevTime = float.Parse(line[1]);
         CheckWall(x);
     }
@@ -233,6 +236,7 @@ public class PositionReplay : MonoBehaviour
             float timeElapsed = 0;
             Vector3 startPos = transform.position;
             Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));
+            Vector3 playerScale = new(0.3f, float.Parse(line[8]), 0.3f);
             while (timeElapsed <= time && time != 0)
             {
                 while (paused)
@@ -251,10 +255,14 @@ public class PositionReplay : MonoBehaviour
                     yield break;
                 }
                 transform.position = Vector3.Lerp(startPos, newPos, timeElapsed / time);
+                playerModel.transform.localScale = Vector3.Lerp(playerModel.transform.localScale, playerScale, timeElapsed / time);
+                playerModel.transform.localPosition = new Vector3(0, playerModel.transform.localScale.y / -2f, 0);
                 timeElapsed += Time.deltaTime;
                 yield return null;
             }
             transform.position = newPos;
+            playerModel.transform.localScale = playerScale;
+            playerModel.transform.localPosition = new Vector3(0, playerModel.transform.localScale.y / -2f, 0);
             CheckWall(x);
             if (Mathf.Abs(float.Parse(line[1]) - prevTime) <= time * 1.1f)
             {
@@ -366,24 +374,7 @@ public class PositionReplay : MonoBehaviour
         prevTrialNum = -1;
         stepped = false;
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        playerModel.transform.localPosition = Vector3.zero;
     }
 
-    //private void OnRenderImage(RenderTexture src, RenderTexture dest)
-    //{
-    //    if (!started) Graphics.Blit(src, dest);
-    //    Vector3 usedDirection = gazeVector; //  <----------  Make this the gaze vector
-
-    //    float aspectRatio = (float)src.height / src.width;
-    //    float convertToUnitSphere = (float)Mathf.Sqrt(1.0f / usedDirection.z);
-
-    //    shiftShaderMaterial.SetFloat("gazeY", (usedDirection.y * convertToUnitSphere) + 0.5f);
-    //    shiftShaderMaterial.SetFloat("gazeX", (usedDirection.x * convertToUnitSphere * aspectRatio) + 0.5f);
-    //    shiftShaderMaterial.SetFloat("aspectRatio", aspectRatio);
-    //    shiftShaderMaterial.SetFloat("scotomaSize", scotomaSize);
-
-    //    RenderTexture temp = src;
-    //    Graphics.Blit(src, temp, shiftShaderMaterial);
-    //    Graphics.Blit(temp, dest);
-
-    //}
 }

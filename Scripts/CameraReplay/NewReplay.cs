@@ -22,7 +22,11 @@ public class NewReplay : MonoBehaviour
     [SerializeField] private Material shiftShaderMaterial;
     [SerializeField] private Vector3 gazeVector;
     private bool started;
-    [SerializeField, Range(0.001f, 0.05f)] private float scotomaSize;
+    [SerializeField, Range(0.01f, 0.1f)] private float scotomaSize;
+
+    [SerializeField] private LineRenderer lineRender;
+    [SerializeField] private float lineWidth;
+    private float maxLineLength;
 
     private string defaultPath;
     private string filePath;
@@ -50,6 +54,7 @@ public class NewReplay : MonoBehaviour
 
     private void Awake()
     {
+        maxLineLength = 5f;
         positions = new();
         wallSpawns = new();
         stressTrials = new();
@@ -59,6 +64,10 @@ public class NewReplay : MonoBehaviour
         defaultPath = Application.dataPath + @"\Data\";
         camInfo = "camera_tracker.csv";
         wallDirections = new Vector3[26];
+        Vector3[] linePositions = new Vector3[2] { Vector3.zero, Vector3.zero };
+        lineRender.SetPositions(linePositions);
+        lineRender.startWidth = lineWidth;
+        lineRender.endWidth = lineWidth;
         for (int i = 0; i < 4; ++i)
         {
             wallDirections[i] = walls[i].GetChild(0).transform.position;
@@ -335,6 +344,8 @@ public class NewReplay : MonoBehaviour
         {
             fogToggle = !fogToggle;
         }
+        DrawGaze();
+        Debug.DrawRay(Vector3.zero, gazeVector, Color.blue);
         timeDisplay.text = $"Time: {prevTime:0.000}";
     }
 
@@ -377,6 +388,10 @@ public class NewReplay : MonoBehaviour
         prevTrialNum = -1;
         stepped = false;
         started = false;
+        Vector3[] linePositions = new Vector3[2] { Vector3.zero, Vector3.zero };
+        lineRender.SetPositions(linePositions);
+        lineRender.startWidth = lineWidth;
+        lineRender.endWidth = lineWidth;
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
 
@@ -397,5 +412,26 @@ public class NewReplay : MonoBehaviour
         Graphics.Blit(src, temp, shiftShaderMaterial);
         Graphics.Blit(temp, dest);
 
+    }
+
+    private void DrawGaze()
+    {
+        Vector3 actualDir = (Vector3.forward - gazeVector).normalized;
+        actualDir = (transform.forward + actualDir).normalized;
+        Debug.Log(actualDir);
+        Ray ray = new(transform.position, actualDir);
+        RaycastHit hit;
+        Vector3 endPos = transform.position + (actualDir * maxLineLength);
+        if(Physics.Raycast(ray, out hit, maxLineLength))
+        {
+            endPos = hit.point;
+        }
+        lineRender.SetPosition(0, transform.position);
+        lineRender.SetPosition(1, endPos);
+    }
+
+    private void OnApplicationQuit()
+    {
+        Stop();
     }
 }

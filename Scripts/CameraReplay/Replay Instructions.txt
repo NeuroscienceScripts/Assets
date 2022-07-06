@@ -5,6 +5,8 @@ How to use Camera Replay:
 	- Unzip and copy paste directory into Data Folder Path
   Subject Number: 
 	- The number of the subject you wish to replay
+  New Replay System --> uses "camera_tracker.csv" file
+  Old Replay System --> uses "camera_Rot.csv" and "cameraPos.csv"
 
 
   After Start:
