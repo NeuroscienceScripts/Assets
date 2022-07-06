@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 257532240620766293}
   - component: {fileID: 257532240620766292}
   - component: {fileID: 776564063899036789}
-  - component: {fileID: 8782113247430811836}
   m_Layer: 0
   m_Name: WallMesh
   m_TagString: Wall
@@ -97,7 +96,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1.1, y: 1, z: 1.1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &776564063899036789
 MonoBehaviour:
@@ -226,24 +225,6 @@ MonoBehaviour:
     initialized: 1
   _unwrapMethod: 0
   freshMesh: 0
---- !u!114 &8782113247430811836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 257532240620766291}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69188cd014451bb4c9f2f911b7e934fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  size: 1
-  spreadRate: 4
-  spreadDecay: 0.1
-  fadeAndDestory: 1
-  fadeSpeed: 0.0025
-  DepthFXFadeRate: 0.01
 --- !u!1 &1578483253656013361
 GameObject:
   m_ObjectHideFlags: 0

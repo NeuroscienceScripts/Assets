@@ -146,7 +146,7 @@ namespace Classes
                 case "G":
                     if (x==2)
                         return "Mailbox";
-                    else if (x == 6)
+                    else if (x == 5)
                         return "Chair";
                     break;
             }
