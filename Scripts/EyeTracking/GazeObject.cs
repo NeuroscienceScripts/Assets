@@ -13,7 +13,7 @@ namespace DefaultNamespace
             //Debug.Log(gameObject.name);
             if(ExperimentController.Instance.recordCameraAndNodes)
                fileHandler.AppendLine(ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time+".csv","_gazeTargets.csv"),
-                ExperimentController.Instance.PrintStepInfo() + gameObject.name);
+                ExperimentController.Instance.PrintStepInfo() + "," + gameObject.name);
         }
     }
 
