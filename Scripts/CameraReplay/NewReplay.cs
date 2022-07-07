@@ -24,8 +24,13 @@ public class NewReplay : MonoBehaviour
     private bool started;
     [SerializeField, Range(0.01f, 0.1f)] private float scotomaSize;
 
+    [SerializeField] private Camera firstPerson;
+    [SerializeField] private Camera thirdPerson;
+    private bool inFirstPerson;
+
     [SerializeField] private LineRenderer lineRender;
     [SerializeField] private float lineWidth;
+    [SerializeField] private LayerMask wallLayerMask;
     private float maxLineLength;
 
     private string defaultPath;
@@ -61,6 +66,9 @@ public class NewReplay : MonoBehaviour
         started = false;
         hidden = false;
         stepped = false;
+        inFirstPerson = true;
+        thirdPerson.enabled = false;
+        firstPerson.enabled = true;
         defaultPath = Application.dataPath + @"\Data\";
         camInfo = "camera_tracker.csv";
         wallDirections = new Vector3[26];
@@ -344,6 +352,10 @@ public class NewReplay : MonoBehaviour
         {
             fogToggle = !fogToggle;
         }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            CameraSwap();
+        }
         DrawGaze();
         Debug.DrawRay(Vector3.zero, gazeVector, Color.blue);
         timeDisplay.text = $"Time: {prevTime:0.000}";
@@ -382,6 +394,9 @@ public class NewReplay : MonoBehaviour
         wallSpawns.Clear();
         stressTrials.Clear();
         processing = false;
+        inFirstPerson = true;
+        thirdPerson.enabled = false;
+        firstPerson.enabled = true;
         paused = false;
         currentPos = 0;
         prevTime = 0f;
@@ -397,7 +412,7 @@ public class NewReplay : MonoBehaviour
 
     private void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
-        if (!started) Graphics.Blit(src, dest);
+        if (!started || !inFirstPerson) Graphics.Blit(src, dest);
         Vector3 usedDirection = gazeVector; //  <----------  Make this the gaze vector
 
         float aspectRatio = (float)src.height / src.width;
@@ -414,15 +429,29 @@ public class NewReplay : MonoBehaviour
 
     }
 
+    private void CameraSwap()
+    {
+        if (inFirstPerson)
+        {
+            inFirstPerson = false;
+            firstPerson.enabled = false;
+            thirdPerson.enabled = true;
+        }
+        else
+        {
+            inFirstPerson = true;
+            firstPerson.enabled = true;
+            thirdPerson.enabled = false;
+        }
+    }
+
     private void DrawGaze()
     {
-        Vector3 actualDir = (Vector3.forward - gazeVector).normalized;
-        actualDir = (transform.forward + actualDir).normalized;
-        Debug.Log(actualDir);
+        if (inFirstPerson) return;
+        Vector3 actualDir = (transform.rotation * gazeVector).normalized;
         Ray ray = new(transform.position, actualDir);
-        RaycastHit hit;
         Vector3 endPos = transform.position + (actualDir * maxLineLength);
-        if(Physics.Raycast(ray, out hit, maxLineLength))
+        if (Physics.Raycast(ray, out RaycastHit hit, maxLineLength, wallLayerMask))
         {
             endPos = hit.point;
         }
