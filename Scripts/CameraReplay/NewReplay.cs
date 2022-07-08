@@ -342,7 +342,7 @@ public class NewReplay : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Stop();
+            if (inFirstPerson) Stop();
         }
         if (Input.GetKeyDown(KeyCode.H))
         {
@@ -352,12 +352,11 @@ public class NewReplay : MonoBehaviour
         {
             fogToggle = !fogToggle;
         }
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.C))
         {
             CameraSwap();
         }
         DrawGaze();
-        Debug.DrawRay(Vector3.zero, gazeVector, Color.blue);
         timeDisplay.text = $"Time: {prevTime:0.000}";
     }
 
