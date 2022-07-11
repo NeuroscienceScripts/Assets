@@ -20,3 +20,4 @@ How to use Camera Replay:
   Third Person Camera:
     - Scroll Wheel => Zoom In/Out
 	- Esc => Lock camera angle
+	- Hold Left Click (when camera locked) => Look around

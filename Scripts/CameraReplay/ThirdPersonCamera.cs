@@ -82,7 +82,7 @@ public class ThirdPersonCamera : MonoBehaviour
         
         Cursor.lockState = CursorLockMode.Locked;
         CameraFollow();
-        if(!lockCam) CameraRotate();
+        if(!lockCam || Input.GetMouseButton(0)) CameraRotate();
         CameraZoom();
     }
 }
