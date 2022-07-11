@@ -14,8 +14,9 @@ How to use Camera Replay:
 	- Left/Right Arrow Key => Step backward/forward by one time step
 	- F => Show/Hide Fog on Stress Trial
 	- H => Hide UI
-	- C => Switch Camera Mode
-	- Esc => Quit (go back to main menu)
+	- C => Switch Camera Mode (first person by default)
+	- Esc (in first person) => Quit (go back to main menu)
 
   Third Person Camera:
     - Scroll Wheel => Zoom In/Out
+	- Esc => Lock camera angle

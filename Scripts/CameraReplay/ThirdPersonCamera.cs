@@ -24,12 +24,14 @@ public class ThirdPersonCamera : MonoBehaviour
     private float horizAngle;
     private float cameraOffsetX;
     private float cameraOffsetY;
+    private bool lockCam;
 
     private void Awake()
     {
         camVelocity = Vector3.zero;
         cameraOffsetX = thirdPersonCam.transform.position.z;
         cameraOffsetY = cameraPivot.transform.position.y;
+        lockCam = false;
     }
 
     private void CameraFollow()
@@ -54,6 +56,16 @@ public class ThirdPersonCamera : MonoBehaviour
         thirdPersonCam.transform.localPosition = Vector3.SmoothDamp(thirdPersonCam.transform.localPosition, new Vector3(thirdPersonCam.transform.localPosition.x, thirdPersonCam.transform.localPosition.y, thirdPersonCam.transform.localPosition.z + (Input.mouseScrollDelta.y * zoomSpeed)), ref zoomVelocity, 0.2f);
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            lockCam = !lockCam;
+            Cursor.lockState = lockCam ? CursorLockMode.None : CursorLockMode.Locked;
+            Cursor.visible = lockCam;
+        }
+    }
+
 
     private void LateUpdate()
     {
@@ -63,10 +75,14 @@ public class ThirdPersonCamera : MonoBehaviour
             cameraPivot.localRotation = Quaternion.identity;
             transform.position = target.position - (target.forward * cameraOffsetX) - (target.up * cameraOffsetY);
             thirdPersonCam.transform.localPosition = new Vector3(0, 0, cameraOffsetX);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
             return;
         }
+        
+        Cursor.lockState = CursorLockMode.Locked;
         CameraFollow();
-        CameraRotate();
+        if(!lockCam) CameraRotate();
         CameraZoom();
     }
 }
