@@ -20,6 +20,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private Vector3 camVelocity;
     private Vector3 zoomVelocity;
+    private float zoomAmount;
     private float vertAngle;
     private float horizAngle;
     private float cameraOffsetX;
@@ -53,7 +54,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void CameraZoom()
     {
-        thirdPersonCam.transform.localPosition = Vector3.SmoothDamp(thirdPersonCam.transform.localPosition, new Vector3(thirdPersonCam.transform.localPosition.x, thirdPersonCam.transform.localPosition.y, thirdPersonCam.transform.localPosition.z + (Input.mouseScrollDelta.y * zoomSpeed)), ref zoomVelocity, 0.2f);
+        thirdPersonCam.transform.localPosition = Vector3.SmoothDamp(thirdPersonCam.transform.localPosition, new Vector3(thirdPersonCam.transform.localPosition.x, thirdPersonCam.transform.localPosition.y, thirdPersonCam.transform.localPosition.z + zoomAmount), ref zoomVelocity, 0.2f);
     }
 
     private void Update()
@@ -64,6 +65,7 @@ public class ThirdPersonCamera : MonoBehaviour
             Cursor.lockState = lockCam ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = lockCam;
         }
+        zoomAmount = (thirdPersonCam.transform.localPosition.z + zoomAmount >= 0) ? zoomAmount + (Input.mouseScrollDelta.y * zoomSpeed) : zoomAmount;
     }
 
 
@@ -77,6 +79,7 @@ public class ThirdPersonCamera : MonoBehaviour
             thirdPersonCam.transform.localPosition = new Vector3(0, 0, cameraOffsetX);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            lockCam = false;
             return;
         }
         
