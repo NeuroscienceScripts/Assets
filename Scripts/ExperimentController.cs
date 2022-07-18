@@ -626,6 +626,8 @@ public class ExperimentController : MonoBehaviour
                         if (!GetTrialInfo().stressTrial || (subjectNumber%2 != 0 && GetTrialInfo().isWallTrial) || (subjectNumber%2 == 0 && !GetTrialInfo().isWallTrial))
                             blockedWall = "N/A";
                         Debug.Log("Selected " + ControllerCollider.Instance.controllerSelection);
+						ControllerCollider.Instance.wallActivated = false;
+            	        ControllerCollider.Instance.currWall = "";
                         fileHandler.AppendLine(subjectFile,
                             PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(ControllerCollider.Instance.controllerSelection.Length > 2 ? 2 : 0) + "," + blockedWall + "," + GetTrialInfo().stressTrial);
                         maze.SetActive(false);
