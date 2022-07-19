@@ -101,7 +101,7 @@ public class WallInfoGenerator : EditorWindow
             if (map.GetPixel(x, up) == Color.black && map.GetPixel(x, down) == Color.black)
             {
                 // Vertical
-                wallInfo.Add(WallDirection.Vertical, c);
+                wallInfo.Add(WallDirection.Horizontal, c);
                 return;
             }
         }
@@ -110,7 +110,7 @@ public class WallInfoGenerator : EditorWindow
             if (map.GetPixel(x, down) == Color.black)
             {
                 // Vertical
-                wallInfo.Add(WallDirection.Vertical, c);
+                wallInfo.Add(WallDirection.Horizontal, c);
                 return;
             }
         }
@@ -119,7 +119,7 @@ public class WallInfoGenerator : EditorWindow
             if (map.GetPixel(x, up) == Color.black)
             {
                 // Vertical
-                wallInfo.Add(WallDirection.Vertical, c);
+                wallInfo.Add(WallDirection.Horizontal, c);
                 return;
             }
         }
@@ -128,7 +128,7 @@ public class WallInfoGenerator : EditorWindow
             if (map.GetPixel(right, y) == Color.black && map.GetPixel(left, y) == Color.black)
             {
                 // Horizontal
-                wallInfo.Add(WallDirection.Horizontal, c);
+                wallInfo.Add(WallDirection.Vertical, c);
                 return;
             }
         }
@@ -137,7 +137,7 @@ public class WallInfoGenerator : EditorWindow
             if (map.GetPixel(right, y) == Color.black)
             {
                 // Horizontal
-                wallInfo.Add(WallDirection.Horizontal, c);
+                wallInfo.Add(WallDirection.Vertical, c);
                 return;
             }
         }
@@ -146,7 +146,7 @@ public class WallInfoGenerator : EditorWindow
             if (map.GetPixel(left, y) == Color.black)
             {
                 // Horizontal
-                wallInfo.Add(WallDirection.Horizontal, c);
+                wallInfo.Add(WallDirection.Vertical, c);
                 return;
             }
         }

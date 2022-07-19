@@ -18,13 +18,13 @@ namespace DefaultNamespace
 
         void Update()
         {
-            if (ExperimentController.Instance.introCanvas.enabled)
-            {
-                firstPersonLook.enabled = false;
-                firstPersonMovement.enabled = false;
-            }
-            else
-            {
+            // if (ExperimentController.Instance.introCanvas.enabled)
+            // {
+            //     firstPersonLook.enabled = false;
+            //     firstPersonMovement.enabled = false;
+            // }
+            // else
+            // {
                 if (ExperimentController.Instance.desktopMode)
                 {
                     firstPersonLook.enabled = true;
@@ -34,7 +34,7 @@ namespace DefaultNamespace
                  {
                     cameraHelperVR.enabled = true;
                 }
-            }
+            //}
         }
     }
 }

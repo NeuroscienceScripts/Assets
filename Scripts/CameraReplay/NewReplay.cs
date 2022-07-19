@@ -24,6 +24,7 @@ public class NewReplay : MonoBehaviour
     private bool started;
     [SerializeField, Range(0.01f, 0.1f)] private float scotomaSize;
 
+
     [SerializeField] private Camera firstPerson;
     [SerializeField] private Camera thirdPerson;
     private bool inFirstPerson;
@@ -31,6 +32,7 @@ public class NewReplay : MonoBehaviour
     [SerializeField] private LineRenderer lineRender;
     [SerializeField] private float lineWidth;
     [SerializeField] private LayerMask wallLayerMask;
+
     private float maxLineLength;
 
     private string defaultPath;
@@ -57,7 +59,9 @@ public class NewReplay : MonoBehaviour
     private Dictionary<int, int> wallSpawns;
     private Dictionary<int, string> stressTrials;
 
+
     [SerializeField] private GameObject playerModel;
+
 
 
     private void Awake()
@@ -69,9 +73,11 @@ public class NewReplay : MonoBehaviour
         started = false;
         hidden = false;
         stepped = false;
+
         inFirstPerson = true;
         thirdPerson.enabled = false;
         firstPerson.enabled = true;
+
         defaultPath = Application.dataPath + @"\Data\";
         camInfo = "camera_tracker.csv";
         wallDirections = new Vector3[26];
@@ -246,6 +252,7 @@ public class NewReplay : MonoBehaviour
         transform.SetPositionAndRotation(newPos, newRot);
         playerModel.transform.localScale = new Vector3(0.3f, float.Parse(line[8]), 0.3f);
         playerModel.transform.localPosition = new Vector3(0, float.Parse(line[8]) / -2f, 0);
+
         gazeVector = gaze;
         prevTime = float.Parse(line[1]);
         CheckWall(x);
@@ -261,6 +268,7 @@ public class NewReplay : MonoBehaviour
             Vector3 startPos = transform.position;
             Vector3 newPos = new(float.Parse(line[10]), float.Parse(line[11]), float.Parse(line[12]));
             Vector3 gaze = new(float.Parse(line[15]), float.Parse(line[16]), float.Parse(line[17]));
+
             Vector3 playerScale = new(0.3f, float.Parse(line[8]), 0.3f);
             while (timeElapsed <= time && time != 0)
             {
@@ -281,6 +289,7 @@ public class NewReplay : MonoBehaviour
                     yield break;
                 }
                 transform.SetPositionAndRotation(Vector3.Lerp(startPos, newPos, timeElapsed / time), Quaternion.Lerp(startRot, newRot, timeElapsed / time));
+
                 playerModel.transform.localScale = Vector3.Lerp(playerModel.transform.localScale, playerScale, timeElapsed / time);
                 playerModel.transform.localPosition = new Vector3(0, playerModel.transform.localScale.y / -2f, 0);
                 timeElapsed += Time.deltaTime;

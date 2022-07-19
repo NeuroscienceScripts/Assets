@@ -1,0 +1,123 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4976004558810006025
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4976004558810006031}
+  - component: {fileID: 4976004558810006024}
+  - component: {fileID: 4976004558810006030}
+  - component: {fileID: 4976004558810006029}
+  m_Layer: 0
+  m_Name: ExperimentController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4976004558810006031
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4976004558810006025}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 565.8502, y: 211.04034, z: -84.191925}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4976004558810006024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4976004558810006025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20cf987c9083f9dc2aa5e8bd9402cbfe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stressCanvas: {fileID: 0}
+  maze: {fileID: 0}
+  footprints: {fileID: 0}
+  moveForwardArrow: {fileID: 0}
+  stressLevel: {fileID: 0}
+  stressText: {fileID: 0}
+  userText: {fileID: 0}
+  redScreen: {fileID: 0}
+  desktopMode: 0
+  hidePaintingsDuringTesting: 0
+  paintings: {fileID: 0}
+  node: {fileID: 0}
+  learningRounds: 5
+  retraceRounds: 1
+  retraceTimeLimit: 10
+  stressTimeLimit: 20
+  nonStressTimeLimit: 30
+  number_practice_trials: 3
+  stressFirst: 0
+  stressFactors: {fileID: 4976004558810006030}
+  dynamicBlock: {fileID: 4976004558810006029}
+  phase: 0
+  stepInPhase: 0
+  currentTrial: 0
+  confirm: 0
+  trialStartTime: 0
+  redFlashTimeLimit: 0.25
+  subjectFile: 
+  recordCameraAndNodes: 0
+  trialOrder: 00000000
+  debugActive: 1
+  phaseDisplay: {fileID: 0}
+  stepDisplay: {fileID: 0}
+  trialDisplay: {fileID: 0}
+  retraceNodes: 0
+  retraceTimer: 0
+--- !u!114 &4976004558810006030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4976004558810006025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180fedb2134444128a0c5dabeb59c71f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stressSound: {fileID: 0}
+  nonStressSound: {fileID: 0}
+  stressBeep: {fileID: 0}
+  stressTimer: {fileID: 0}
+  startFog: 1
+  endFog: 2.5
+--- !u!114 &4976004558810006029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4976004558810006025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9c525e563741b0438b37b12e4e5195a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wallInfo: {fileID: 11400000, guid: ab7d3932c6e4d614fae9f117b8c68927, type: 2}
+  walls:
+  - {fileID: 7564822371925053593, guid: ac0ad90bfedc51a44a9338c1390f07a6, type: 3}
+  - {fileID: 3568555106091239171, guid: b956c274d0daf92419f244491eb2a25d, type: 3}
+  - {fileID: 1578483253656013361, guid: c0cc54123932b9848bc48691bdca1378, type: 3}
+  - {fileID: 8296313656515918045, guid: 0433b8cf48863784e9cddcc334edfdcd, type: 3}
+  renderers: []
+  colliders: []
+  wallSound: {fileID: 0}

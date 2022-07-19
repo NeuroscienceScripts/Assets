@@ -12,23 +12,31 @@ namespace Classes
         public GridLocation start;
         public GridLocation end;
         public bool stressTrial;
-        public GridLocation blockedLocation; 
+        public bool isWallTrial;
         
         public Trial(GridLocation start, GridLocation end)
         {
             this.start = start;
             this.end = end;
             this.stressTrial = false;
-            this.blockedLocation = new GridLocation("A", 1);
+            isWallTrial = false;
         }
         
-        public Trial(GridLocation start, GridLocation end, bool stressTrial, GridLocation blockedLocation)
+        public Trial(GridLocation start, GridLocation end, bool stressTrial)
         {
             this.start = start;
             this.end = end;
             this.stressTrial = stressTrial;
-            this.blockedLocation = blockedLocation;
+            isWallTrial = false;
         }
+        public Trial(GridLocation start, GridLocation end, bool stressTrial, bool isWallTrial)
+        {
+            this.start = start;
+            this.end = end;
+            this.stressTrial = stressTrial;
+            this.isWallTrial = isWallTrial;
+        }
+        
 
         public override string ToString()
         {

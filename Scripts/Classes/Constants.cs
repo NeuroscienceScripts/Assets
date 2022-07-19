@@ -12,4 +12,3 @@ namespace Classes
         public const int NUM_OF_TRIALS = 26;
     }
 }
-
