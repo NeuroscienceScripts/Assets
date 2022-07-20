@@ -24,8 +24,15 @@ public class NewReplay : MonoBehaviour
     private bool started;
     [SerializeField, Range(0.01f, 0.1f)] private float scotomaSize;
 
+
+    [SerializeField] private Camera firstPerson;
+    [SerializeField] private Camera thirdPerson;
+    private bool inFirstPerson;
+
     [SerializeField] private LineRenderer lineRender;
     [SerializeField] private float lineWidth;
+    [SerializeField] private LayerMask wallLayerMask;
+
     private float maxLineLength;
 
     private string defaultPath;
@@ -52,6 +59,11 @@ public class NewReplay : MonoBehaviour
     private Dictionary<int, int> wallSpawns;
     private Dictionary<int, string> stressTrials;
 
+
+    [SerializeField] private GameObject playerModel;
+
+
+
     private void Awake()
     {
         maxLineLength = 5f;
@@ -61,6 +73,11 @@ public class NewReplay : MonoBehaviour
         started = false;
         hidden = false;
         stepped = false;
+
+        inFirstPerson = true;
+        thirdPerson.enabled = false;
+        firstPerson.enabled = true;
+
         defaultPath = Application.dataPath + @"\Data\";
         camInfo = "camera_tracker.csv";
         wallDirections = new Vector3[26];
@@ -233,6 +250,9 @@ public class NewReplay : MonoBehaviour
         Vector3 newPos = new(float.Parse(line[10]), float.Parse(line[11]), float.Parse(line[12]));
         Vector3 gaze = new(float.Parse(line[15]), float.Parse(line[16]), float.Parse(line[17]));
         transform.SetPositionAndRotation(newPos, newRot);
+        playerModel.transform.localScale = new Vector3(0.3f, float.Parse(line[8]), 0.3f);
+        playerModel.transform.localPosition = new Vector3(0, float.Parse(line[8]) / -2f, 0);
+
         gazeVector = gaze;
         prevTime = float.Parse(line[1]);
         CheckWall(x);
@@ -248,6 +268,8 @@ public class NewReplay : MonoBehaviour
             Vector3 startPos = transform.position;
             Vector3 newPos = new(float.Parse(line[10]), float.Parse(line[11]), float.Parse(line[12]));
             Vector3 gaze = new(float.Parse(line[15]), float.Parse(line[16]), float.Parse(line[17]));
+
+            Vector3 playerScale = new(0.3f, float.Parse(line[8]), 0.3f);
             while (timeElapsed <= time && time != 0)
             {
                 while (paused)
@@ -267,11 +289,16 @@ public class NewReplay : MonoBehaviour
                     yield break;
                 }
                 transform.SetPositionAndRotation(Vector3.Lerp(startPos, newPos, timeElapsed / time), Quaternion.Lerp(startRot, newRot, timeElapsed / time));
+
+                playerModel.transform.localScale = Vector3.Lerp(playerModel.transform.localScale, playerScale, timeElapsed / time);
+                playerModel.transform.localPosition = new Vector3(0, playerModel.transform.localScale.y / -2f, 0);
                 timeElapsed += Time.deltaTime;
                 gazeVector = Vector3.Lerp(gazeVector, gaze, timeElapsed / time);
                 yield return null;
             }
             transform.SetPositionAndRotation(newPos, newRot);
+            playerModel.transform.localScale = playerScale;
+            playerModel.transform.localPosition = new Vector3(0, playerModel.transform.localScale.y / -2f, 0);
             CheckWall(x);
             if (Mathf.Abs(float.Parse(line[1]) - prevTime) <= time * 1.1f)
             {
@@ -289,7 +316,7 @@ public class NewReplay : MonoBehaviour
             return;
         }
         GridLocation gl = new(wallPositions[trialNum][0][0].ToString(), int.Parse(wallPositions[trialNum][0][1].ToString()));
-        if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(gl.GetX(), gl.GetY())) <= 0.3f)
+        if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(gl.GetX(), gl.GetY())) <= 0.35f)
         {
             ShowWall(trialNum);
             if (!wallSpawns.ContainsKey(trialNum))
@@ -334,7 +361,7 @@ public class NewReplay : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Stop();
+            if (inFirstPerson) Stop();
         }
         if (Input.GetKeyDown(KeyCode.H))
         {
@@ -344,8 +371,11 @@ public class NewReplay : MonoBehaviour
         {
             fogToggle = !fogToggle;
         }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            CameraSwap();
+        }
         DrawGaze();
-        Debug.DrawRay(Vector3.zero, gazeVector, Color.blue);
         timeDisplay.text = $"Time: {prevTime:0.000}";
     }
 
@@ -382,6 +412,9 @@ public class NewReplay : MonoBehaviour
         wallSpawns.Clear();
         stressTrials.Clear();
         processing = false;
+        inFirstPerson = true;
+        thirdPerson.enabled = false;
+        firstPerson.enabled = true;
         paused = false;
         currentPos = 0;
         prevTime = 0f;
@@ -393,11 +426,12 @@ public class NewReplay : MonoBehaviour
         lineRender.startWidth = lineWidth;
         lineRender.endWidth = lineWidth;
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        playerModel.transform.localPosition = Vector3.zero;
     }
 
     private void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
-        if (!started) Graphics.Blit(src, dest);
+        if (!started || !inFirstPerson) Graphics.Blit(src, dest);
         Vector3 usedDirection = gazeVector; //  <----------  Make this the gaze vector
 
         float aspectRatio = (float)src.height / src.width;
@@ -414,15 +448,32 @@ public class NewReplay : MonoBehaviour
 
     }
 
+    private void CameraSwap()
+    {
+        if (inFirstPerson)
+        {
+            inFirstPerson = false;
+            firstPerson.enabled = false;
+            thirdPerson.enabled = true;
+        }
+        else
+        {
+            inFirstPerson = true;
+            firstPerson.enabled = true;
+            thirdPerson.enabled = false;
+        }
+    }
+
     private void DrawGaze()
     {
-        Vector3 actualDir = (Vector3.forward - gazeVector).normalized;
-        actualDir = (transform.forward + actualDir).normalized;
-        Debug.Log(actualDir);
+        if (inFirstPerson) {
+            lineRender.SetPositions(new Vector3[2] { Vector3.zero, Vector3.zero });
+            return;
+        }
+        Vector3 actualDir = (transform.rotation * gazeVector).normalized;
         Ray ray = new(transform.position, actualDir);
-        RaycastHit hit;
         Vector3 endPos = transform.position + (actualDir * maxLineLength);
-        if(Physics.Raycast(ray, out hit, maxLineLength))
+        if (Physics.Raycast(ray, out RaycastHit hit, maxLineLength, wallLayerMask))
         {
             endPos = hit.point;
         }
