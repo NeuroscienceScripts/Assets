@@ -109,12 +109,18 @@ public class ExperimentController : MonoBehaviour
         new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
         new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
         new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
-        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
-        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
-        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
-        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true),
-        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true),
-        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true),
+        // new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
+        // new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
+        // new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
+        // new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true),
+        // new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true),
+        // new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true),
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true,true),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true,true),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true,true),
+        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true,true),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true,true),
+        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true,true),
         
         // Non-stress trials 
         new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
@@ -631,8 +637,8 @@ public class ExperimentController : MonoBehaviour
                         fileHandler.AppendLine(subjectFile,
                             PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(ControllerCollider.Instance.controllerSelection.Length > 2 ? 2 : 0) + "," + blockedWall + "," + GetTrialInfo().stressTrial);
                         maze.SetActive(false);
-                        stressLevel.GetComponent<TextMeshProUGUI>().text = "4"; 
-
+                        stressLevel.GetComponent<TextMeshProUGUI>().text = "4";
+                        dynamicBlock.enabled = false;
                         stepInPhase++;
                     }
 
