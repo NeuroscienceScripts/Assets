@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using System.IO;
 using Classes;
+using System;
 
 public class NewReplay : MonoBehaviour
 {
@@ -39,9 +40,9 @@ public class NewReplay : MonoBehaviour
     private string filePath;
     private string camInfo = "camera_tracker.csv";
 
-    private int subjectNum = 0;
+    public int subjectNum = 0;
 
-    private bool paused;
+    public bool paused;
 
     private List<long> positions;
     private int currentPos;
@@ -62,6 +63,7 @@ public class NewReplay : MonoBehaviour
 
     [SerializeField] private GameObject playerModel;
 
+    public event Action<int> OnTrialChanged;
 
 
     private void Awake()
@@ -165,7 +167,8 @@ public class NewReplay : MonoBehaviour
             if (prevTrialNum != x)
             {
                 float timeElapsed = 0f;
-                while (timeElapsed <= 1f)
+                OnTrialChanged?.Invoke(prevTrialNum);
+                while (timeElapsed <= 0.5f)
                 {
                     yield return null;
                     timeElapsed += Time.deltaTime;
