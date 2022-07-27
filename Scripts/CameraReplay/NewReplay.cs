@@ -51,6 +51,7 @@ public class NewReplay : MonoBehaviour
 
     float prevTime;
     int prevTrialNum;
+    float[] timeInTrials;
 
     private string[][] wallPositions;
     [SerializeField] private Transform[] walls;
@@ -63,8 +64,8 @@ public class NewReplay : MonoBehaviour
 
     [SerializeField] private GameObject playerModel;
 
-    public event Action<int> OnTrialChanged;
-
+    public event Action<int, float> OnTrialChanged;
+    public bool isRecordingGaze;
 
     private void Awake()
     {
@@ -126,6 +127,7 @@ public class NewReplay : MonoBehaviour
     private void GetWallPositions()
     {
         wallPositions = new string[Constants.NUM_OF_TRIALS][];
+        timeInTrials = new float[Constants.NUM_OF_TRIALS];
         sr = new StreamReader(filePath + subjectNum + ".csv");
         string s = sr.ReadLine();
         while (!sr.EndOfStream)
@@ -134,6 +136,7 @@ public class NewReplay : MonoBehaviour
             int trialNum = int.Parse(line[0]);
             string[] pos = !line[8].Contains("N/A") ? new string[] { line[8].Substring(0, 2), line[8][2..] } : new string[] { "N/A", "N/A" };
             wallPositions[trialNum] = pos;
+            timeInTrials[trialNum] = float.Parse(line[1]);
             if (line.Length > 9)
             {
                 stressTrials[trialNum] = line[9];
@@ -167,7 +170,7 @@ public class NewReplay : MonoBehaviour
             if (prevTrialNum != x)
             {
                 float timeElapsed = 0f;
-                OnTrialChanged?.Invoke(prevTrialNum);
+                if(prevTrialNum >= 0) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
                 while (timeElapsed <= 0.5f)
                 {
                     yield return null;
@@ -430,6 +433,7 @@ public class NewReplay : MonoBehaviour
         lineRender.endWidth = lineWidth;
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         playerModel.transform.localPosition = Vector3.zero;
+        OnTrialChanged?.Invoke(-1, 0);
     }
 
     private void OnRenderImage(RenderTexture src, RenderTexture dest)
@@ -469,7 +473,7 @@ public class NewReplay : MonoBehaviour
 
     private void DrawGaze()
     {
-        if (inFirstPerson) {
+        if (inFirstPerson && !isRecordingGaze) {
             lineRender.SetPositions(new Vector3[2] { Vector3.zero, Vector3.zero });
             return;
         }

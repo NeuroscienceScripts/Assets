@@ -40,7 +40,7 @@ public class PaintingTracker : MonoBehaviour
         started = true;
         int subjectNumber = replay.subjectNum;
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + ".csv";
-        fileHandler.AppendLine(subjectFile, "Trial_ID, A1, A6, B2, C6, C7, D1, D4, E6, F1, F6, G2, G5");
+        fileHandler.AppendLine(subjectFile, "trialID, timeInTrial, A1, A6, B2, C6, C7, D1, D4, E6, F1, F6, G2, G5");
     }
 
     private void Update()
@@ -65,10 +65,14 @@ public class PaintingTracker : MonoBehaviour
         replay.OnTrialChanged += NextTrial;
     }
 
-    private void NextTrial(int trialNum)
+    private void NextTrial(int trialNum, float timeInTrial)
     {
+        if (trialNum == -1) { 
+            started = false;
+            return;
+        }
         if (Array.Exists(trials.ToArray(), trial => trial == trialNum)) return;
-        fileHandler.AppendLine(subjectFile, trialNum.ToString() + PrintWatchTimes());
+        fileHandler.AppendLine(subjectFile, trialNum.ToString() + "," + timeInTrial.ToString() + PrintWatchTimes());
         trials.Add(trialNum);
         for (int i = 0; i < watchTimes.Length; i++)
         {

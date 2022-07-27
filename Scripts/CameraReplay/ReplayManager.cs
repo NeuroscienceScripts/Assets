@@ -12,6 +12,7 @@ public class ReplayManager : MonoBehaviour
     [SerializeField] private NewReplay newReplay;
     [SerializeField] private PositionReplay posReplay;
     [SerializeField] private RotationReplay rotReplay;
+    [SerializeField] private PaintingTracker paintingTracker;
 
     private void Awake()
     {
@@ -25,12 +26,25 @@ public class ReplayManager : MonoBehaviour
             newReplay.StartReplay();
             posReplay.enabled = false;
             rotReplay.enabled = false;
+            newReplay.isRecordingGaze = false;
         }
-        else
+        else if(replayOptions.value == 1)
         {
             posReplay.StartReplay();
             rotReplay.StartReplay();
             newReplay.enabled = false;
+        }else
+        {
+            newReplay.StartReplay();
+            paintingTracker.StartRec();
+            posReplay.enabled = false;
+            rotReplay.enabled = false;
+            newReplay.isRecordingGaze = true;
         }
+    }
+
+    private void OnDisable()
+    {
+        startBtn.onClick.RemoveListener(StartReplay);
     }
 }
