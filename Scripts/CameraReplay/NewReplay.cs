@@ -19,6 +19,7 @@ public class NewReplay : MonoBehaviour
 
     [SerializeField] private FogReplay fog;
     [SerializeField] private bool fogToggle;
+    private bool fogOn;
 
     [SerializeField] private Material shiftShaderMaterial;
     [SerializeField] private Vector3 gazeVector;
@@ -76,6 +77,7 @@ public class NewReplay : MonoBehaviour
         started = false;
         hidden = false;
         stepped = false;
+        fogOn = false;
 
         inFirstPerson = true;
         thirdPerson.enabled = false;
@@ -170,7 +172,7 @@ public class NewReplay : MonoBehaviour
             if (prevTrialNum != x)
             {
                 float timeElapsed = 0f;
-                if(prevTrialNum >= 0) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
+                if(prevTrialNum >= 0 && isRecordingGaze) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
                 while (timeElapsed <= 0.5f)
                 {
                     yield return null;
@@ -183,10 +185,12 @@ public class NewReplay : MonoBehaviour
                 if (stressTrials[x] == "True" && fogToggle)
                 {
                     fog.On();
+                    fogOn = true;
                 }
                 else
                 {
                     fog.Off();
+                    fogOn = false;
                 }
             }
             processing = true;
@@ -246,10 +250,12 @@ public class NewReplay : MonoBehaviour
             if (stressTrials[x] == "True" && fogToggle)
             {
                 fog.On();
+                fogOn = true;
             }
             else
             {
                 fog.Off();
+                fogOn = false;
             }
         }
         Quaternion newRot = Quaternion.Euler(new Vector3(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9])));
@@ -433,7 +439,7 @@ public class NewReplay : MonoBehaviour
         lineRender.endWidth = lineWidth;
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         playerModel.transform.localPosition = Vector3.zero;
-        OnTrialChanged?.Invoke(-1, 0);
+        if(isRecordingGaze) OnTrialChanged?.Invoke(-1, 0);
     }
 
     private void OnRenderImage(RenderTexture src, RenderTexture dest)
@@ -479,8 +485,9 @@ public class NewReplay : MonoBehaviour
         }
         Vector3 actualDir = (transform.rotation * gazeVector).normalized;
         Ray ray = new(transform.position, actualDir);
-        Vector3 endPos = transform.position + (actualDir * maxLineLength);
-        if (Physics.Raycast(ray, out RaycastHit hit, maxLineLength, wallLayerMask))
+        float lineLength = fogOn ? 2.5f : maxLineLength;
+        Vector3 endPos = transform.position + (actualDir * lineLength);
+        if (Physics.Raycast(ray, out RaycastHit hit, lineLength, wallLayerMask))
         {
             endPos = hit.point;
         }

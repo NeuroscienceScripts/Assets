@@ -30,13 +30,12 @@ public class PaintingTracker : MonoBehaviour
             watchTimes[i] = 0d;
         }
         started = false;
-        fileHandler = new();
-        trials = new();
-        
     }
 
     public void StartRec()
     {
+        trials = new();
+        fileHandler = new();
         started = true;
         int subjectNumber = replay.subjectNum;
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + ".csv";
