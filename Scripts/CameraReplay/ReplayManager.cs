@@ -9,10 +9,12 @@ public class ReplayManager : MonoBehaviour
     [SerializeField] private Button startBtn;
     [SerializeField] private TMP_Dropdown replayOptions;
 
+    [SerializeField] private GameObject subjectNumInput;
+    [SerializeField] private GameObject recordPathInput;
+
     [SerializeField] private NewReplay newReplay;
     [SerializeField] private PositionReplay posReplay;
     [SerializeField] private RotationReplay rotReplay;
-    [SerializeField] private PaintingTracker paintingTracker;
 
     private void Awake()
     {
@@ -26,7 +28,6 @@ public class ReplayManager : MonoBehaviour
             newReplay.StartReplay();
             posReplay.enabled = false;
             rotReplay.enabled = false;
-            newReplay.isRecordingGaze = false;
         }
         else if(replayOptions.value == 1)
         {
@@ -35,11 +36,23 @@ public class ReplayManager : MonoBehaviour
             newReplay.enabled = false;
         }else
         {
-            newReplay.StartReplay();
-            paintingTracker.StartRec();
+            newReplay.StartRecordingReplay();
             posReplay.enabled = false;
             rotReplay.enabled = false;
-            newReplay.isRecordingGaze = true;
+        }
+    }
+
+    public void ChangeTexts()
+    {
+        if(replayOptions.value < 2)
+        {
+            subjectNumInput.SetActive(true);
+            recordPathInput.SetActive(false);
+        }
+        else
+        {
+            subjectNumInput.SetActive(false);
+            recordPathInput.SetActive(true);
         }
     }
 

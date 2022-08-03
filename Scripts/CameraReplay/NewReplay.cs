@@ -12,6 +12,7 @@ public class NewReplay : MonoBehaviour
 
     [SerializeField] private TMP_InputField fileInput;
     [SerializeField] private TMP_InputField subjectInput;
+    [SerializeField] private TMP_InputField recordListInput;
     [SerializeField] private GameObject startCanvas;
     [SerializeField] private TextMeshProUGUI trialDisplay;
     [SerializeField] private TextMeshProUGUI timeDisplay;
@@ -66,7 +67,8 @@ public class NewReplay : MonoBehaviour
     [SerializeField] private GameObject playerModel;
 
     public event Action<int, float> OnTrialChanged;
-    public bool isRecordingGaze;
+    private bool isRecordingGaze;
+    [SerializeField] private PaintingTracker paintingTracker;
 
     private void Awake()
     {
@@ -102,6 +104,7 @@ public class NewReplay : MonoBehaviour
 
     public void StartReplay()
     {
+        isRecordingGaze = false;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         if (filePath[^1] != '/')
         {
@@ -124,6 +127,59 @@ public class NewReplay : MonoBehaviour
             GetWallPositions();
             StartCoroutine(Replay());
         }
+    }
+
+    public void StartRecordingReplay()
+    {
+        
+        string recordPath = recordListInput.text;
+        if (!File.Exists(recordPath))
+        {
+            Stop();
+            Debug.LogError("Invalid File Path/Missing File");
+        }
+        else
+        {
+            StartCoroutine(RecordReplay(recordPath));
+        }
+    }
+
+    private IEnumerator RecordReplay(string recordPath)
+    {
+        StreamReader s = new(recordPath);
+        while (!s.EndOfStream)
+        {
+            isRecordingGaze = true;
+            filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
+            if (filePath[^1] != '/')
+            {
+                filePath += @"/";
+            }
+            subjectNum = int.Parse(s.ReadLine());
+            camInfo = filePath + subjectNum + "_" + camInfo;
+            if (!File.Exists(camInfo))
+            {
+                RecordStop();
+                startCanvas.SetActive(false);
+                Debug.LogError("Invalid File Path or Missing Critical File: camera_tracker.csv");
+                continue;
+            }
+            else if (!File.Exists(filePath + subjectNum + ".csv"))
+            {
+                RecordStop();
+                startCanvas.SetActive(false);
+                Debug.LogError($"Invalid File Path or Missing Critical File: {subjectNum}.csv");
+                continue;
+            }
+            else
+            {
+                GetWallPositions();
+                paintingTracker.StartRec();
+                yield return Replay();
+                startCanvas.SetActive(false);
+            }
+        }
+        Stop();
     }
 
     private void GetWallPositions()
@@ -199,7 +255,12 @@ public class NewReplay : MonoBehaviour
             while (paused) yield return null;
         }
         yield return null;
-        Stop();
+        if (!isRecordingGaze) Stop();
+        else 
+        {
+            OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
+            RecordStop(); 
+        }
     }
 
     private void ShowWall(int trialNum)
@@ -440,6 +501,37 @@ public class NewReplay : MonoBehaviour
         transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         playerModel.transform.localPosition = Vector3.zero;
         if(isRecordingGaze) OnTrialChanged?.Invoke(-1, 0);
+        isRecordingGaze = false;
+    }
+
+    private void RecordStop()
+    {
+        if (sr != null) sr.Close();
+        HideWall();
+        filePath = @defaultPath;
+        startCanvas.SetActive(true);
+        camInfo = "camera_tracker.csv";
+        positions.Clear();
+        wallSpawns.Clear();
+        stressTrials.Clear();
+        processing = false;
+        inFirstPerson = true;
+        thirdPerson.enabled = false;
+        firstPerson.enabled = true;
+        paused = false;
+        currentPos = 0;
+        prevTime = 0f;
+        prevTrialNum = -1;
+        stepped = false;
+        started = false;
+        Vector3[] linePositions = new Vector3[2] { Vector3.zero, Vector3.zero };
+        lineRender.SetPositions(linePositions);
+        lineRender.startWidth = lineWidth;
+        lineRender.endWidth = lineWidth;
+        transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        playerModel.transform.localPosition = Vector3.zero;
+        if (isRecordingGaze) OnTrialChanged?.Invoke(-1, 0);
+        isRecordingGaze = false;
     }
 
     private void OnRenderImage(RenderTexture src, RenderTexture dest)

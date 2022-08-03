@@ -14,7 +14,7 @@ public class PaintingTracker : MonoBehaviour
 
     private List<int> trials;
 
-    private double[] watchTimes;
+    [SerializeField] private double[] watchTimes;
     private bool started;
 
     private FileHandler fileHandler;
@@ -24,21 +24,21 @@ public class PaintingTracker : MonoBehaviour
 
     private void Awake()
     {
-        watchTimes = new double[paintings.Length];
-        for (int i = 0; i < watchTimes.Length; i++)
-        {
-            watchTimes[i] = 0d;
-        }
         started = false;
     }
 
     public void StartRec()
     {
+        watchTimes = new double[paintings.Length];
+        for (int i = 0; i < watchTimes.Length; i++)
+        {
+            watchTimes[i] = 0d;
+        }
         trials = new();
         fileHandler = new();
         started = true;
         int subjectNumber = replay.subjectNum;
-        subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + ".csv";
+        subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_painting_gaze.csv";
         fileHandler.AppendLine(subjectFile, "trialID, timeInTrial, A1, A6, B2, C6, C7, D1, D4, E6, F1, F6, G2, G5");
     }
 
