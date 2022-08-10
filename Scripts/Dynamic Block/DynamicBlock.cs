@@ -7,16 +7,25 @@ using DefaultNamespace;
 public class DynamicBlock : MonoBehaviour
 {
 
+    [SerializeField] Transform player;
+
     [SerializeField] private WallInfoObject wallInfo;
     private GameObject temp;
 
     [SerializeField] private GameObject[] walls; // 0 is north, 1 is south, 2 is east, 3 is west
     private List<GameObject> possWalls;
-    [SerializeField] private List<MeshRenderer> renderers;
-    [SerializeField] private List<BoxCollider> colliders;
+    //[SerializeField] private List<MeshRenderer> renderers;
+    //[SerializeField] private List<BoxCollider> colliders;
 
     [SerializeField] private AudioSource wallSound;
     private bool playedSound = false;
+
+    private GridLocation prevNode;
+
+    private Dictionary<GridLocation, GameObject[]> horizWalls;
+    private Dictionary<GridLocation, GameObject[]> vertWalls;
+
+    private bool wallActivated;
 
     private void OnEnable()
     {
@@ -33,8 +42,8 @@ public class DynamicBlock : MonoBehaviour
     private void Awake()
     {
         possWalls = new();
-        renderers = new();
-        colliders = new();
+        //renderers = new();
+        //colliders = new();
         InstantiateWalls();
         DisableWalls();
         enabled = false;
@@ -44,60 +53,96 @@ public class DynamicBlock : MonoBehaviour
     private void OnDisable()
     {
         temp = null;
-        if(ControllerCollider.Instance != null)
-        {
-            ControllerCollider.Instance.wallActivated = false;
-            ControllerCollider.Instance.currWall = "";
-        }
+        //if(ControllerCollider.Instance != null)
+        //{
+        //    ControllerCollider.Instance.wallActivated = false;
+        //    ControllerCollider.Instance.currWall = "";
+        //}
         
     }
 
     private void Update()
     {
-        if (ControllerCollider.Instance.wallActivated)
+        if (!wallActivated && enabled)
         {
-            if (!wallSound.isPlaying & !playedSound)
+            GridLocation currentNode = NodeExtension.CurrentNode(player.position);
+
+            if (prevNode != null && currentNode != prevNode)
             {
-                wallSound.Play();
-                playedSound = true;
-            }
-            for (int i = 0; i < possWalls.Count; i++)
-            {
-                if (possWalls[i].name == ControllerCollider.Instance.currWall)
+                if (horizWalls.ContainsKey(currentNode))
                 {
-                    
-                    if (possWalls[i].name.Contains("North"))
+                    if(prevNode.GetX() > currentNode.GetX())
                     {
-                        ExperimentController.Instance.blockedWall = possWalls[i + 1].name;
-                        renderers[i + 1].enabled = true;
-                        colliders[i + 1].isTrigger = false;
-                        enabled = false;
+                        // larger to smaller
+                        Activate(horizWalls[currentNode][1]);
                     }
-                    else if (possWalls[i].name.Contains("South"))
+                    else
                     {
-                        ExperimentController.Instance.blockedWall = possWalls[i - 1].name;
-                        renderers[i - 1].enabled = true;
-                        colliders[i - 1].isTrigger = false;
-                        enabled = false;
+                        Activate(horizWalls[currentNode][0]);
                     }
-                    else if (possWalls[i].name.Contains("East"))
+                }
+                else if (vertWalls.ContainsKey(currentNode))
+                {
+                    if (prevNode.GetY() > currentNode.GetY())
                     {
-                        ExperimentController.Instance.blockedWall = possWalls[i + 1].name;
-                        renderers[i + 1].enabled = true;
-                        colliders[i + 1].isTrigger = false;
-                        enabled = false;
+                        // larger to smaller
+                        Activate(horizWalls[currentNode][1]);
                     }
-                    else if (possWalls[i].name.Contains("West"))
+                    else
                     {
-                        ExperimentController.Instance.blockedWall = possWalls[i - 1].name;
-                        renderers[i - 1].enabled = true;
-                        colliders[i - 1].isTrigger = false;
-                        enabled = false;
+                        Activate(horizWalls[currentNode][0]);
                     }
-                    break;
                 }
             }
+
+            prevNode = currentNode;
         }
+        
+
+        //if (ControllerCollider.Instance.wallActivated)
+        //{
+        //    if (!wallSound.isPlaying & !playedSound)
+        //    {
+        //        wallSound.Play();
+        //        playedSound = true;
+        //    }
+        //    for (int i = 0; i < possWalls.Count; i++)
+        //    {
+        //        if (possWalls[i].name == ControllerCollider.Instance.currWall)
+        //        {
+                    
+        //            if (possWalls[i].name.Contains("North"))
+        //            {
+        //                ExperimentController.Instance.blockedWall = possWalls[i + 1].name;
+        //                renderers[i + 1].enabled = true;
+        //                colliders[i + 1].isTrigger = false;
+        //                enabled = false;
+        //            }
+        //            else if (possWalls[i].name.Contains("South"))
+        //            {
+        //                ExperimentController.Instance.blockedWall = possWalls[i - 1].name;
+        //                renderers[i - 1].enabled = true;
+        //                colliders[i - 1].isTrigger = false;
+        //                enabled = false;
+        //            }
+        //            else if (possWalls[i].name.Contains("East"))
+        //            {
+        //                ExperimentController.Instance.blockedWall = possWalls[i + 1].name;
+        //                renderers[i + 1].enabled = true;
+        //                colliders[i + 1].isTrigger = false;
+        //                enabled = false;
+        //            }
+        //            else if (possWalls[i].name.Contains("West"))
+        //            {
+        //                ExperimentController.Instance.blockedWall = possWalls[i - 1].name;
+        //                renderers[i - 1].enabled = true;
+        //                colliders[i - 1].isTrigger = false;
+        //                enabled = false;
+        //            }
+        //            break;
+        //        }
+        //    }
+        //}
     }
     
 
@@ -105,48 +150,74 @@ public class DynamicBlock : MonoBehaviour
     {
         GameObject parent = new();
         parent.name = "Walls";
+
+        GridLocation gridLoc;
         foreach (WallPosition wp in wallInfo.wallPositions)
         {
-            if(wp.direction == WallDirection.Horizontal)
+            gridLoc = wp.position.ToGridLocation();
+            if (wp.direction == WallDirection.Horizontal)
             {
-                temp = Instantiate(walls[2], new Vector3(wp.position.ToGridLocation().GetX(), 1, wp.position.ToGridLocation().GetY()), walls[2].transform.rotation);
-                temp.name = wp.position.ToGridLocation().GetString() + "East";
+                
+                temp = Instantiate(walls[2], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()), walls[2].transform.rotation);
+                temp.name = gridLoc.GetString() + "East";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
-                renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
-                colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
-                temp = Instantiate(walls[3], new Vector3(wp.position.ToGridLocation().GetX(), 1, wp.position.ToGridLocation().GetY()), walls[3].transform.rotation);
-                temp.name = wp.position.ToGridLocation().GetString() + "West";
+                horizWalls.Add(gridLoc, new GameObject[2] { temp, null });
+
+                //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
+                //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
+
+
+                temp = Instantiate(walls[3], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()), walls[3].transform.rotation);
+                temp.name = gridLoc.GetString() + "West";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
-                renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
-                colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
+                horizWalls[gridLoc][1] = temp;
+
+                //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
+                //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
+
+
             }
             else
             {
-                temp = Instantiate(walls[0], new Vector3(wp.position.ToGridLocation().GetX(), 1, wp.position.ToGridLocation().GetY()), walls[0].transform.rotation);
-                temp.name = wp.position.ToGridLocation().GetString() + "North";
+                temp = Instantiate(walls[0], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()), walls[0].transform.rotation);
+                temp.name = gridLoc.GetString() + "North";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
-                renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
-                colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
-                temp = Instantiate(walls[1], new Vector3(wp.position.ToGridLocation().GetX(), 1, wp.position.ToGridLocation().GetY()), walls[1].transform.rotation);
-                temp.name = wp.position.ToGridLocation().GetString() + "South";
+                vertWalls.Add(gridLoc, new GameObject[2] { temp, null });
+                //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
+                //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
+
+                temp = Instantiate(walls[1], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()), walls[1].transform.rotation);
+                temp.name = gridLoc.GetString() + "South";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
-                renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
-                colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
+                vertWalls[gridLoc][1] = temp;
+
+                //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
+                //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
             }
         }
     }
 
     public void DisableWalls()
     {
+        wallActivated = false;
         foreach (GameObject go in possWalls)
         {
             go.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
-            go.transform.GetChild(0).GetComponent<BoxCollider>().isTrigger = true;
             go.SetActive(false);
+        }
+    }
+
+    private void Activate(GameObject wall)
+    {
+        if (wall.activeInHierarchy)
+        {
+            wall.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
+            wallActivated = true;
+            enabled = false;
         }
     }
 
