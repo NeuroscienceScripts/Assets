@@ -29,7 +29,8 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject footprints;
     [SerializeField] private GameObject moveForwardArrow;
     [SerializeField] public GameObject stressLevel;
-    [SerializeField] public GameObject stressText; 
+    [SerializeField] public GameObject stressText;
+    [SerializeField] public GameObject player; 
 
     //[SerializeField] private GameObject subjectInput;
     //[SerializeField] private GameObject trialInput;
@@ -97,8 +98,8 @@ public class ExperimentController : MonoBehaviour
     private Trial[] trialList =
     {
         // Practice trials
-        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
-        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
+        // new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
+        // new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
 
         // Stress trials
         // blockedList = {7,6,5,11,3,9};
@@ -109,12 +110,12 @@ public class ExperimentController : MonoBehaviour
         new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
         new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
         new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
-        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
-        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
-        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
-        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true),
-        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true),
-        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true),
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true, true),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true, true),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
+        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true, true),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true, true),
+        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true, true),
 
         // Non-stress trials 
         new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
@@ -216,7 +217,20 @@ public class ExperimentController : MonoBehaviour
                     Application.Quit();
                     break;
             }
+
+            if (recordCameraAndNodes)
+            {
+                RecordNodes(); 
+            }
         }
+    }
+
+    private GridLocation lastLoc; 
+    void RecordNodes()
+    {
+        if(NodeExtension.CurrentNode(player.transform.position) != lastLoc)
+            fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(ExperimentController.Instance.Date_time+".csv",
+                "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString());
     }
 
     private StreamReader sr;

@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Classes;
 using DefaultNamespace;
+using TMPro;
 
 public class DynamicBlock : MonoBehaviour
 {
-
-    [SerializeField] Transform player;
-
     [SerializeField] private WallInfoObject wallInfo;
     private GameObject temp;
 
@@ -25,7 +23,7 @@ public class DynamicBlock : MonoBehaviour
     private Dictionary<GridLocation, GameObject[]> horizWalls;
     private Dictionary<GridLocation, GameObject[]> vertWalls;
 
-    private bool wallActivated;
+    public bool wallActivated;
 
     private void OnEnable()
     {
@@ -41,6 +39,8 @@ public class DynamicBlock : MonoBehaviour
 
     private void Awake()
     {
+        vertWalls = new();
+        horizWalls = new(); 
         possWalls = new();
         //renderers = new();
         //colliders = new();
@@ -61,12 +61,14 @@ public class DynamicBlock : MonoBehaviour
         
     }
 
+    [SerializeField] private TextMeshProUGUI nodeOut; 
     private void Update()
     {
-        if (!wallActivated && enabled)
+        if (!wallActivated)
         {
-            GridLocation currentNode = NodeExtension.CurrentNode(player.position);
-
+            Debug.Log("Inside");
+            GridLocation currentNode = NodeExtension.CurrentNode(ExperimentController.Instance.player.transform.position);
+            nodeOut.text = currentNode.GetString(); 
             if (prevNode != null && currentNode != prevNode)
             {
                 if (horizWalls.ContainsKey(currentNode))
@@ -86,11 +88,11 @@ public class DynamicBlock : MonoBehaviour
                     if (prevNode.GetY() > currentNode.GetY())
                     {
                         // larger to smaller
-                        Activate(horizWalls[currentNode][1]);
+                        Activate(vertWalls[currentNode][1]);
                     }
                     else
                     {
-                        Activate(horizWalls[currentNode][0]);
+                        Activate(vertWalls[currentNode][0]);
                     }
                 }
             }
@@ -185,7 +187,7 @@ public class DynamicBlock : MonoBehaviour
                 temp.name = gridLoc.GetString() + "North";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
-                vertWalls.Add(gridLoc, new GameObject[2] { temp, null });
+                vertWalls.Add(gridLoc, new GameObject[2] {temp, null});//null });
                 //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
                 //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
 
@@ -213,12 +215,11 @@ public class DynamicBlock : MonoBehaviour
 
     private void Activate(GameObject wall)
     {
-        if (wall.activeInHierarchy)
-        {
-            wall.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-            wallActivated = true;
-            enabled = false;
-        }
+        wall.SetActive(true);
+        wall.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
+        wallActivated = true;
+        enabled = false;
+        
     }
 
     private void ActivateWalls()
@@ -274,4 +275,5 @@ public class DynamicBlock : MonoBehaviour
         //    }
         //}
     }
+
 }
