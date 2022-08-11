@@ -40,10 +40,11 @@ public class DynamicBlock : MonoBehaviour
     private void Awake()
     {
         vertWalls = new();
-        horizWalls = new(); 
+        horizWalls = new();
         possWalls = new();
         //renderers = new();
         //colliders = new();
+        wallActivated = false;
         InstantiateWalls();
         DisableWalls();
         enabled = false;
@@ -53,18 +54,19 @@ public class DynamicBlock : MonoBehaviour
     private void OnDisable()
     {
         temp = null;
+        wallActivated = false;
         //if(ControllerCollider.Instance != null)
         //{
         //    ControllerCollider.Instance.wallActivated = false;
         //    ControllerCollider.Instance.currWall = "";
         //}
-        
+
     }
 
     [SerializeField] private TextMeshProUGUI nodeOut; 
     private void Update()
     {
-        if (!wallActivated)
+        if (!wallActivated && enabled)
         {
             Debug.Log("Inside");
             GridLocation currentNode = NodeExtension.CurrentNode(ExperimentController.Instance.player.transform.position);
@@ -73,7 +75,7 @@ public class DynamicBlock : MonoBehaviour
             {
                 if (horizWalls.ContainsKey(currentNode))
                 {
-                    if(prevNode.GetX() > currentNode.GetX())
+                    if (prevNode.GetX() > currentNode.GetX())
                     {
                         // larger to smaller
                         Activate(horizWalls[currentNode][1]);
@@ -99,7 +101,7 @@ public class DynamicBlock : MonoBehaviour
 
             prevNode = currentNode;
         }
-        
+
 
         //if (ControllerCollider.Instance.wallActivated)
         //{
@@ -112,7 +114,7 @@ public class DynamicBlock : MonoBehaviour
         //    {
         //        if (possWalls[i].name == ControllerCollider.Instance.currWall)
         //        {
-                    
+
         //            if (possWalls[i].name.Contains("North"))
         //            {
         //                ExperimentController.Instance.blockedWall = possWalls[i + 1].name;
@@ -146,7 +148,7 @@ public class DynamicBlock : MonoBehaviour
         //    }
         //}
     }
-    
+
 
     private void InstantiateWalls()
     {
@@ -159,7 +161,7 @@ public class DynamicBlock : MonoBehaviour
             gridLoc = wp.position.ToGridLocation();
             if (wp.direction == WallDirection.Horizontal)
             {
-                
+
                 temp = Instantiate(walls[2], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()), walls[2].transform.rotation);
                 temp.name = gridLoc.GetString() + "East";
                 temp.transform.parent = parent.transform;
@@ -187,7 +189,7 @@ public class DynamicBlock : MonoBehaviour
                 temp.name = gridLoc.GetString() + "North";
                 temp.transform.parent = parent.transform;
                 possWalls.Add(temp);
-                vertWalls.Add(gridLoc, new GameObject[2] {temp, null});//null });
+                vertWalls.Add(gridLoc, new GameObject[2] { temp, null });
                 //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
                 //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
 
@@ -205,7 +207,6 @@ public class DynamicBlock : MonoBehaviour
 
     public void DisableWalls()
     {
-        wallActivated = false;
         foreach (GameObject go in possWalls)
         {
             go.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
@@ -215,11 +216,16 @@ public class DynamicBlock : MonoBehaviour
 
     private void Activate(GameObject wall)
     {
-        wall.SetActive(true);
+        if (!wall.activeSelf) return;
+        if (!wallSound.isPlaying & !playedSound)
+        {
+            wallSound.Play();
+            playedSound = true;
+        }
         wall.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
         wallActivated = true;
+        ExperimentController.Instance.blockedWall = wall.name;
         enabled = false;
-        
     }
 
     private void ActivateWalls()
@@ -233,11 +239,11 @@ public class DynamicBlock : MonoBehaviour
                 new Vector2(go.transform.position.x, go.transform.position.z));
             if (dist > 2.5f || (!(startLocation.GetY() == -(Constants.GRID_LENGTH / 2)) && !(startLocation.GetY() == Constants.GRID_LENGTH / 2)))
             {
-                if(go.transform.position != new Vector3(startLocation.GetX(), 1f, startLocation.GetY())) go.SetActive(true);
+                if (go.transform.position != new Vector3(startLocation.GetX(), 1f, startLocation.GetY())) go.SetActive(true);
             }
             else
             {
-                if(dist > 2.5f || (go.transform.position.z != -(Constants.GRID_LENGTH / 2) && go.transform.position.z != Constants.GRID_LENGTH / 2))
+                if (dist > 2.5f || (go.transform.position.z != -(Constants.GRID_LENGTH / 2) && go.transform.position.z != Constants.GRID_LENGTH / 2))
                 {
                     if (go.transform.position != new Vector3(startLocation.GetX(), 1f, startLocation.GetY())) go.SetActive(true);
                 }
