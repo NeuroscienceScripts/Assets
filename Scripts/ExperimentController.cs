@@ -29,7 +29,8 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject footprints;
     [SerializeField] private GameObject moveForwardArrow;
     [SerializeField] public GameObject stressLevel;
-    [SerializeField] public GameObject stressText; 
+    [SerializeField] public GameObject stressText;
+    [SerializeField] public GameObject player; 
 
     //[SerializeField] private GameObject subjectInput;
     //[SerializeField] private GameObject trialInput;
@@ -42,7 +43,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject node;
 
     [SerializeField] private int learningRounds = 5;
-    [SerializeField] private int retraceRounds = 1; 
+    [SerializeField] private int retraceRounds = 1;
     private int learningRedoRounds = 0;
     [SerializeField] private float retraceTimeLimit = 10.0f;
     [SerializeField] public float stressTimeLimit = 15.0f;
@@ -51,7 +52,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private int number_practice_trials = 2;
     private int numTrials = 24;
     [SerializeField] private bool stressFirst = false;
-    
+
     #region StressVars
     [SerializeField] private StressFactors stressFactors;
     [SerializeField] private DynamicBlock dynamicBlock;
@@ -64,16 +65,16 @@ public class ExperimentController : MonoBehaviour
     public int currentTrial;
     public bool confirm = false;
     public float trialStartTime = 0.0f;
-    private float redFlashTimer = 0.0f; 
+    private float redFlashTimer = 0.0f;
     [SerializeField] private float redFlashTimeLimit = .5f;
-    
-    
+
+
     public FileHandler fileHandler = new FileHandler();
     public string subjectFile;
     public string Date_time;
     public bool recordCameraAndNodes = false;
     public string blockedWall = "";
-    
+
 
     private Vector3[] arrowPath =
     {
@@ -93,12 +94,12 @@ public class ExperimentController : MonoBehaviour
         new Vector3(0f, -1.0f, 0.0f),
         new Vector3(2.0f, -1.0f, 90.0f),
     };
-    
+
     private Trial[] trialList =
     {
         // Practice trials
-        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
-        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
+        // new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
+        // new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
 
         // Stress trials
         // blockedList = {7,6,5,11,3,9};
@@ -109,16 +110,16 @@ public class ExperimentController : MonoBehaviour
         new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
         new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
         new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
-        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
-        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
-        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
-        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true),
-        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true),
-        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true),
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true, true),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true, true),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
+        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true, true),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true, true),
+        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true, true),
 
         // Non-stress trials 
         new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
-        new Trial(new GridLocation("B", 2), new GridLocation("G", 5), false), 
+        new Trial(new GridLocation("B", 2), new GridLocation("G", 5), false),
         new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
         new Trial(new GridLocation("C", 6), new GridLocation("F", 1), false),
         new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
@@ -160,7 +161,7 @@ public class ExperimentController : MonoBehaviour
 
     private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
 
-    [SerializeField] private int[] trialOrder = {0}; //Randomized at start
+    [SerializeField] private int[] trialOrder = { 0 }; //Randomized at start
 
 
     /* Debug */
@@ -216,22 +217,35 @@ public class ExperimentController : MonoBehaviour
                     Application.Quit();
                     break;
             }
+
+            if (recordCameraAndNodes)
+            {
+                RecordNodes(); 
+            }
         }
     }
 
+    private GridLocation lastLoc;
+    void RecordNodes()
+    {
+        if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)
+            fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(ExperimentController.Instance.Date_time + ".csv",
+                "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString());
+    }
+
     private StreamReader sr;
-    private string[][] split_lines; 
+    private string[][] split_lines;
 
     private void Start()
     {
         if (StartData.instance.replayMode)
         {
-           /* "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
-                "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ" */
+            /* "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
+                 "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ" */
             split_lines = new string[System.IO.File.ReadAllLines(StartData.instance.replayFile).Length][];
-            int count = 0; 
+            int count = 0;
             sr = new StreamReader(StartData.instance.replayFile);
-            
+
             while (!sr.EndOfStream)
             {
                 // Should input every line split into the array
@@ -248,7 +262,7 @@ public class ExperimentController : MonoBehaviour
         {
             camera.transform.position = new Vector3(float.Parse(split_lines[currentFrame][10]),
                 float.Parse(split_lines[currentFrame][11]), float.Parse(split_lines[currentFrame][12]));
-            
+
             Graphics.Blit(src, dest);
         }
     }
@@ -287,16 +301,16 @@ public class ExperimentController : MonoBehaviour
     {
         //subjectNumber = int.Parse(subjectInput.GetComponent<TMP_InputField>().text);
         Date_time = "_" + DateTime.Today.Month + "_" + DateTime.Today.Day + "-" + DateTime.Now.Hour + "_" + DateTime.Now.Minute;
-        subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + Date_time +".csv";
+        subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + Date_time + ".csv";
         Debug.Log(subjectFile);
         fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,goal,selected,blockedWall,isStressTrial");
-        fileHandler.AppendLine(subjectFile.Replace(Date_time +".csv", "_nodePath.csv"),
+        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"),
             DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute);
         // fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraRot.csv"),
         //     "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xRot,yRot,zRot");
         // fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraPos.csv"),
         //     "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xPos,yPos,zPos");
-        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_stress.csv"),
+        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"),
             "start,end,stress_level");
 
         //currentTrial = int.Parse(trialInput.GetComponent<TMP_InputField>().text);
@@ -325,12 +339,12 @@ public class ExperimentController : MonoBehaviour
         }
 
         Random.InitState(subjectNumber * 10);
-        stress = stress.ToArray().OrderBy(x => Random.Range(0,stress.Count)).ToList();
-        
-        nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0,nonStress.Count)).ToList();
+        stress = stress.ToArray().OrderBy(x => Random.Range(0, stress.Count)).ToList();
 
-        
-        
+        nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0, nonStress.Count)).ToList();
+
+
+
         if (stressFirst)
         {
             for (int i = 0; i < stress.Count; i++)
@@ -393,9 +407,9 @@ public class ExperimentController : MonoBehaviour
     {
         float arrowHeight = moveForwardArrow.transform.position.y;
 
-        if ( currentTrial >= learningRounds)
+        if (currentTrial >= learningRounds)
         {
-            Debug.Log("Move to retracing phase"); 
+            Debug.Log("Move to retracing phase");
             moveForwardArrow.SetActive(false);
             currentTrial = 0;
             phase++;
@@ -413,7 +427,7 @@ public class ExperimentController : MonoBehaviour
                 if (GetTrigger(false) & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
                 {
                     recordCameraAndNodes = true;
-                    fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_nodePath.csv"), "Learning Phase"); 
+                    fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
                     stepInPhase++;
                 }
             }
@@ -448,13 +462,13 @@ public class ExperimentController : MonoBehaviour
                 currentTrial++;
                 stepInPhase = 0;
             }
-            
+
         }
 
     }
 
     public int retraceNodes = 0;
-    public float retraceTimer = 0; 
+    public float retraceTimer = 0;
     /// <summary>
     /// Has participants retrace their learned route.  The arrow is invisible but still detecting collisions and moving
     /// like in RunLearning(). If the participant travels too many nodes before reaching a checkpoint, they fail and
@@ -464,7 +478,7 @@ public class ExperimentController : MonoBehaviour
     {
         if (stepInPhase > 1)
         {
-            userText.GetComponent<TextMeshProUGUI>().text = ""; 
+            userText.GetComponent<TextMeshProUGUI>().text = "";
         }
 
         if (currentTrial < retraceRounds)
@@ -476,23 +490,23 @@ public class ExperimentController : MonoBehaviour
                 moveForwardArrow.SetActive(false);
                 footprints.SetActive(true);
                 footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
-                
+
                 if (GetTrigger(false) & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
                 {
                     stepInPhase++;
                     recordCameraAndNodes = true;
                     retraceNodes = 0;
                     footprints.SetActive(false);
-                    Debug.Log("Start retracing phase"); 
-                    fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_nodePath.csv"), "Start_retrace");
+                    Debug.Log("Start retracing phase");
+                    fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_retrace");
                     recordCameraAndNodes = true;
                     retraceTimer = Time.time;
                 }
             }
             else if (stepInPhase < arrowPath.Length)
             {
-               
-                    
+
+
                 maze.SetActive(true);
                 userText.GetComponent<TextMeshProUGUI>().text = "Retrace your learned route.";
                 moveForwardArrow.SetActive(true);
@@ -508,18 +522,18 @@ public class ExperimentController : MonoBehaviour
                     stepInPhase++;
                     ControllerCollider.Instance.controllerSelection = "Not selected";
                     retraceNodes = 0;
-                    retraceTimer = Time.time; 
+                    retraceTimer = Time.time;
                 }
-                if(Time.time - retraceTimer > retraceTimeLimit) //if (retraceNodes > 4)
+                if (Time.time - retraceTimer > retraceTimeLimit) //if (retraceNodes > 4)
                 {
                     stepInPhase = 0;
                     phase--; // Need to relearn
                     learningRedoRounds++;
-                    currentTrial = learningRounds-1;
+                    currentTrial = learningRounds - 1;
                     moveForwardArrow.GetComponent<MeshRenderer>().enabled = true;
                     foreach (var arrowPart in moveForwardArrow.GetComponentsInChildren<MeshRenderer>())
                     {
-                        arrowPart.enabled = true; 
+                        arrowPart.enabled = true;
                     }
                 }
             }
@@ -530,11 +544,11 @@ public class ExperimentController : MonoBehaviour
                 stepInPhase = 0;
             }
 
-           
+
         }
-        if(phase == 2 & currentTrial >= retraceRounds)
+        if (phase == 2 & currentTrial >= retraceRounds)
         {
-            fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_numLearning.csv"), learningRedoRounds.ToString());
+            fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_numLearning.csv"), learningRedoRounds.ToString());
             currentTrial = 0;
             phase++;
             stepInPhase = 0;
@@ -553,9 +567,9 @@ public class ExperimentController : MonoBehaviour
     {
         foreach (var textMesh in paintings.GetComponentsInChildren<TextMeshPro>())
         {
-            textMesh.enabled = false; 
+            textMesh.enabled = false;
         }
-       
+
         if (currentTrial < trialList.Length)
         {
             // foreach (var painting in paintings.GetComponentsInChildren<MeshRenderer>())
@@ -569,14 +583,14 @@ public class ExperimentController : MonoBehaviour
                 case 0: // Reorient
                     maze.SetActive(false);
                     footprints.SetActive(true);
-                    footprints.GetComponent<MeshRenderer>().enabled =false;
-                    
+                    footprints.GetComponent<MeshRenderer>().enabled = false;
+
                     userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
                     if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger(false))
                     {
                         float nextX = GetTrialInfo().start.GetX();
                         float nextY = GetTrialInfo().start.GetY();
-                        Vector3 rot = new Vector3(0, GetFootprintDir()-90, 0);
+                        Vector3 rot = new Vector3(0, GetFootprintDir() - 90, 0);
 
                         footprints.transform.position = new Vector3(nextX, footprints.transform.position.y, nextY);
                         footprints.transform.eulerAngles = rot;
@@ -586,17 +600,17 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 1: // Go to next start
-                    footprints.GetComponent<MeshRenderer>().enabled = true; 
+                    footprints.GetComponent<MeshRenderer>().enabled = true;
                     if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger(false))
                     {
-                        
+
                         footprints.SetActive(false);
                         maze.SetActive(true);
                         stepInPhase++;
                         fileHandler.AppendLine(
-                            (ExperimentController.Instance.subjectFile).Replace(Date_time+".csv", "_nodePath.csv"),
+                            (ExperimentController.Instance.subjectFile).Replace(Date_time + ".csv", "_nodePath.csv"),
                             PrintStepInfo() + "," + GetTrialInfo().start.GetString() + "," + GetTrialInfo().end.GetString());
-                       
+
                     }
                     break;
 
@@ -608,10 +622,10 @@ public class ExperimentController : MonoBehaviour
                         dynamicBlock.enabled = true;
                         stepInPhase++;
                         trialStartTime = Time.time;
-                        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_nodePath.csv"), "Start_Testing");
-                        recordCameraAndNodes = true; 
+                        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_Testing");
+                        recordCameraAndNodes = true;
                     }
-                        
+
                     break;
 
                 case 3: // Walk to end
@@ -619,11 +633,11 @@ public class ExperimentController : MonoBehaviour
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Target Object: " + GetTrialInfo().end.GetTarget();
                     //Debug.Log("Walk to end");
-                    if ((GetTrigger(true) & ControllerCollider.Instance.controllerSelection.Contains("targ")) || 
+                    if ((GetTrigger(true) & ControllerCollider.Instance.controllerSelection.Contains("targ")) ||
                         (GetTrialInfo().stressTrial & Time.time - trialStartTime >= stressTimeLimit) ||
                         Time.time - trialStartTime >= nonStressTimeLimit)
                     {
-                        if (!GetTrialInfo().stressTrial || (subjectNumber%2 != 0 && GetTrialInfo().isWallTrial) || (subjectNumber%2 == 0 && !GetTrialInfo().isWallTrial))
+                        if (!GetTrialInfo().stressTrial || (subjectNumber % 2 != 0 && GetTrialInfo().isWallTrial) || (subjectNumber % 2 == 0 && !GetTrialInfo().isWallTrial))
                             blockedWall = "N/A";
                         Debug.Log("Selected " + ControllerCollider.Instance.controllerSelection);
                         fileHandler.AppendLine(subjectFile,
@@ -637,7 +651,7 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 4: // Rate stress
-                    
+
                     if (SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any))
                     {
                         stressLevel.GetComponent<TextMeshProUGUI>().text =
@@ -651,7 +665,7 @@ public class ExperimentController : MonoBehaviour
                     }
 
                     stressLevel.GetComponent<TextMeshProUGUI>().text =
-                        Math.Clamp(int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text), 1, 7).ToString(); 
+                        Math.Clamp(int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text), 1, 7).ToString();
 
                     dynamicBlock.DisableWalls();
                     userText.GetComponent<TextMeshProUGUI>().text = "";
@@ -661,35 +675,35 @@ public class ExperimentController : MonoBehaviour
                     recordCameraAndNodes = false;
 
                     // select stress, once selected disable stress UI and move phase forward
-                    if (GetTrigger(false) )
+                    if (GetTrigger(false))
                     {
-                        stressText.GetComponent<TextMeshProUGUI>().text = "Confirm?"; 
-                        stepInPhase++; 
+                        stressText.GetComponent<TextMeshProUGUI>().text = "Confirm?";
+                        stepInPhase++;
                     }
                     break;
                 case 5:
                     if (GetTrigger(false))
                     {
                         //move forward
-                        stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level"; 
+                        stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
                         stressCanvas.enabled = false;
                         stepInPhase = 0;
                         footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
                             Random.Range(-3, 3));
-                        
-                        
-                        fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text );
+
+
+                        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text);
 
                         currentTrial++;
                         Debug.Log("Current trial: " + currentTrial);
                     }
                     else if (SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
                     {
-                        stepInPhase--; 
-                        stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level"; 
+                        stepInPhase--;
+                        stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
                     }
 
-                    break; 
+                    break;
 
 
                 default:
@@ -723,7 +737,7 @@ public class ExperimentController : MonoBehaviour
         userText.GetComponent<TextMeshProUGUI>().text = "THE END\nThanks for participating!!";
         //TODO update for VR (have a screenSpace canvas and worldSpace canvas)
     }
-    
+
     float GetFootprintDir()
     {
         string loc = GetTrialInfo().start.GetString();
@@ -783,16 +797,16 @@ public class ExperimentController : MonoBehaviour
     /// <returns> if(trigger & >.5 seconds since last press){return true};</returns>
     private bool GetTrigger(bool forPainting)
     {
-        if ((SteamVR_Actions._default.InteractUI.GetStateDown(SteamVR_Input_Sources.Any) || Input.GetKeyDown(KeyCode.Space)) &
+        if (/*(SteamVR_Actions._default.InteractUI.GetStateDown(SteamVR_Input_Sources.Any) ||*/ Input.GetKeyDown(KeyCode.Space) &
             Time.time - triggerTimer > 1)
         {
             redScreen.enabled = true;
-            redFlashTimer = Time.time; 
+            redFlashTimer = Time.time;
             triggerTimer = Time.time;
             if (forPainting) return ControllerCollider.Instance.PaintingCheck();
             return true;
         }
-        
+
 
         return false;
     }
@@ -804,7 +818,7 @@ public class ExperimentController : MonoBehaviour
     {
         return trialList[trialOrder[currentTrial]];
     }
-    
+
 
     /// <summary>
     /// Returns trial ID, time in trial, phase, trial number, step in phase
@@ -829,7 +843,7 @@ public class ExperimentController : MonoBehaviour
         for (int i = 0; i < trialOrder.Length; i++)
         {
             trialOrder[i] = i;
-            Debug.Log(trialOrder[i]); 
+            Debug.Log(trialOrder[i]);
         }
 
         for (int t = number_practice_trials; t < trialOrder.Length; t++)
@@ -838,7 +852,7 @@ public class ExperimentController : MonoBehaviour
             int r = Random.Range(t, trialOrder.Length);
             trialOrder[t] = trialOrder[r];
             trialOrder[r] = tmp;
-            Debug.Log(trialOrder[t]); 
+            Debug.Log(trialOrder[t]);
         }
     }
 
@@ -847,7 +861,7 @@ public class ExperimentController : MonoBehaviour
     {
         QualitySettings.vSyncCount = 2;
         Application.targetFrameRate = 45;
-        Debug.Log(Application.targetFrameRate); 
+        Debug.Log(Application.targetFrameRate);
         if (Instance == null)
         {
             Instance = this;
@@ -865,7 +879,7 @@ public class ExperimentController : MonoBehaviour
         stressFirst = startData.stressFirst;
         subjectNumber = startData.subjNum;
         currentTrial = startData.trialNum;
-        phase = (int) startData.phase;
+        phase = (int)startData.phase;
         stressCanvas.enabled = false;
         RunStartup(phase);
     }

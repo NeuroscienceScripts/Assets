@@ -46,20 +46,20 @@ namespace DefaultNamespace
                 controllerSelection = other.name;
             
             
-            if (other.CompareTag("Wall"))
-            {
-                if (other.GetComponent<MeshRenderer>().enabled & wallActivated)
-                {
-                    // Ran into wall
-                    // add variable that will be true if this occurs, and check on Line 560 of ExperimentController for this and print to file
-                }
-                wallActivated = true;
-                currWall = other.transform.parent.gameObject.name;
-            } else
-            {
-                wallActivated = false;
-                currWall = "";
-            }
+            //if (other.CompareTag("Wall"))
+            //{
+            //    if (other.GetComponent<MeshRenderer>().enabled & wallActivated)
+            //    {
+            //        // Ran into wall
+            //        // add variable that will be true if this occurs, and check on Line 560 of ExperimentController for this and print to file
+            //    }
+            //    wallActivated = true;
+            //    currWall = other.transform.parent.gameObject.name;
+            //} else
+            //{
+            //    wallActivated = false;
+            //    currWall = "";
+            //}
         }
 
         public void OnTriggerExit(Collider other)
