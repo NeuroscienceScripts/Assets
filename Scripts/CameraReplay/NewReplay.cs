@@ -26,6 +26,8 @@ public class NewReplay : MonoBehaviour
     [SerializeField] private Vector3 gazeVector;
     private bool started;
     [SerializeField, Range(0.01f, 0.1f)] private float scotomaSize;
+    private float averageEyeMovementMagnitude;
+    private int stepCount;
 
 
     [SerializeField] private Camera firstPerson;
@@ -129,6 +131,33 @@ public class NewReplay : MonoBehaviour
         }
     }
 
+    public void StartReplay(int trial)
+    {
+        isRecordingGaze = false;
+        filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
+        if (filePath[^1] != '/')
+        {
+            filePath += @"/";
+        }
+        subjectNum = int.Parse(subjectInput.text);
+        camInfo = filePath + subjectNum + "_" + camInfo;
+        if (!File.Exists(camInfo))
+        {
+            Stop();
+            Debug.LogError("Invalid File Path or Missing Critical File: camera_tracker.csv");
+        }
+        else if (!File.Exists(filePath + subjectNum + ".csv"))
+        {
+            Stop();
+            Debug.LogError($"Invalid File Path or Missing Critical File: {subjectNum}.csv");
+        }
+        else
+        {
+            GetWallPositions();
+            StartCoroutine(Replay(trial));
+        }
+    }
+
     public void StartRecordingReplay()
     {
         
@@ -210,6 +239,7 @@ public class NewReplay : MonoBehaviour
     private IEnumerator Replay()
     {
         currentPos = 0;
+        stepCount = 0;
         processing = false;
         paused = false;
         startCanvas.SetActive(false);
@@ -223,11 +253,14 @@ public class NewReplay : MonoBehaviour
             started = true;
             currentPos++;
             if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
+            stepCount++;
             line = sr.ReadLine().Split(',');
             if (!int.TryParse(line[0], out int x)) break;
             if (prevTrialNum != x)
             {
                 float timeElapsed = 0f;
+                averageEyeMovementMagnitude /= stepCount;
+                stepCount = 0;
                 if(prevTrialNum >= 0 && isRecordingGaze) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
                 while (timeElapsed <= 0.5f)
                 {
@@ -261,6 +294,43 @@ public class NewReplay : MonoBehaviour
             OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
             RecordStop(); 
         }
+    }
+
+    private IEnumerator Replay(int trial)
+    {
+        currentPos = 0;
+        processing = false;
+        paused = false;
+        startCanvas.SetActive(false);
+        infoCanvas.SetActive(true);
+        sr = new StreamReader(camInfo);
+        string[] line;
+        int targetTrial = trial;
+        prevTime = 0;
+        prevTrialNum = -1;
+        while (!sr.EndOfStream)
+        {
+            started = true;
+            currentPos++;
+            if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
+            line = sr.ReadLine().Split(',');
+            if (!int.TryParse(line[0], out int x)) break;
+            if (targetTrial != x && prevTrialNum == -1) continue;
+
+            if (targetTrial != x && prevTrialNum != -1)
+            {
+                break;
+            }
+            trialDisplay.text = $"Trial: {x}";
+            prevTrialNum = x;
+            processing = true;
+            float currentTime = float.Parse(line[1]);
+            yield return ProcessLine(currentTime - prevTime, line);
+            while (paused) yield return null;
+        }
+        yield return null;
+        Stop();
+        
     }
 
     private void ShowWall(int trialNum)
@@ -325,7 +395,7 @@ public class NewReplay : MonoBehaviour
         transform.SetPositionAndRotation(newPos, newRot);
         playerModel.transform.localScale = new Vector3(0.3f, float.Parse(line[8]), 0.3f);
         playerModel.transform.localPosition = new Vector3(0, float.Parse(line[8]) / -2f, 0);
-
+        averageEyeMovementMagnitude += Vector3.Distance(gazeVector, gaze);
         gazeVector = gaze;
         prevTime = float.Parse(line[1]);
         CheckWall(x);
@@ -343,6 +413,7 @@ public class NewReplay : MonoBehaviour
             Vector3 gaze = new(float.Parse(line[15]), float.Parse(line[16]), float.Parse(line[17]));
 
             Vector3 playerScale = new(0.3f, float.Parse(line[8]), 0.3f);
+            averageEyeMovementMagnitude += Vector3.Distance(gazeVector, gaze);
             while (timeElapsed <= time && time != 0)
             {
                 while (paused)
@@ -372,6 +443,7 @@ public class NewReplay : MonoBehaviour
             transform.SetPositionAndRotation(newPos, newRot);
             playerModel.transform.localScale = playerScale;
             playerModel.transform.localPosition = new Vector3(0, playerModel.transform.localScale.y / -2f, 0);
+            gazeVector = gaze;
             CheckWall(x);
             if (Mathf.Abs(float.Parse(line[1]) - prevTime) <= time * 1.1f)
             {
