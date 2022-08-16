@@ -51,6 +51,23 @@ public class RotationReplay : MonoBehaviour
         else StartCoroutine(Replay());
     }
 
+    public void StartReplay(int trial)
+    {
+        filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
+        if (filePath[^1] != '/')
+        {
+            filePath += @"/";
+        }
+        subjectNum = int.Parse(subjectInput.text);
+        camRot = filePath + subjectNum + "_" + camRot;
+        if (!File.Exists(camRot))
+        {
+            Stop();
+            Debug.LogError("Invalid File Path or Missing Critical File: camera_Rot.csv");
+        }
+        else StartCoroutine(Replay(trial));
+    }
+
     private IEnumerator Replay()
     {
         currentPos = 0;
@@ -78,6 +95,37 @@ public class RotationReplay : MonoBehaviour
                 prevTrialNum = x;
                 prevTime = 0f;
             }
+            processing = true;
+            yield return ProcessLine(float.Parse(line[1]) - prevTime, line);
+            while (paused) yield return null;
+        }
+        yield return null;
+        Stop();
+    }
+
+    private IEnumerator Replay(int trial)
+    {
+        currentPos = 0;
+        processing = false;
+        paused = false;
+        sr = new StreamReader(camRot);
+        string[] line;
+        int targetTrial = trial;
+        prevTime = 0;
+        prevTrialNum = -1;
+        while (!sr.EndOfStream)
+        {
+            currentPos++;
+            if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
+            line = sr.ReadLine().Split(',');
+            if (!int.TryParse(line[0], out int x)) break;
+            if (targetTrial != x && prevTrialNum == -1) continue;
+
+            if (targetTrial != x && prevTrialNum != -1)
+            {
+                break;
+            }
+            prevTrialNum = x;
             processing = true;
             yield return ProcessLine(float.Parse(line[1]) - prevTime, line);
             while (paused) yield return null;

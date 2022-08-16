@@ -96,6 +96,32 @@ public class PositionReplay : MonoBehaviour
         }
     }
 
+    public void StartReplay(int trial)
+    {
+        filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
+        if (filePath[^1] != '/')
+        {
+            filePath += @"/";
+        }
+        subjectNum = int.Parse(subjectInput.text);
+        camPos = filePath + subjectNum + "_" + camPos;
+        if (!File.Exists(camPos))
+        {
+            Stop();
+            Debug.LogError("Invalid File Path or Missing Critical File: cameraPos.csv");
+        }
+        else if (!File.Exists(filePath + subjectNum + ".csv"))
+        {
+            Stop();
+            Debug.LogError($"Invalid File Path or Missing Critical File: {subjectNum}.csv");
+        }
+        else
+        {
+            GetWallPositions();
+            StartCoroutine(Replay(trial));
+        }
+    }
+
     private void GetWallPositions()
     {
         wallPositions = new string[Constants.NUM_OF_TRIALS][];
@@ -158,6 +184,42 @@ public class PositionReplay : MonoBehaviour
                     fog.Off();
                 }
             }
+            processing = true;
+            float currentTime = float.Parse(line[1]);
+            yield return ProcessLine(currentTime - prevTime, line);
+            while (paused) yield return null;
+        }
+        yield return null;
+        Stop();
+    }
+
+    private IEnumerator Replay(int trial)
+    {
+        currentPos = 0;
+        processing = false;
+        paused = false;
+        startCanvas.SetActive(false);
+        infoCanvas.SetActive(true);
+        sr = new StreamReader(camPos);
+        string[] line;
+        int targetTrial = trial;
+        prevTime = 0;
+        prevTrialNum = -1;
+        while (!sr.EndOfStream)
+        {
+            started = true;
+            currentPos++;
+            if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
+            line = sr.ReadLine().Split(',');
+            if (!int.TryParse(line[0], out int x)) break;
+            if (targetTrial != x && prevTrialNum == -1) continue;
+
+            if (targetTrial != x && prevTrialNum != -1)
+            {
+                break;
+            }
+            trialDisplay.text = $"Trial: {x}";
+            prevTrialNum = x;
             processing = true;
             float currentTime = float.Parse(line[1]);
             yield return ProcessLine(currentTime - prevTime, line);

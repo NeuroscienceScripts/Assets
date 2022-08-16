@@ -34,8 +34,17 @@ public class ReplayManager : MonoBehaviour
         }
         else if(replayOptions.value == 1)
         {
-            posReplay.StartReplay();
-            rotReplay.StartReplay();
+            if (trialNumInput.text == "")
+            {
+                posReplay.StartReplay();
+                rotReplay.StartReplay();
+            }
+            else
+            {
+                posReplay.StartReplay(int.Parse(trialNumInput.text));
+                rotReplay.StartReplay(int.Parse(trialNumInput.text));
+            }
+                
             newReplay.enabled = false;
         }else if(replayOptions.value == 2)
         {
