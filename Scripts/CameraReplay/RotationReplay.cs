@@ -25,7 +25,7 @@ public class RotationReplay : MonoBehaviour
 
     float prevTime;
     int prevTrialNum;
-
+    bool trialSpecific;
 
     private void Awake()
     {
@@ -36,6 +36,7 @@ public class RotationReplay : MonoBehaviour
 
     public void StartReplay()
     {
+        trialSpecific = false;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         if (filePath[^1] != '/')
         {
@@ -53,6 +54,7 @@ public class RotationReplay : MonoBehaviour
 
     public void StartReplay(int trial)
     {
+        trialSpecific = true;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         if (filePath[^1] != '/')
         {
@@ -139,6 +141,11 @@ public class RotationReplay : MonoBehaviour
         if (!int.TryParse(line[0], out int x)) return;
         if (x != prevTrialNum)
         {
+            if (trialSpecific)
+            {
+                currentPos--;
+                return;
+            }
             prevTrialNum = x;
         }
         Vector3 newPos = new(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9]));

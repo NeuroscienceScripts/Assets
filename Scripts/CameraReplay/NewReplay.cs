@@ -56,6 +56,7 @@ public class NewReplay : MonoBehaviour
     float prevTime;
     int prevTrialNum;
     float[] timeInTrials;
+    bool trialSpecific;
 
     private string[][] wallPositions;
     [SerializeField] private Transform[] walls;
@@ -107,6 +108,7 @@ public class NewReplay : MonoBehaviour
     public void StartReplay()
     {
         isRecordingGaze = false;
+        trialSpecific = false;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         if (filePath[^1] != '/')
         {
@@ -134,6 +136,7 @@ public class NewReplay : MonoBehaviour
     public void StartReplay(int trial)
     {
         isRecordingGaze = false;
+        trialSpecific = true;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         if (filePath[^1] != '/')
         {
@@ -160,7 +163,7 @@ public class NewReplay : MonoBehaviour
 
     public void StartRecordingReplay()
     {
-        
+        trialSpecific = false;
         string recordPath = recordListInput.text;
         if (!File.Exists(recordPath))
         {
@@ -376,6 +379,11 @@ public class NewReplay : MonoBehaviour
         if (!int.TryParse(line[0], out int x)) return;
         if (x != prevTrialNum)
         {
+            if (trialSpecific)
+            {
+                currentPos--;
+                return;
+            }
             prevTrialNum = x;
             trialDisplay.text = $"Trial: {prevTrialNum}";
             if (stressTrials[x] == "True" && fogToggle)

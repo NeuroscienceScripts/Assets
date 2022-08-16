@@ -38,6 +38,7 @@ public class PositionReplay : MonoBehaviour
 
     float prevTime;
     int prevTrialNum;
+    bool trialSpecific;
 
     private string[][] wallPositions;
     [SerializeField] private Transform[] walls;
@@ -57,6 +58,7 @@ public class PositionReplay : MonoBehaviour
         stressTrials = new();
         hidden = false;
         stepped = false;
+        trialSpecific = false;
         defaultPath = Application.dataPath + @"\Data\";
         camPos = "cameraPos.csv";
         wallDirections = new Vector3[26];
@@ -72,6 +74,7 @@ public class PositionReplay : MonoBehaviour
 
     public void StartReplay()
     {
+        trialSpecific = false;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         if (filePath[^1] != '/')
         {
@@ -98,6 +101,7 @@ public class PositionReplay : MonoBehaviour
 
     public void StartReplay(int trial)
     {
+        trialSpecific = true;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         if (filePath[^1] != '/')
         {
@@ -272,6 +276,11 @@ public class PositionReplay : MonoBehaviour
         if (!int.TryParse(line[0], out int x)) return;
         if(x != prevTrialNum)
         {
+            if (trialSpecific)
+            {
+                currentPos--;
+                return;
+            }
             prevTrialNum = x;
             trialDisplay.text = $"Trial: {prevTrialNum}";
             if (stressTrials[x] == "True" && fogToggle)
