@@ -39,7 +39,7 @@ public class PaintingTracker : MonoBehaviour
         started = true;
         int subjectNumber = replay.subjectNum;
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_painting_gaze.csv";
-        fileHandler.AppendLine(subjectFile, "trialID, timeInTrial, A1, A6, B2, C6, C7, D1, D4, E6, F1, F6, G2, G5");
+        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,A1,A6,B2,C6,C7,D1,D4,E6,F1,F6,G2,G5");
     }
 
     private void Update()

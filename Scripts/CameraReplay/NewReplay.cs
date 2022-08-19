@@ -26,7 +26,7 @@ public class NewReplay : MonoBehaviour
     [SerializeField] private Vector3 gazeVector;
     private bool started;
     [SerializeField, Range(0.01f, 0.1f)] private float scotomaSize;
-    private float averageEyeMovementMagnitude;
+    public float averageEyeMovementMagnitude;
     private int stepCount;
 
 
@@ -72,6 +72,7 @@ public class NewReplay : MonoBehaviour
     public event Action<int, float> OnTrialChanged;
     private bool isRecordingGaze;
     [SerializeField] private PaintingTracker paintingTracker;
+    [SerializeField] private EyeDataTracker eyeDataTracker;
 
     private void Awake()
     {
@@ -207,6 +208,7 @@ public class NewReplay : MonoBehaviour
             {
                 GetWallPositions();
                 paintingTracker.StartRec();
+                eyeDataTracker.StartRec();
                 yield return Replay();
                 startCanvas.SetActive(false);
             }
