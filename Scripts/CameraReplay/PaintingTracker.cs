@@ -29,7 +29,7 @@ public class PaintingTracker : MonoBehaviour
 
     public void StartRec()
     {
-        watchTimes = new double[paintings.Length];
+        watchTimes = new double[paintings.Length+1];
         for (int i = 0; i < watchTimes.Length; i++)
         {
             watchTimes[i] = 0d;
@@ -39,7 +39,7 @@ public class PaintingTracker : MonoBehaviour
         started = true;
         int subjectNumber = replay.subjectNum;
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_painting_gaze.csv";
-        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,A1,A6,B2,C6,C7,D1,D4,E6,F1,F6,G2,G5");
+        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,A1,A6,B2,C6,C7,D1,D4,E6,F1,F6,G2,G5,nonPainting");
     }
 
     private void Update()
@@ -56,6 +56,10 @@ public class PaintingTracker : MonoBehaviour
                     watchTimes[j] += Time.deltaTime;
                 }
             }
+        }
+        if(numColliders == 0)
+        {
+            watchTimes[paintings.Length - 1] += Time.deltaTime;
         }
     }
 
