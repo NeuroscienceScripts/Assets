@@ -18,7 +18,8 @@ public class PaintingTracker : MonoBehaviour
     private bool started;
 
     private FileHandler fileHandler;
-    private string subjectFile;
+    private string gazeTimes;
+    private string fixationFile;
 
     private readonly Collider[] _colliders = new Collider[10];
 
@@ -29,7 +30,7 @@ public class PaintingTracker : MonoBehaviour
 
     public void StartRec()
     {
-        watchTimes = new double[paintings.Length+1];
+        watchTimes = new double[paintings.Length];
         for (int i = 0; i < watchTimes.Length; i++)
         {
             watchTimes[i] = 0d;
@@ -38,15 +39,17 @@ public class PaintingTracker : MonoBehaviour
         fileHandler = new();
         started = true;
         int subjectNumber = replay.subjectNum;
-        subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_painting_gaze.csv";
-        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,A1,A6,B2,C6,C7,D1,D4,E6,F1,F6,G2,G5,nonPainting");
+        gazeTimes = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_painting_gaze.csv";
+        fixationFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_fixations.csv";
+        fileHandler.AppendLine(gazeTimes, "trialID,timeInTrial,A1,A6,B2,C6,C7,D1,D4,E6,F1,F6,G2,G5");
+        fileHandler.AppendLine(fixationFile, "trialID,timeInTrial,painting");
     }
 
     private void Update()
     {
         if (!started || replay.paused) return;
         Vector3 pos = lineRender.GetPosition(1);
-        int numColliders = Physics.OverlapSphereNonAlloc(pos, detectionRadius, _colliders);
+        int numColliders = Physics.OverlapSphereNonAlloc(pos, detectionRadius, _colliders, mask);
         float t = -1;
         for (int i = 0; i < numColliders; i++)
         {
@@ -59,15 +62,12 @@ public class PaintingTracker : MonoBehaviour
                 }
             }
         }
-        if(t == -1)
-        {
-            watchTimes[paintings.Length - 1] += Time.deltaTime;
-        }
     }
 
     private void OnEnable()
     {
         replay.OnTrialChanged += NextTrial;
+        replay.OnNextFrame += NextFrame;
     }
 
     private void NextTrial(int trialNum, float timeInTrial)
@@ -77,12 +77,30 @@ public class PaintingTracker : MonoBehaviour
             return;
         }
         if (Array.Exists(trials.ToArray(), trial => trial == trialNum)) return;
-        fileHandler.AppendLine(subjectFile, trialNum.ToString() + "," + timeInTrial.ToString() + PrintWatchTimes());
+        fileHandler.AppendLine(gazeTimes, trialNum.ToString() + "," + timeInTrial.ToString() + PrintWatchTimes());
         trials.Add(trialNum);
         for (int i = 0; i < watchTimes.Length; i++)
         {
             watchTimes[i] = 0d;
         }
+    }
+
+    private void NextFrame(int trialNum, float timeInTrial, float currentTime)
+    {
+        Vector3 pos = lineRender.GetPosition(1);
+        string painting = "None";
+        int numColliders = Physics.OverlapSphereNonAlloc(pos, detectionRadius, _colliders, mask);
+        for (int i = 0; i < numColliders; i++)
+        {
+            for (int j = 0; j < paintings.Length; j++)
+            {
+                if (paintings[j] == _colliders[i].gameObject)
+                {
+                    painting = _colliders[i].gameObject.name;
+                }
+            }
+        }
+        fileHandler.AppendLine(fixationFile, trialNum.ToString() + "," + timeInTrial.ToString() + "," + currentTime.ToString() + "," + painting);
     }
 
     private string PrintWatchTimes()
@@ -98,5 +116,6 @@ public class PaintingTracker : MonoBehaviour
     private void OnDisable()
     {
         replay.OnTrialChanged -= NextTrial;
+        replay.OnNextFrame -= NextFrame;
     }
 }

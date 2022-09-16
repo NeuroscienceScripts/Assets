@@ -71,6 +71,7 @@ public class NewReplay : MonoBehaviour
     [SerializeField] private GameObject playerModel;
 
     public event Action<int, float> OnTrialChanged;
+    public event Action<int, float, float> OnNextFrame;
     private bool isRecordingGaze;
     [SerializeField] private PaintingTracker paintingTracker;
     [SerializeField] private EyeDataTracker eyeDataTracker;
@@ -264,6 +265,7 @@ public class NewReplay : MonoBehaviour
             if (hidden) wallStepCount++;
             line = sr.ReadLine().Split(',');
             if (!int.TryParse(line[0], out int x)) break;
+            
             if (prevTrialNum != x)
             {
                 float timeElapsed = 0f;
@@ -297,13 +299,18 @@ public class NewReplay : MonoBehaviour
             }
             processing = true;
             float currentTime = float.Parse(line[1]);
-            yield return ProcessLine(currentTime - prevTime, line);
+            float dTime = currentTime - prevTime;
+            yield return ProcessLine(dTime, line);
+            if (isRecordingGaze) OnNextFrame?.Invoke(prevTrialNum, timeInTrials[prevTrialNum],currentTime);
             while (paused) yield return null;
         }
         yield return null;
         if (!isRecordingGaze) Stop();
         else 
         {
+            averageEyeMovementMagnitude /= stepCount;
+            if (prevTrialNum >= 0 && wallPositions[prevTrialNum][0] == "N/A") averageMovementWallBlock = -1;
+            else averageMovementWallBlock /= wallStepCount;
             OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
             RecordStop(); 
         }
