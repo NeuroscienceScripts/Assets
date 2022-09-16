@@ -27,7 +27,8 @@ public class NewReplay : MonoBehaviour
     private bool started;
     [SerializeField, Range(0.01f, 0.1f)] private float scotomaSize;
     public float averageEyeMovementMagnitude;
-    private int stepCount;
+    public float averageMovementWallBlock;
+    private int stepCount, wallStepCount;
 
 
     [SerializeField] private Camera firstPerson;
@@ -245,6 +246,7 @@ public class NewReplay : MonoBehaviour
     {
         currentPos = 0;
         stepCount = 0;
+        wallStepCount = 0;
         processing = false;
         paused = false;
         startCanvas.SetActive(false);
@@ -259,13 +261,17 @@ public class NewReplay : MonoBehaviour
             currentPos++;
             if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
             stepCount++;
+            if (hidden) wallStepCount++;
             line = sr.ReadLine().Split(',');
             if (!int.TryParse(line[0], out int x)) break;
             if (prevTrialNum != x)
             {
                 float timeElapsed = 0f;
                 averageEyeMovementMagnitude /= stepCount;
+                if (prevTrialNum >= 0 && wallPositions[prevTrialNum][0] == "N/A") averageMovementWallBlock = -1;
+                else averageMovementWallBlock /= wallStepCount;
                 stepCount = 0;
+                wallStepCount = 0;
                 if(prevTrialNum >= 0 && isRecordingGaze) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
                 while (timeElapsed <= 0.5f)
                 {
@@ -273,6 +279,8 @@ public class NewReplay : MonoBehaviour
                     timeElapsed += Time.deltaTime;
                     if (paused || !processing) break;
                 }
+                averageEyeMovementMagnitude = 0;
+                averageMovementWallBlock = 0;
                 trialDisplay.text = $"Trial: {x}";
                 prevTrialNum = x;
                 prevTime = 0f;
@@ -405,7 +413,9 @@ public class NewReplay : MonoBehaviour
         transform.SetPositionAndRotation(newPos, newRot);
         playerModel.transform.localScale = new Vector3(0.3f, float.Parse(line[8]), 0.3f);
         playerModel.transform.localPosition = new Vector3(0, float.Parse(line[8]) / -2f, 0);
-        averageEyeMovementMagnitude += Vector3.Distance(gazeVector, gaze);
+        float eyeMovement = Vector3.Distance(gazeVector, gaze);
+        averageEyeMovementMagnitude += eyeMovement;
+        averageMovementWallBlock += eyeMovement;
         gazeVector = gaze;
         prevTime = float.Parse(line[1]);
         CheckWall(x);
@@ -423,7 +433,9 @@ public class NewReplay : MonoBehaviour
             Vector3 gaze = new(float.Parse(line[15]), float.Parse(line[16]), float.Parse(line[17]));
 
             Vector3 playerScale = new(0.3f, float.Parse(line[8]), 0.3f);
-            averageEyeMovementMagnitude += Vector3.Distance(gazeVector, gaze);
+            float eyeMovement = Vector3.Distance(gazeVector, gaze);
+            averageEyeMovementMagnitude += eyeMovement;
+            averageMovementWallBlock += eyeMovement;
             while (timeElapsed <= time && time != 0)
             {
                 while (paused)

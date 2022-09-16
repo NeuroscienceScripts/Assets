@@ -31,11 +31,13 @@ public class EyeDataTracker : MonoBehaviour
         started = true;
         int subjectNumber = replay.subjectNum;
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_eye_data.csv";
-        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,avgEyeMovementMagnitude");
+        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,avgEyeMovementMagnitude, avgMagnitudeWallBlock");
     }
 
     private void NextTrial(int trialNum, float timeInTrial)
     {
-        fileHandler.AppendLine(subjectFile, trialNum + "," + timeInTrial + "," + replay.averageEyeMovementMagnitude);
+        if (trialNum == -1) return;
+        string wallBlockMagnitude = replay.averageMovementWallBlock < 0 ? "N/A" : replay.averageMovementWallBlock.ToString();
+        fileHandler.AppendLine(subjectFile, trialNum + "," + timeInTrial + "," + replay.averageEyeMovementMagnitude + "," + wallBlockMagnitude);
     }
 }

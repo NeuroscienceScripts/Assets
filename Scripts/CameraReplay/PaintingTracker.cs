@@ -47,17 +47,19 @@ public class PaintingTracker : MonoBehaviour
         if (!started || replay.paused) return;
         Vector3 pos = lineRender.GetPosition(1);
         int numColliders = Physics.OverlapSphereNonAlloc(pos, detectionRadius, _colliders);
+        float t = -1;
         for (int i = 0; i < numColliders; i++)
         {
             for (int j = 0; j < paintings.Length; j++)
             {
                 if(paintings[j] == _colliders[i].gameObject)
                 {
-                    watchTimes[j] += Time.deltaTime;
+                    t = Time.deltaTime;
+                    watchTimes[j] += t;
                 }
             }
         }
-        if(numColliders == 0)
+        if(t == -1)
         {
             watchTimes[paintings.Length - 1] += Time.deltaTime;
         }
