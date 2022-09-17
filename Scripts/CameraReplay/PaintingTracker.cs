@@ -88,7 +88,7 @@ public class PaintingTracker : MonoBehaviour
     private void NextFrame(int trialNum, float timeInTrial, float currentTime)
     {
         Vector3 pos = lineRender.GetPosition(1);
-        string painting = "None";
+        string painting = "N/A";
         int numColliders = Physics.OverlapSphereNonAlloc(pos, detectionRadius, _colliders, mask);
         for (int i = 0; i < numColliders; i++)
         {
