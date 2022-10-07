@@ -31,7 +31,7 @@ public class EyeDataTracker : MonoBehaviour
         started = true;
         int subjectNumber = replay.subjectNum;
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_eye_data.csv";
-        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,avgEyeMovementMagnitude, avgMagnitudeWallBlock");
+        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,avgEyeMovementMagnitude,avgMagnitudeWallBlock");
     }
 
     private void NextTrial(int trialNum, float timeInTrial)

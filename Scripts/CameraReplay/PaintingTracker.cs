@@ -42,7 +42,7 @@ public class PaintingTracker : MonoBehaviour
         gazeTimes = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_painting_gaze.csv";
         fixationFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_fixations.csv";
         fileHandler.AppendLine(gazeTimes, "trialID,timeInTrial,A1,A6,B2,C6,C7,D1,D4,E6,F1,F6,G2,G5");
-        fileHandler.AppendLine(fixationFile, "trialID,timeInTrial,painting");
+        fileHandler.AppendLine(fixationFile, "trialID,timeInTrial,timeStep,painting");
     }
 
     private void Update()

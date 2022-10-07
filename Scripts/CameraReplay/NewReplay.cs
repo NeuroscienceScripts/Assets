@@ -5,6 +5,7 @@ using TMPro;
 using System.IO;
 using Classes;
 using System;
+using Tobii.XR.GazeModifier;
 
 public class NewReplay : MonoBehaviour
 {
@@ -167,11 +168,12 @@ public class NewReplay : MonoBehaviour
     public void StartRecordingReplay()
     {
         trialSpecific = false;
-        string recordPath = recordListInput.text;
+        string recordPath = String.IsNullOrEmpty(recordListInput.text) || recordListInput.text == "" ? "Assets/subjectList.csv" : recordListInput.text;
+       Debug.Log(recordPath);
         if (!File.Exists(recordPath))
         {
             Stop();
-            Debug.LogError("Invalid File Path/Missing File");
+           Debug.LogError("Invalid File Path/Missing File");
         }
         else
         {
@@ -185,6 +187,7 @@ public class NewReplay : MonoBehaviour
         while (!s.EndOfStream)
         {
             isRecordingGaze = true;
+            defaultPath = "Assets/ICB-camera-tracker/";
             filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
             if (filePath[^1] != '/')
             {
@@ -196,7 +199,7 @@ public class NewReplay : MonoBehaviour
             {
                 RecordStop();
                 startCanvas.SetActive(false);
-                Debug.LogError("Invalid File Path or Missing Critical File: camera_tracker.csv");
+                Debug.LogError("Invalid File Path or Missing Critical File:"  + subjectNum + " camera_tracker.csv");
                 continue;
             }
             else if (!File.Exists(filePath + subjectNum + ".csv"))
@@ -253,6 +256,7 @@ public class NewReplay : MonoBehaviour
         startCanvas.SetActive(false);
         infoCanvas.SetActive(true);
         sr = new StreamReader(camInfo);
+        Debug.Log(camInfo);
         string[] line;
         prevTime = 0;
         prevTrialNum = -1;
@@ -283,6 +287,7 @@ public class NewReplay : MonoBehaviour
                 }
                 averageEyeMovementMagnitude = 0;
                 averageMovementWallBlock = 0;
+                gazeVector = Vector3.forward;
                 trialDisplay.text = $"Trial: {x}";
                 prevTrialNum = x;
                 prevTime = 0f;
@@ -311,7 +316,9 @@ public class NewReplay : MonoBehaviour
             averageEyeMovementMagnitude /= stepCount;
             if (prevTrialNum >= 0 && wallPositions[prevTrialNum][0] == "N/A") averageMovementWallBlock = -1;
             else averageMovementWallBlock /= wallStepCount;
-            OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
+            Debug.Log(prevTrialNum);
+            Debug.Log(timeInTrials.Length);
+            if(timeInTrials.Length>=prevTrialNum && prevTrialNum>=0) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
             RecordStop(); 
         }
     }
