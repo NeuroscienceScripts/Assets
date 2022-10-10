@@ -1,4 +1,4 @@
-/* SceneHandler.cs*/
+/* SceneHandler.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -51,4 +51,4 @@ public class SceneHandler : MonoBehaviour
             Debug.Log("Button was exited");
         }
     }
-}
+}*/

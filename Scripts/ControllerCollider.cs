@@ -33,7 +33,7 @@ namespace DefaultNamespace
             if (other.name.Length == 2 & lastNodePosition == "")
                 lastNodePosition = other.name; 
                 
-            if (other.name.Length == 2 & !lastNodePosition.Equals(other.name) & ExperimentController.Instance.recordCameraAndNodes & Time.realtimeSinceStartup - previousTime >= cooldownTime)
+            if (ExperimentController.Instance!=null && other.name.Length == 2 & !lastNodePosition.Equals(other.name) & ExperimentController.Instance.recordCameraAndNodes & Time.realtimeSinceStartup - previousTime >= cooldownTime)
             {
                 currentNode = new GridLocation("" + other.name[0], int.Parse("" + other.name[1]));
                 fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(ExperimentController.Instance.Date_time+".csv", "_nodePath.csv"),

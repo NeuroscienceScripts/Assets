@@ -93,6 +93,7 @@ public class ExperimentController : MonoBehaviour
         new Vector3(0.0f, 1.0f, 90.0f),
         new Vector3(0f, -1.0f, 0.0f),
         new Vector3(2.0f, -1.0f, 90.0f),
+        new Vector3(2.0f, -2.0f, 90.0f)
     };
 
     private Trial[] trialList =
@@ -238,6 +239,7 @@ public class ExperimentController : MonoBehaviour
 
     private void Start()
     {
+        player = ControllerCollider.Instance.gameObject;
         if (StartData.instance.replayMode)
         {
             /* "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
@@ -797,17 +799,16 @@ public class ExperimentController : MonoBehaviour
     /// <returns> if(trigger & >.5 seconds since last press){return true};</returns>
     private bool GetTrigger(bool forPainting)
     {
-        if (/*(SteamVR_Actions._default.InteractUI.GetStateDown(SteamVR_Input_Sources.Any) ||*/ Input.GetKeyDown(KeyCode.Space) &
+        if (SteamControllerVR.Instance.TriggerPressed || Input.GetKeyDown(KeyCode.Space) &
             Time.time - triggerTimer > 1)
         {
             redScreen.enabled = true;
             redFlashTimer = Time.time;
             triggerTimer = Time.time;
             if (forPainting) return ControllerCollider.Instance.PaintingCheck();
+
             return true;
         }
-
-
         return false;
     }
 
@@ -855,7 +856,7 @@ public class ExperimentController : MonoBehaviour
             Debug.Log(trialOrder[t]);
         }
     }
-
+    
     // The following code will make instance of ExperimentController persist between scenes and destroy subsequent instances
     void Awake()
     {
