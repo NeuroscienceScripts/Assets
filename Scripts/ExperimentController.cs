@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Classes;
-using DefaultNamespace;
 using TMPro;
-//using UnityEditorInternal;
+using Classes;
+using VR; 
+using DynamicBlocking;
+
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR;
@@ -24,21 +25,22 @@ public class ExperimentController : MonoBehaviour
     public static ExperimentController Instance { get; private set; }
 
     //[SerializeField] public Canvas introCanvas;
-    [SerializeField] public Canvas stressCanvas;
+    [SerializeField] public Canvas introCanvas;
+    [SerializeField] GameObject stressCanvas;
     [SerializeField] private GameObject maze;
     [SerializeField] private GameObject footprints;
     [SerializeField] private GameObject moveForwardArrow;
     [SerializeField] public GameObject stressLevel;
     [SerializeField] public GameObject stressText;
     [SerializeField] public GameObject player; 
-
+    [SerializeField] private DynamicBlock dynamicBlock;
+    [SerializeField] private TMP_InputField subjectNum, trialNum; 
+    
     //[SerializeField] private GameObject subjectInput;
     //[SerializeField] private GameObject trialInput;
     [SerializeField] private GameObject userText;
     [SerializeField] private RawImage redScreen;
-
-    [SerializeField] public bool desktopMode = false;
-    [SerializeField] private bool hidePaintingsDuringTesting = true;
+    
     [SerializeField] private GameObject paintings;
     [SerializeField] private GameObject node;
 
@@ -54,8 +56,6 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private bool stressFirst = false;
 
     #region StressVars
-    [SerializeField] private StressFactors stressFactors;
-    [SerializeField] private DynamicBlock dynamicBlock;
     #endregion
 
     public int subjectNumber = 0;
@@ -63,7 +63,6 @@ public class ExperimentController : MonoBehaviour
     public int phase = 0;
     public int stepInPhase = 0;
     public int currentTrial;
-    public bool confirm = false;
     public float trialStartTime = 0.0f;
     private float redFlashTimer = 0.0f;
     [SerializeField] private float redFlashTimeLimit = .5f;
@@ -73,8 +72,9 @@ public class ExperimentController : MonoBehaviour
     public string subjectFile;
     public string Date_time;
     public bool recordCameraAndNodes = false;
+    public bool confirm = false;
     public string blockedWall = "";
-
+    private bool replayMode = false; 
 
     private Vector3[] arrowPath =
     {
@@ -99,65 +99,65 @@ public class ExperimentController : MonoBehaviour
     private Trial[] trialList =
     {
         // Practice trials
-        // new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
-        // new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
+        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
+        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
 
         // Stress trials
         // blockedList = {7,6,5,11,3,9};
-        // IsWallTrial = true --> odd id participants will have these trials blocked, even will be opposite
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true),
-        new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true),
-        new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true),
-        new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
-        new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
-        new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
-        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true, true),
-        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true, true),
-        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
-        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true, true),
-        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true, true),
-        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true, true),
-
-        // Non-stress trials 
-        new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
-        new Trial(new GridLocation("B", 2), new GridLocation("G", 5), false),
-        new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
-        new Trial(new GridLocation("C", 6), new GridLocation("F", 1), false),
-        new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
-        new Trial(new GridLocation("G", 2), new GridLocation("C", 6), false),
-        new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
-        new Trial(new GridLocation("C", 7), new GridLocation("D", 1), false),
-        new Trial(new GridLocation("D", 1), new GridLocation("D", 4), false),
-        new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
-        new Trial(new GridLocation("A", 6), new GridLocation("E", 6), false),
-        new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
-        
-        // new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true),
-        // new Trial(new GridLocation("A", 6), new GridLocation("E", 6), true),
-        // new Trial(new GridLocation("B", 2), new GridLocation("G", 5), true),
-        // new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
-        // new Trial(new GridLocation("C", 6), new GridLocation("F", 1), true),
-        // new Trial(new GridLocation("C", 7), new GridLocation("D", 1), true, true),
-        // new Trial(new GridLocation("D", 1), new GridLocation("D", 4), true, true),
+        // IsWallTrial = true --> even id participants will have these trials blocked, odd will be opposite
+        // new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true),
+        // new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true),
+        // new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true),
+        // new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
         // new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
-        // new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true),
-        // new Trial(new GridLocation("F", 6), new GridLocation("B", 2), true, true),
-        // new Trial(new GridLocation("G", 2), new GridLocation("C", 6), true),
         // new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
+        // new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true, true),
+        // new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true, true),
+        // new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
+        // new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true, true),
+        // new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true, true),
+        // new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true, true),
         //
         // // Non-stress trials 
-        // new Trial(new GridLocation("A", 1), new GridLocation("D", 4), false),
-        // new Trial(new GridLocation("A", 6), new GridLocation("G", 2), false),
-        // new Trial(new GridLocation("B", 2), new GridLocation("C", 6), false),
+        // new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
+        // new Trial(new GridLocation("B", 2), new GridLocation("G", 5), false),
         // new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
+        // new Trial(new GridLocation("C", 6), new GridLocation("F", 1), false),
         // new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
-        // new Trial(new GridLocation("C", 7), new GridLocation("B", 2), false),
-        // new Trial(new GridLocation("D", 1), new GridLocation("F", 6), false),
-        // new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
+        // new Trial(new GridLocation("G", 2), new GridLocation("C", 6), false),
         // new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
-        // new Trial(new GridLocation("F", 6), new GridLocation("A", 6), false),
-        // new Trial(new GridLocation("G", 2), new GridLocation("C", 7), false),
+        // new Trial(new GridLocation("C", 7), new GridLocation("D", 1), false),
+        // new Trial(new GridLocation("D", 1), new GridLocation("D", 4), false),
+        // new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
+        // new Trial(new GridLocation("A", 6), new GridLocation("E", 6), false),
         // new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
+        //
+        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true),
+        new Trial(new GridLocation("A", 6), new GridLocation("E", 6), true),
+        new Trial(new GridLocation("B", 2), new GridLocation("G", 5), true),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
+        new Trial(new GridLocation("C", 6), new GridLocation("F", 1), true),
+        new Trial(new GridLocation("C", 7), new GridLocation("D", 1), true, true),
+        new Trial(new GridLocation("D", 1), new GridLocation("D", 4), true, true),
+        new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
+        new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true),
+        new Trial(new GridLocation("F", 6), new GridLocation("B", 2), true, true),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 6), true),
+        new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
+        
+        // Non-stress trials 
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), false),
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), false),
+        new Trial(new GridLocation("B", 2), new GridLocation("C", 6), false),
+        new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
+        new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
+        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), false),
+        new Trial(new GridLocation("D", 1), new GridLocation("F", 6), false),
+        new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
+        new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
+        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), false),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), false),
+        new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
     };
 
     private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
@@ -177,90 +177,68 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (!StartData.instance.replayMode)
-        {
-            if (SteamVR.calibrating)
-            {
-                pause.SetActive(true);
-                Time.timeScale = 0f;
-            }
-            else
-            {
-                if (Time.timeScale == 0f)
-                {
-                    pause.SetActive(false);
-                    Time.timeScale = 1f;
-                }
-            }
+        if (phase !=0) {   //Wait for start canvas to complete.
+            if (!replayMode) {
+                if (XRSettings.enabled && SteamVR.calibrating) {
+                    pause.SetActive(true);
+                    Time.timeScale = 0f; }
+                else {
+                    if (Time.timeScale == 0f) {
+                        pause.SetActive(false);
+                        Time.timeScale = 1f; } }
 
-            if (Time.time - redFlashTimer > redFlashTimeLimit)
-                redScreen.enabled = false;
-            DisplayDebugInfo();
+                if (Time.time - redFlashTimer > redFlashTimeLimit)
+                    redScreen.enabled = false;
+                DisplayDebugInfo();
 
-            switch (phase)
-            {
-                case 0:
-                    // stressCanvas.enabled = false;
-                    // userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
-                    break;
-                case 1:
-                    RunLearning();
-                    break;
-                case 2:
-                    RunRetrace();
-                    break;
-                case 3:
-                    RunTesting();
-                    break;
-                default:
-                    FinishExperiment();
-                    StartCoroutine(WaitCoroutine());
-                    Application.Quit();
-                    break;
-            }
+                switch (phase) {
+                    case 0:
+                        stressCanvas.SetActive(false); 
+                        userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
+                        break;
+                    case 1:
+                        RunLearning();
+                        break;
+                    case 2:
+                        RunRetrace();
+                        break;
+                    case 3:
+                        RunTesting();
+                        break;
+                    default:
+                        FinishExperiment();
+                        StartCoroutine(WaitCoroutine());
+                        Application.Quit();
+                        break; }
 
-            if (recordCameraAndNodes)
-            {
-                RecordNodes(); 
-            }
-        }
-    }
+                if (recordCameraAndNodes) {
+                    RecordNodes(); } }
+
+            else {
+                /* "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
+                     "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ" 
+                split_lines = new string[System.IO.File.ReadAllLines(StartData.instance.replayFile).Length][];
+                int count = 0;
+                sr = new StreamReader(StartData.instance.replayFile);
+                
+                while (!sr.EndOfStream) {
+                    // Should input every line split into the array
+                    split_lines[count] = sr.ReadLine().Split(',');} */ } } } 
 
     private GridLocation lastLoc;
-    void RecordNodes()
-    {
+    void RecordNodes() {
         if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)
-            fileHandler.AppendLine((ExperimentController.Instance.subjectFile).Replace(ExperimentController.Instance.Date_time + ".csv",
-                "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString());
-    }
+            fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv",
+                "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString()); }
 
     private StreamReader sr;
     private string[][] split_lines;
-
-    private void Start()
-    {
-        player = ControllerCollider.Instance.gameObject;
-        if (StartData.instance.replayMode)
-        {
-            /* "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
-                 "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ" */
-            split_lines = new string[System.IO.File.ReadAllLines(StartData.instance.replayFile).Length][];
-            int count = 0;
-            sr = new StreamReader(StartData.instance.replayFile);
-
-            while (!sr.EndOfStream)
-            {
-                // Should input every line split into the array
-                split_lines[count] = sr.ReadLine().Split(',');
-            }
-        }
-    }
-
+    
     private int currentFrame = 0;
     [SerializeField] private GameObject camera;
     private void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
-        if (StartData.instance.replayMode)
+        if (replayMode)
         {
             camera.transform.position = new Vector3(float.Parse(split_lines[currentFrame][10]),
                 float.Parse(split_lines[currentFrame][11]), float.Parse(split_lines[currentFrame][12]));
@@ -301,23 +279,17 @@ public class ExperimentController : MonoBehaviour
     /// <param name="phaseNumberStart"> int value attached to GUI button which calls RunStartup()</param> 
     public void RunStartup(int phaseNumberStart)
     {
-        //subjectNumber = int.Parse(subjectInput.GetComponent<TMP_InputField>().text);
+        subjectNumber = Int32.Parse((string) subjectNum.text.ToString());
+        currentTrial = Int32.Parse((string) trialNum.text.ToString()); 
         Date_time = "_" + DateTime.Today.Month + "_" + DateTime.Today.Day + "-" + DateTime.Now.Hour + "_" + DateTime.Now.Minute;
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + Date_time + ".csv";
         Debug.Log(subjectFile);
         fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,goal,selected,blockedWall,isStressTrial");
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"),
             DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute);
-        // fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraRot.csv"),
-        //     "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xRot,yRot,zRot");
-        // fileHandler.AppendLine(subjectFile.Replace(Date_time+".csv", "_cameraPos.csv"),
-        //     "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,end,xPos,yPos,zPos");
+        
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"),
             "start,end,stress_level");
-
-        //currentTrial = int.Parse(trialInput.GetComponent<TMP_InputField>().text);
-        //phase = phaseNumberStart;
-        //introCanvas.enabled = false;
 
         // Blocking
         trialOrder = new int[trialList.Length];
@@ -326,76 +298,51 @@ public class ExperimentController : MonoBehaviour
             trialOrder[i] = i;
         }
 
-        List<int> stress = new();
-        List<int> nonStress = new();
-        for (int i = number_practice_trials; i < trialList.Length; i++)
-        {
+        List<int> stress = new List<int>();
+        List<int> nonStress = new List<int>();
+        for (int i = number_practice_trials; i < trialList.Length; i++) {
             if (trialList[i].stressTrial)
-            {
                 stress.Add(i);
-            }
             else
-            {
-                nonStress.Add(i);
-            }
-        }
+                nonStress.Add(i); }
 
         Random.InitState(subjectNumber * 10);
         stress = stress.ToArray().OrderBy(x => Random.Range(0, stress.Count)).ToList();
 
         nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0, nonStress.Count)).ToList();
+        
 
-
-
-        if (stressFirst)
-        {
+        if (stressFirst){
             for (int i = 0; i < stress.Count; i++)
-            {
                 trialOrder[number_practice_trials + i] = stress[i];
-            }
             for (int i = 0; i < nonStress.Count; i++)
-            {
-                trialOrder[number_practice_trials + stress.Count + i] = nonStress[i];
-            }
-        }
-        else
-        {
+                trialOrder[number_practice_trials + stress.Count + i] = nonStress[i]; }
+        else {
             for (int i = 0; i < nonStress.Count; i++)
-            {
                 trialOrder[number_practice_trials + i] = nonStress[i];
-            }
             for (int i = 0; i < stress.Count; i++)
-            {
                 trialOrder[number_practice_trials + nonStress.Count + i] = stress[i];
-            }
         }
 
         // Create a web of invisible node colliders to track position
         string[] letters = { "A", "B", "C", "D", "E", "F", "G" };
         int[] numbers = { 1, 2, 3, 4, 5, 6, 7 };
         GameObject[] nodes = new GameObject[49];
-        for (int letter = 0; letter < letters.Length; letter++)
-        {
-            for (int number = 1; number <= 7; number++)
-            {
+        for (int letter = 0; letter < letters.Length; letter++){
+            for (int number = 1; number <= 7; number++) {
                 int currentPos = number - 1 + letter * 7;
                 nodes[currentPos] = GameObject.Instantiate(node);
                 nodes[currentPos].name = letters[letter] + number;
 
-                if (!obstaclesList.Contains(nodes[currentPos].name))
-                {
+                if (!obstaclesList.Contains(nodes[currentPos].name)) {
                     GridLocation nodeLocation = new GridLocation(letters[letter], number);
                     nodes[currentPos].transform.position =
-                        new Vector3(nodeLocation.GetX(), node.transform.position.y, nodeLocation.GetY());
-                }
+                        new Vector3(nodeLocation.GetX(), node.transform.position.y, nodeLocation.GetY()); }
                 else
-                {
                     nodes[currentPos].SetActive(false); // To avoid erroneous recordings from inside walls
-                }
-
-            }
-        }
-        //introCanvas.enabled = false;
+            } }
+        introCanvas.enabled = false;
+        phase = phaseNumberStart; 
     }
 
 
@@ -420,13 +367,13 @@ public class ExperimentController : MonoBehaviour
         {
             if (stepInPhase == 0)
             {
-                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
+                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
                 maze.SetActive(false);
                 moveForwardArrow.SetActive(false);
                 footprints.SetActive(true);
                 footprints.transform.position =
                     new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
-                if (GetTrigger(false) & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
+                if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
                 {
                     recordCameraAndNodes = true;
                     fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
@@ -445,10 +392,9 @@ public class ExperimentController : MonoBehaviour
                     moveForwardArrow.transform.rotation.eulerAngles.x,
                     arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
 
-                if (ControllerCollider.Instance.controllerSelection.Contains(moveForwardArrow.name))
+                if (NodeExtension.SameNode(player, moveForwardArrow))
                 {
                     stepInPhase++;
-                    ControllerCollider.Instance.controllerSelection = "Not selected";
                     recordCameraAndNodes = false;
                 }
             }
@@ -487,13 +433,13 @@ public class ExperimentController : MonoBehaviour
         {
             if (stepInPhase == 0)
             {
-                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
+                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
                 maze.SetActive(false);
                 moveForwardArrow.SetActive(false);
                 footprints.SetActive(true);
                 footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
 
-                if (GetTrigger(false) & ControllerCollider.Instance.controllerSelection.Contains(footprints.name))
+                if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
                 {
                     stepInPhase++;
                     recordCameraAndNodes = true;
@@ -517,12 +463,12 @@ public class ExperimentController : MonoBehaviour
                     arrowChild.enabled = false;
                 }
 
-                moveForwardArrow.transform.position =
-                    new Vector3(arrowPath[stepInPhase].x, moveForwardArrow.transform.position.y, arrowPath[stepInPhase].y);
-                if (ControllerCollider.Instance.controllerSelection.Contains(moveForwardArrow.name))
+                if(stepInPhase < arrowPath.Length-1)
+                    moveForwardArrow.transform.position =
+                        new Vector3(arrowPath[stepInPhase].x, moveForwardArrow.transform.position.y, arrowPath[stepInPhase].y);
+                if (NodeExtension.SameNode(player, moveForwardArrow))
                 {
                     stepInPhase++;
-                    ControllerCollider.Instance.controllerSelection = "Not selected";
                     retraceNodes = 0;
                     retraceTimer = Time.time;
                 }
@@ -587,8 +533,8 @@ public class ExperimentController : MonoBehaviour
                     footprints.SetActive(true);
                     footprints.GetComponent<MeshRenderer>().enabled = false;
 
-                    userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
-                    if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger(false))
+                    userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the " + (XRSettings.enabled ? "trigger" : "space" ) + " button";
+                    if (NodeExtension.SameNode(player, footprints) & GetTrigger(false))
                     {
                         float nextX = GetTrialInfo().start.GetX();
                         float nextY = GetTrialInfo().start.GetY();
@@ -603,14 +549,14 @@ public class ExperimentController : MonoBehaviour
 
                 case 1: // Go to next start
                     footprints.GetComponent<MeshRenderer>().enabled = true;
-                    if (ControllerCollider.Instance.controllerSelection.Contains(footprints.name) & GetTrigger(false))
+                    if (NodeExtension.SameNode(player, footprints) & GetTrigger(false))
                     {
 
                         footprints.SetActive(false);
                         maze.SetActive(true);
                         stepInPhase++;
                         fileHandler.AppendLine(
-                            (ExperimentController.Instance.subjectFile).Replace(Date_time + ".csv", "_nodePath.csv"),
+                            (subjectFile).Replace(Date_time + ".csv", "_nodePath.csv"),
                             PrintStepInfo() + "," + GetTrialInfo().start.GetString() + "," + GetTrialInfo().end.GetString());
 
                     }
@@ -618,8 +564,8 @@ public class ExperimentController : MonoBehaviour
 
                 case 2: // Wait for them to touch painting
                     userText.GetComponent<TextMeshProUGUI>().text =
-                        "Touch the painting and pull the trigger to start trial";
-                    if (GetTrigger(true) & ControllerCollider.Instance.controllerSelection.Contains(GetTrialInfo().start.GetString()))
+                        "Touch the painting and press " + (XRSettings.enabled ? "trigger" : "space" ) + " to start trial";
+                    if (GetTrigger(true) )
                     {
                         dynamicBlock.enabled = true;
                         stepInPhase++;
@@ -635,15 +581,15 @@ public class ExperimentController : MonoBehaviour
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Target Object: " + GetTrialInfo().end.GetTarget();
                     //Debug.Log("Walk to end");
-                    if ((GetTrigger(true) & ControllerCollider.Instance.controllerSelection.Contains("targ")) ||
+                    if (GetTrigger(true)  ||
                         (GetTrialInfo().stressTrial & Time.time - trialStartTime >= stressTimeLimit) ||
                         Time.time - trialStartTime >= nonStressTimeLimit)
                     {
                         if (!GetTrialInfo().stressTrial || (subjectNumber % 2 != 0 && GetTrialInfo().isWallTrial) || (subjectNumber % 2 == 0 && !GetTrialInfo().isWallTrial))
                             blockedWall = "N/A";
-                        Debug.Log("Selected " + ControllerCollider.Instance.controllerSelection);
+                        
                         fileHandler.AppendLine(subjectFile,
-                            PrintStepInfo() + "," + GetTrialInfo() + "," + ControllerCollider.Instance.controllerSelection.Remove(ControllerCollider.Instance.controllerSelection.Length > 2 ? 2 : 0) + "," + blockedWall + "," + GetTrialInfo().stressTrial);
+                            PrintStepInfo() + "," + GetTrialInfo() + "," + NodeExtension.CurrentNode(player.transform.position)  + "," + blockedWall + "," + GetTrialInfo().stressTrial);
                         maze.SetActive(false);
                         stressLevel.GetComponent<TextMeshProUGUI>().text = "4";
                         dynamicBlock.enabled = false;
@@ -653,14 +599,16 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 4: // Rate stress
-
-                    if (SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any))
+                    stressCanvas.SetActive(true); 
+                    if (XRSettings.enabled && SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any) ||
+                         Input.GetKeyDown(KeyCode.LeftArrow))
                     {
                         stressLevel.GetComponent<TextMeshProUGUI>().text =
                             (int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text) - 1).ToString();
                     }
 
-                    if (SteamVR_Actions._default.SnapTurnRight.GetStateDown(SteamVR_Input_Sources.Any))
+                    if (XRSettings.enabled && SteamVR_Actions._default.SnapTurnRight.GetStateDown(SteamVR_Input_Sources.Any)||
+                        Input.GetKeyDown(KeyCode.RightArrow))
                     {
                         stressLevel.GetComponent<TextMeshProUGUI>().text =
                             (int.Parse(stressLevel.GetComponent<TextMeshProUGUI>().text) + 1).ToString();
@@ -671,7 +619,6 @@ public class ExperimentController : MonoBehaviour
 
                     dynamicBlock.DisableWalls();
                     userText.GetComponent<TextMeshProUGUI>().text = "";
-                    stressCanvas.enabled = true;
 
                     recordCameraAndNodes = false;
                     recordCameraAndNodes = false;
@@ -688,7 +635,7 @@ public class ExperimentController : MonoBehaviour
                     {
                         //move forward
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
-                        stressCanvas.enabled = false;
+                        stressCanvas.SetActive(false); 
                         stepInPhase = 0;
                         footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
                             Random.Range(-3, 3));
@@ -699,7 +646,7 @@ public class ExperimentController : MonoBehaviour
                         currentTrial++;
                         Debug.Log("Current trial: " + currentTrial);
                     }
-                    else if (SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
+                    else if (XRSettings.enabled && SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
                     {
                         stepInPhase--;
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
@@ -791,7 +738,8 @@ public class ExperimentController : MonoBehaviour
     }
 
 
-    private float triggerTimer = 0;
+    private float lastTrigger; 
+    private float triggerTimer = 0.75f;
     /// <summary>
     /// Checks if the trigger (or spacebar) is pressed, has a half second delay before it will read a subsequent
     /// trigger press.
@@ -799,13 +747,15 @@ public class ExperimentController : MonoBehaviour
     /// <returns> if(trigger & >.5 seconds since last press){return true};</returns>
     private bool GetTrigger(bool forPainting)
     {
-        if (SteamControllerVR.Instance.TriggerPressed || Input.GetKeyDown(KeyCode.Space) &
-            Time.time - triggerTimer > 1)
+        if (Time.realtimeSinceStartup-lastTrigger > triggerTimer && ((XRSettings.enabled && SteamControllerVR.Instance.TriggerPressed) || Input.GetKeyDown(KeyCode.Space) &
+            Time.time - triggerTimer > 1))
         {
             redScreen.enabled = true;
             redFlashTimer = Time.time;
             triggerTimer = Time.time;
-            if (forPainting) return ControllerCollider.Instance.PaintingCheck();
+            if (forPainting)
+                return NodeExtension.SameNode(player, GetTrialInfo().end) && stepInPhase == 3 ||
+                       NodeExtension.SameNode(player, GetTrialInfo().start) && stepInPhase == 2;
 
             return true;
         }
@@ -860,9 +810,7 @@ public class ExperimentController : MonoBehaviour
     // The following code will make instance of ExperimentController persist between scenes and destroy subsequent instances
     void Awake()
     {
-        QualitySettings.vSyncCount = 2;
-        Application.targetFrameRate = 45;
-        Debug.Log(Application.targetFrameRate);
+
         if (Instance == null)
         {
             Instance = this;
@@ -873,15 +821,5 @@ public class ExperimentController : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    private void OnEnable()
-    {
-        StartData startData = GameObject.FindGameObjectWithTag("StartData").GetComponent<StartData>();
-        stressFirst = startData.stressFirst;
-        subjectNumber = startData.subjNum;
-        currentTrial = startData.trialNum;
-        phase = (int)startData.phase;
-        stressCanvas.enabled = false;
-        RunStartup(phase);
-    }
+    
 }

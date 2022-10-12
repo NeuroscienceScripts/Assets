@@ -3,49 +3,56 @@ using System.Collections.Generic;
 using UnityEngine;
 using Classes;
 
-public enum WallDirection
+namespace DynamicBlocking
 {
-    Vertical = 0,
-    Horizontal = 1
-}
-[System.Serializable]
-public struct WallPosition
-{
-    public WallDirection direction;
-    public Coordinate position;
-}
-
-public class WallInfoObject : ScriptableObject
-{
-
-    public List<WallPosition> wallPositions = new();
-
-    public void Clear()
+    public enum WallDirection
     {
-        wallPositions.Clear();
+        Vertical = 0,
+        Horizontal = 1
     }
 
-    public void Add(WallDirection dir, Coordinate pos)
+    [System.Serializable]
+    public struct WallPosition
     {
-        wallPositions.Add(new WallPosition { direction = dir, position = pos });
+        public WallDirection direction;
+        public Coordinate position;
     }
 
-    public List<WallDirection> GetDirections()
+    public class WallInfoObject : ScriptableObject
     {
-        List<WallDirection> list = new();
-        foreach (var item in wallPositions)
+
+        public List<WallPosition> wallPositions = new();
+
+        public void Clear()
         {
-            list.Add(item.direction);
+            wallPositions.Clear();
         }
-        return list;
-    }
-    public List<GridLocation> GetPositions()
-    {
-        List<GridLocation> list = new();
-        foreach (var item in wallPositions)
+
+        public void Add(WallDirection dir, Coordinate pos)
         {
-            list.Add(item.position.ToGridLocation());
+            wallPositions.Add(new WallPosition {direction = dir, position = pos});
         }
-        return list;
+
+        public List<WallDirection> GetDirections()
+        {
+            List<WallDirection> list = new();
+            foreach (var item in wallPositions)
+            {
+                list.Add(item.direction);
+            }
+
+            return list;
+        }
+
+        public List<GridLocation> GetPositions()
+        {
+            List<GridLocation> list = new();
+            foreach (var item in wallPositions)
+            {
+                list.Add(item.position.ToGridLocation());
+            }
+
+            return list;
+        }
     }
 }

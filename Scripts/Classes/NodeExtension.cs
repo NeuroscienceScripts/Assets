@@ -17,5 +17,11 @@ namespace Classes
 
             return new GridLocation(xPos, zPos);
         }
+
+        public static bool SameNode(GameObject first, GameObject second) {
+            return CurrentNode(first.transform.position) == CurrentNode(second.transform.position); }
+        
+        public static bool SameNode(GameObject first, GridLocation second) {
+            return CurrentNode(first.transform.position) == second; }
     }
 }
