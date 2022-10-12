@@ -38,6 +38,7 @@ public class ExperimentController : MonoBehaviour
     
     //[SerializeField] private GameObject subjectInput;
     //[SerializeField] private GameObject trialInput;
+    [SerializeField] private Canvas debugCanvas; 
     [SerializeField] private GameObject userText;
     [SerializeField] private RawImage redScreen;
     
@@ -60,6 +61,7 @@ public class ExperimentController : MonoBehaviour
 
     public int subjectNumber = 0;
 
+    public Vector3 _lastGazeDirection;
     public int phase = 0;
     public int stepInPhase = 0;
     public int currentTrial;
@@ -170,6 +172,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject phaseDisplay;
     [SerializeField] private GameObject stepDisplay;
     [SerializeField] private GameObject trialDisplay;
+    [SerializeField] private GameObject gazeTrackingDisplay;
     [SerializeField] private GameObject pause;
 
     /// <summary>
@@ -257,11 +260,13 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void DisplayDebugInfo()
     {
+        debugCanvas.enabled = XRSettings.enabled; 
         if (debugActive)
         {
             phaseDisplay.GetComponent<TextMeshProUGUI>().text = "Phase: " + phase.ToString();
             stepDisplay.GetComponent<TextMeshProUGUI>().text = "Step: " + stepInPhase.ToString();
             trialDisplay.GetComponent<TextMeshProUGUI>().text = "Trial: " + currentTrial;
+            gazeTrackingDisplay.GetComponent<TextMeshProUGUI>().text = "Gaze: " + _lastGazeDirection.ToString();
         }
         else
         {
