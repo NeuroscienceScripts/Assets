@@ -29,6 +29,7 @@ public class NewReplay : MonoBehaviour
     [SerializeField, Range(0.01f, 0.1f)] private float scotomaSize;
     public float averageEyeMovementMagnitude;
     public float averageMovementWallBlock;
+    public float rawEyeMagnitude;
     private int stepCount, wallStepCount;
 
 
@@ -266,7 +267,7 @@ public class NewReplay : MonoBehaviour
             currentPos++;
             if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
             stepCount++;
-            if (hidden) wallStepCount++;
+            if (!hidden) wallStepCount++;
             line = sr.ReadLine().Split(',');
             if (!int.TryParse(line[0], out int x)) break;
             
@@ -428,11 +429,17 @@ public class NewReplay : MonoBehaviour
         playerModel.transform.localScale = new Vector3(0.3f, float.Parse(line[8]), 0.3f);
         playerModel.transform.localPosition = new Vector3(0, float.Parse(line[8]) / -2f, 0);
         float eyeMovement = Vector3.Distance(gazeVector, gaze);
+        CheckWall(x);
+        rawEyeMagnitude = eyeMovement;
         averageEyeMovementMagnitude += eyeMovement;
-        averageMovementWallBlock += eyeMovement;
+        if (!hidden)
+            averageMovementWallBlock += eyeMovement;
+        else
+        {
+            averageMovementWallBlock = 0.0f;
+        }
         gazeVector = gaze;
         prevTime = float.Parse(line[1]);
-        CheckWall(x);
     }
 
     private IEnumerator ProcessLine(float time, string[] line)
@@ -447,9 +454,16 @@ public class NewReplay : MonoBehaviour
             Vector3 gaze = new(float.Parse(line[15]), float.Parse(line[16]), float.Parse(line[17]));
 
             Vector3 playerScale = new(0.3f, float.Parse(line[8]), 0.3f);
-            float eyeMovement = Vector3.Distance(gazeVector, gaze);
+            float eyeMovement = Vector3.Distance(gazeVector.normalized, gaze.normalized);
+            CheckWall(x);
+            rawEyeMagnitude = eyeMovement;
             averageEyeMovementMagnitude += eyeMovement;
-            averageMovementWallBlock += eyeMovement;
+            if (!hidden)
+                averageMovementWallBlock += eyeMovement;
+            else
+            {
+                averageMovementWallBlock = 0.0f;
+            }
             while (timeElapsed <= time && time != 0)
             {
                 while (paused)
@@ -480,7 +494,6 @@ public class NewReplay : MonoBehaviour
             playerModel.transform.localScale = playerScale;
             playerModel.transform.localPosition = new Vector3(0, playerModel.transform.localScale.y / -2f, 0);
             gazeVector = gaze;
-            CheckWall(x);
             if (Mathf.Abs(float.Parse(line[1]) - prevTime) <= time * 1.1f)
             {
                 prevTime = float.Parse(line[1]);
