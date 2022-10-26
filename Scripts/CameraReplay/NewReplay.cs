@@ -138,6 +138,28 @@ public class NewReplay : MonoBehaviour
         }
     }
 
+    public void StartLearningReplay()
+    {
+        isRecordingGaze = false;
+        trialSpecific = false;
+        filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
+        if (filePath[^1] != '/')
+        {
+            filePath += @"/";
+        }
+        subjectNum = int.Parse(subjectInput.text);
+        camInfo = filePath + subjectNum + "_" + camInfo;
+        if (!File.Exists(camInfo))
+        {
+            Stop();
+            Debug.LogError("Invalid File Path or Missing Critical File: camera_tracker.csv");
+        }
+        else
+        {
+            StartCoroutine(LearningReplay());
+        }
+    }
+
     public void StartReplay(int trial)
     {
         isRecordingGaze = false;
@@ -227,7 +249,7 @@ public class NewReplay : MonoBehaviour
         wallPositions = new string[Constants.NUM_OF_TRIALS][];
         timeInTrials = new float[Constants.NUM_OF_TRIALS];
         sr = new StreamReader(filePath + subjectNum + ".csv");
-        string s = sr.ReadLine();
+        sr.ReadLine();
         while (!sr.EndOfStream)
         {
             string[] line = sr.ReadLine().Split(',');
@@ -257,7 +279,6 @@ public class NewReplay : MonoBehaviour
         startCanvas.SetActive(false);
         infoCanvas.SetActive(true);
         sr = new StreamReader(camInfo);
-        Debug.Log(camInfo);
         string[] line;
         prevTime = 0;
         prevTrialNum = -1;
@@ -321,6 +342,63 @@ public class NewReplay : MonoBehaviour
             Debug.Log(timeInTrials.Length);
             if(timeInTrials.Length>=prevTrialNum && prevTrialNum>=0) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
             RecordStop(); 
+        }
+    }
+
+    private IEnumerator LearningReplay()
+    {
+        currentPos = 0;
+        stepCount = 0;
+        processing = false;
+        paused = false;
+        startCanvas.SetActive(false);
+        infoCanvas.SetActive(true);
+        sr = new StreamReader(camInfo);
+        string[] line;
+        prevTime = 0;
+        prevTrialNum = -1;
+        while (!sr.EndOfStream)
+        {
+            started = true;
+            currentPos++;
+            if (currentPos >= positions.Count) positions.Add(sr.GetPosition());
+            stepCount++;
+            if (!hidden) wallStepCount++;
+            line = sr.ReadLine().Split(',');
+            if (!int.TryParse(line[0], out int x)) break;
+
+            if (prevTrialNum != x)
+            {
+                float timeElapsed = 0f;
+                averageEyeMovementMagnitude /= stepCount;
+                stepCount = 0;
+                //if (prevTrialNum >= 0 && isRecordingGaze) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
+                while (timeElapsed <= 0.5f)
+                {
+                    yield return null;
+                    timeElapsed += Time.deltaTime;
+                    if (paused || !processing) break;
+                }
+                averageEyeMovementMagnitude = 0;
+                gazeVector = Vector3.forward;
+                trialDisplay.text = $"Trial: {x}";
+                prevTrialNum = x;
+                prevTime = 0f;
+            }
+            processing = true;
+            float currentTime = float.Parse(line[1]);
+            float dTime = currentTime - prevTime;
+            yield return ProcessLine(dTime, line);
+            //if (isRecordingGaze) OnNextFrame?.Invoke(prevTrialNum, timeInTrials[prevTrialNum], currentTime);
+            while (paused) yield return null;
+        }
+        yield return null;
+        if (!isRecordingGaze) Stop();
+        else
+        {
+            averageEyeMovementMagnitude /= stepCount;
+            //if (timeInTrials.Length >= prevTrialNum && prevTrialNum >= 0) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
+            RecordStop();
         }
     }
 

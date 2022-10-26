@@ -52,6 +52,12 @@ public class ReplayManager : MonoBehaviour
             posReplay.enabled = false;
             rotReplay.enabled = false;
         }
+        else if (replayOptions.value == 3)
+        {
+            newReplay.StartLearningReplay();
+            posReplay.enabled = false;
+            rotReplay.enabled = false;
+        }
     }
 
     public void ChangeTexts()
