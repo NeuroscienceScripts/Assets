@@ -68,10 +68,16 @@ public class ReplayManager : MonoBehaviour
             recordPathInput.SetActive(false);
             trialNumInput.gameObject.SetActive(true);
         }
-        else
+        else if(replayOptions.value < 3)
         {
             subjectNumInput.SetActive(false);
             recordPathInput.SetActive(true);
+            trialNumInput.gameObject.SetActive(false);
+        }
+        else
+        {
+            subjectNumInput.SetActive(true);
+            recordPathInput.SetActive(false);
             trialNumInput.gameObject.SetActive(false);
         }
     }

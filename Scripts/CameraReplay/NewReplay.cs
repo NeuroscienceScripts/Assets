@@ -60,6 +60,7 @@ public class NewReplay : MonoBehaviour
     int prevTrialNum;
     float[] timeInTrials;
     bool trialSpecific;
+    int timeIndex;
 
     private string[][] wallPositions;
     [SerializeField] private Transform[] walls;
@@ -112,6 +113,7 @@ public class NewReplay : MonoBehaviour
 
     public void StartReplay()
     {
+        timeIndex = 1;
         isRecordingGaze = false;
         trialSpecific = false;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
@@ -140,6 +142,7 @@ public class NewReplay : MonoBehaviour
 
     public void StartLearningReplay()
     {
+        timeIndex = 18;
         isRecordingGaze = false;
         trialSpecific = false;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
@@ -162,6 +165,7 @@ public class NewReplay : MonoBehaviour
 
     public void StartReplay(int trial)
     {
+        timeIndex = 1;
         isRecordingGaze = false;
         trialSpecific = true;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
@@ -190,6 +194,7 @@ public class NewReplay : MonoBehaviour
 
     public void StartRecordingReplay()
     {
+        timeIndex = 1;
         trialSpecific = false;
         string recordPath = String.IsNullOrEmpty(recordListInput.text) || recordListInput.text == "" ? "Assets/subjectList.csv" : recordListInput.text;
        Debug.Log(recordPath);
@@ -386,7 +391,7 @@ public class NewReplay : MonoBehaviour
                 prevTime = 0f;
             }
             processing = true;
-            float currentTime = float.Parse(line[1]);
+            float currentTime = float.Parse(line[18]);
             float dTime = currentTime - prevTime;
             yield return ProcessLine(dTime, line);
             //if (isRecordingGaze) OnNextFrame?.Invoke(prevTrialNum, timeInTrials[prevTrialNum], currentTime);
@@ -508,7 +513,7 @@ public class NewReplay : MonoBehaviour
         playerModel.transform.localPosition = new Vector3(0, float.Parse(line[8]) / -2f, 0);
         float eyeMovement = Vector3.Distance(gazeVector, gaze);
         gazeVector = gaze;
-        prevTime = float.Parse(line[1]);
+        prevTime = float.Parse(line[timeIndex]);
         CheckWall(x);
         rawEyeMagnitude = eyeMovement;
         averageEyeMovementMagnitude += eyeMovement;
@@ -573,9 +578,9 @@ public class NewReplay : MonoBehaviour
             {
                 averageMovementWallBlock = 0.0f;
             }
-            if (Mathf.Abs(float.Parse(line[1]) - prevTime) <= time * 1.1f)
+            if (Mathf.Abs(float.Parse(line[timeIndex]) - prevTime) <= time * 1.1f)
             {
-                prevTime = float.Parse(line[1]);
+                prevTime = float.Parse(line[timeIndex]);
             }
         }
         processing = false;
@@ -583,6 +588,7 @@ public class NewReplay : MonoBehaviour
 
     private void CheckWall(int trialNum)
     {
+        if (timeIndex != 1) return;
         if (wallPositions[trialNum][1].Contains("N/A"))
         {
             HideWall();
