@@ -78,6 +78,7 @@ public class NewReplay : MonoBehaviour
     public event Action<int, float, float> OnNextFrame;
     public event Action<int, float> OnNextFrameLearning;
     private bool isRecordingGaze;
+    private bool isLearningPhase;
     [SerializeField] private PaintingTracker paintingTracker;
     [SerializeField] private EyeDataTracker eyeDataTracker;
 
@@ -116,6 +117,7 @@ public class NewReplay : MonoBehaviour
     public void StartReplay()
     {
         timeIndex = 1;
+        isLearningPhase = false;
         isRecordingGaze = false;
         trialSpecific = false;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
@@ -146,6 +148,7 @@ public class NewReplay : MonoBehaviour
     {
         timeIndex = 1;
         isRecordingGaze = false;
+        isLearningPhase = true;
         trialSpecific = false;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
         if (filePath[^1] != '/')
@@ -168,6 +171,7 @@ public class NewReplay : MonoBehaviour
     public void StartReplay(int trial)
     {
         timeIndex = 1;
+        isLearningPhase = false;
         isRecordingGaze = false;
         trialSpecific = true;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
@@ -197,6 +201,7 @@ public class NewReplay : MonoBehaviour
     public void StartRecordingReplay()
     {
         timeIndex = 1;
+        isLearningPhase = false;
         trialSpecific = false;
         string recordPath = string.IsNullOrEmpty(recordListInput.text) || recordListInput.text == "" ? "Assets/subjectList.csv" : recordListInput.text;
         Debug.Log(recordPath);
@@ -213,6 +218,7 @@ public class NewReplay : MonoBehaviour
     public void StartLearnRecordingReplay()
     {
         timeIndex = 1;
+        isLearningPhase = true;
         trialSpecific = false;
         string recordPath = string.IsNullOrEmpty(recordListInput.text) || recordListInput.text == "" ? "Assets/subjectList.csv" : recordListInput.text;
         Debug.Log(recordPath);
@@ -641,7 +647,7 @@ public class NewReplay : MonoBehaviour
 
     private void CheckWall(int trialNum)
     {
-        if (timeIndex != 1) return;
+        if (isLearningPhase) return;
         if (wallPositions[trialNum][1].Contains("N/A"))
         {
             HideWall();
@@ -761,6 +767,7 @@ public class NewReplay : MonoBehaviour
         playerModel.transform.localPosition = Vector3.zero;
         if(isRecordingGaze) OnTrialChanged?.Invoke(-1, 0);
         isRecordingGaze = false;
+        isLearningPhase = false;
         timeInTrial = 0;
     }
 
@@ -792,6 +799,7 @@ public class NewReplay : MonoBehaviour
         playerModel.transform.localPosition = Vector3.zero;
         if (isRecordingGaze) OnTrialChanged?.Invoke(-1, 0);
         isRecordingGaze = false;
+        isLearningPhase = false;
         timeInTrial = 0;
     }
 
