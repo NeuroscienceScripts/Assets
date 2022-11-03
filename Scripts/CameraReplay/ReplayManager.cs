@@ -8,6 +8,7 @@ public class ReplayManager : MonoBehaviour
 {
     [SerializeField] private Button startBtn;
     [SerializeField] private TMP_Dropdown replayOptions;
+    [SerializeField] private TMP_Dropdown recordPhase;
 
     [SerializeField] private GameObject subjectNumInput;
     [SerializeField] private GameObject recordPathInput;
@@ -44,11 +45,11 @@ public class ReplayManager : MonoBehaviour
                 posReplay.StartReplay(int.Parse(trialNumInput.text));
                 rotReplay.StartReplay(int.Parse(trialNumInput.text));
             }
-                
             newReplay.enabled = false;
         }else if(replayOptions.value == 2)
         {
-            newReplay.StartRecordingReplay();
+            if (recordPhase.value == 0) newReplay.StartRecordingReplay();
+            else newReplay.StartLearnRecordingReplay();
             posReplay.enabled = false;
             rotReplay.enabled = false;
         }
@@ -67,19 +68,23 @@ public class ReplayManager : MonoBehaviour
             subjectNumInput.SetActive(true);
             recordPathInput.SetActive(false);
             trialNumInput.gameObject.SetActive(true);
+            recordPhase.gameObject.SetActive(false);
         }
         else if(replayOptions.value < 3)
         {
             subjectNumInput.SetActive(false);
             recordPathInput.SetActive(true);
             trialNumInput.gameObject.SetActive(false);
+            recordPhase.gameObject.SetActive(true);
         }
         else
         {
             subjectNumInput.SetActive(true);
             recordPathInput.SetActive(false);
             trialNumInput.gameObject.SetActive(false);
+            recordPhase.gameObject.SetActive(false);
         }
+        
     }
 
     private void OnDisable()

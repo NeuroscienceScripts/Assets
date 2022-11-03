@@ -68,6 +68,7 @@ public class PaintingTracker : MonoBehaviour
     {
         replay.OnTrialChanged += NextTrial;
         replay.OnNextFrame += NextFrame;
+        replay.OnNextFrameLearning += NextFrame;
     }
 
     private void NextTrial(int trialNum, float timeInTrial)
@@ -103,6 +104,24 @@ public class PaintingTracker : MonoBehaviour
         fileHandler.AppendLine(fixationFile, trialNum.ToString() + "," + timeInTrial.ToString() + "," + currentTime.ToString() + "," + painting + "," + replay.averageEyeMovementMagnitude + "," + replay.averageMovementWallBlock + "," + replay.rawEyeMagnitude);
     }
 
+    private void NextFrame(int trialNum, float currentTime)
+    {
+        Vector3 pos = lineRender.GetPosition(1);
+        string painting = "N/A";
+        int numColliders = Physics.OverlapSphereNonAlloc(pos, detectionRadius, _colliders, mask);
+        for (int i = 0; i < numColliders; i++)
+        {
+            for (int j = 0; j < paintings.Length; j++)
+            {
+                if (paintings[j] == _colliders[i].gameObject)
+                {
+                    painting = _colliders[i].gameObject.name;
+                }
+            }
+        }
+        fileHandler.AppendLine(fixationFile, trialNum.ToString() + "," + currentTime.ToString() + "," + painting + "," + replay.averageEyeMovementMagnitude + "," + replay.averageMovementWallBlock + "," + replay.rawEyeMagnitude);
+    }
+
     private string PrintWatchTimes()
     {
         System.Text.StringBuilder sb = new();
@@ -117,5 +136,6 @@ public class PaintingTracker : MonoBehaviour
     {
         replay.OnTrialChanged -= NextTrial;
         replay.OnNextFrame -= NextFrame;
+        replay.OnNextFrameLearning -= NextFrame;
     }
 }

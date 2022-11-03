@@ -60,6 +60,7 @@ public class NewReplay : MonoBehaviour
     int prevTrialNum;
     float[] timeInTrials;
     bool trialSpecific;
+    float timeInTrial;
     int timeIndex;
 
     private string[][] wallPositions;
@@ -75,6 +76,7 @@ public class NewReplay : MonoBehaviour
 
     public event Action<int, float> OnTrialChanged;
     public event Action<int, float, float> OnNextFrame;
+    public event Action<int, float> OnNextFrameLearning;
     private bool isRecordingGaze;
     [SerializeField] private PaintingTracker paintingTracker;
     [SerializeField] private EyeDataTracker eyeDataTracker;
@@ -142,7 +144,7 @@ public class NewReplay : MonoBehaviour
 
     public void StartLearningReplay()
     {
-        timeIndex = 18;
+        timeIndex = 1;
         isRecordingGaze = false;
         trialSpecific = false;
         filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
@@ -196,8 +198,8 @@ public class NewReplay : MonoBehaviour
     {
         timeIndex = 1;
         trialSpecific = false;
-        string recordPath = String.IsNullOrEmpty(recordListInput.text) || recordListInput.text == "" ? "Assets/subjectList.csv" : recordListInput.text;
-       Debug.Log(recordPath);
+        string recordPath = string.IsNullOrEmpty(recordListInput.text) || recordListInput.text == "" ? "Assets/subjectList.csv" : recordListInput.text;
+        Debug.Log(recordPath);
         if (!File.Exists(recordPath))
         {
             Stop();
@@ -206,6 +208,22 @@ public class NewReplay : MonoBehaviour
         else
         {
             StartCoroutine(RecordReplay(recordPath));
+        }
+    }
+    public void StartLearnRecordingReplay()
+    {
+        timeIndex = 1;
+        trialSpecific = false;
+        string recordPath = string.IsNullOrEmpty(recordListInput.text) || recordListInput.text == "" ? "Assets/subjectList.csv" : recordListInput.text;
+        Debug.Log(recordPath);
+        if (!File.Exists(recordPath))
+        {
+            Stop();
+            Debug.LogError("Invalid File Path/Missing File");
+        }
+        else
+        {
+            StartCoroutine(LearningRecordReplay(recordPath));
         }
     }
 
@@ -243,6 +261,38 @@ public class NewReplay : MonoBehaviour
                 paintingTracker.StartRec();
                 eyeDataTracker.StartRec();
                 yield return Replay();
+                startCanvas.SetActive(false);
+            }
+        }
+        Stop();
+    }
+
+    private IEnumerator LearningRecordReplay(string recordPath)
+    {
+        StreamReader s = new(recordPath);
+        while (!s.EndOfStream)
+        {
+            isRecordingGaze = true;
+            defaultPath = "Assets/ICB-camera-tracker/";
+            filePath = (fileInput.text != "") ? @fileInput.text : @defaultPath;
+            if (filePath[^1] != '/')
+            {
+                filePath += @"/";
+            }
+            subjectNum = int.Parse(s.ReadLine());
+            camInfo = filePath + subjectNum + "_" + camInfo;
+            if (!File.Exists(camInfo))
+            {
+                RecordStop();
+                startCanvas.SetActive(false);
+                Debug.LogError("Invalid File Path or Missing Critical File:" + subjectNum + " camera_tracker.csv");
+                continue;
+            }
+            else
+            {
+                paintingTracker.StartRec();
+                eyeDataTracker.StartRec();
+                yield return LearningReplay();
                 startCanvas.SetActive(false);
             }
         }
@@ -377,7 +427,8 @@ public class NewReplay : MonoBehaviour
                 float timeElapsed = 0f;
                 averageEyeMovementMagnitude /= stepCount;
                 stepCount = 0;
-                //if (prevTrialNum >= 0 && isRecordingGaze) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
+                timeInTrial = float.Parse(line[1]);
+                if (prevTrialNum >= 0 && isRecordingGaze) OnTrialChanged?.Invoke(prevTrialNum, timeInTrial);
                 while (timeElapsed <= 0.5f)
                 {
                     yield return null;
@@ -389,12 +440,14 @@ public class NewReplay : MonoBehaviour
                 trialDisplay.text = $"Trial: {x}";
                 prevTrialNum = x;
                 prevTime = 0f;
+                timeInTrial = 0f;
             }
             processing = true;
-            float currentTime = float.Parse(line[18]);
+            float currentTime = float.Parse(line[1]);
+            timeInTrial = currentTime;
             float dTime = currentTime - prevTime;
             yield return ProcessLine(dTime, line);
-            //if (isRecordingGaze) OnNextFrame?.Invoke(prevTrialNum, timeInTrials[prevTrialNum], currentTime);
+            if (isRecordingGaze) OnNextFrameLearning?.Invoke(prevTrialNum, currentTime);
             while (paused) yield return null;
         }
         yield return null;
@@ -402,7 +455,7 @@ public class NewReplay : MonoBehaviour
         else
         {
             averageEyeMovementMagnitude /= stepCount;
-            //if (timeInTrials.Length >= prevTrialNum && prevTrialNum >= 0) OnTrialChanged?.Invoke(prevTrialNum, timeInTrials[prevTrialNum]);
+            if (timeInTrials.Length >= prevTrialNum && prevTrialNum >= 0) OnTrialChanged?.Invoke(prevTrialNum, timeInTrial);
             RecordStop();
         }
     }
@@ -708,6 +761,7 @@ public class NewReplay : MonoBehaviour
         playerModel.transform.localPosition = Vector3.zero;
         if(isRecordingGaze) OnTrialChanged?.Invoke(-1, 0);
         isRecordingGaze = false;
+        timeInTrial = 0;
     }
 
     private void RecordStop()
@@ -738,6 +792,7 @@ public class NewReplay : MonoBehaviour
         playerModel.transform.localPosition = Vector3.zero;
         if (isRecordingGaze) OnTrialChanged?.Invoke(-1, 0);
         isRecordingGaze = false;
+        timeInTrial = 0;
     }
 
     private void OnRenderImage(RenderTexture src, RenderTexture dest)

@@ -37,7 +37,7 @@ public class EyeDataTracker : MonoBehaviour
     private void NextTrial(int trialNum, float timeInTrial)
     {
         if (trialNum == -1) return;
-        string wallBlockMagnitude = replay.averageMovementWallBlock < 0 ? "N/A" : replay.averageMovementWallBlock.ToString();
+        string wallBlockMagnitude = replay.averageMovementWallBlock <= 0 ? "N/A" : replay.averageMovementWallBlock.ToString();
         fileHandler.AppendLine(subjectFile, trialNum + "," + timeInTrial + "," + replay.averageEyeMovementMagnitude + "," + wallBlockMagnitude);
     }
 }
