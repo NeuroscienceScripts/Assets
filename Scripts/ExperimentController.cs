@@ -447,7 +447,7 @@ public class ExperimentController : MonoBehaviour
                 {
                     stepInPhase++;
                     ControllerCollider.Instance.controllerSelection = "Not selected";
-                    recordCameraAndNodes = false;
+                    
                 }
             }
 
@@ -459,6 +459,7 @@ public class ExperimentController : MonoBehaviour
             if (stepInPhase >= arrowPath.Length)
             {
                 Debug.Log("Increment current trial");
+                recordCameraAndNodes = false;
                 currentTrial++;
                 stepInPhase = 0;
             }
