@@ -17,7 +17,7 @@ namespace VR
         // public Material pointShader;
         public Camera vrCamera;
         public float smoothMove = 80;
-        private Vector3 _lastGazeDirection;
+
 
         private void Start()
         {
@@ -36,12 +36,12 @@ namespace VR
                 provider.GetEyeTrackingDataLocal(eyeTrackingData);
                 var smoothMoveSpeed = true;
 
-                var interpolatedGazeDirection = Vector3.Lerp(_lastGazeDirection, eyeTrackingData.GazeRay.Direction,
+                var interpolatedGazeDirection = Vector3.Lerp(ExperimentController.Instance._lastGazeDirection, eyeTrackingData.GazeRay.Direction,
                     (smoothMove) * Time.unscaledDeltaTime);
                 var usedDirection = smoothMoveSpeed
                     ? interpolatedGazeDirection.normalized
                     : eyeTrackingData.GazeRay.Direction.normalized;
-                _lastGazeDirection = usedDirection;
+                ExperimentController.Instance._lastGazeDirection = usedDirection;
 
                 var screenPos =
                     vrCamera.WorldToScreenPoint(vrCamera.transform.position +
@@ -80,10 +80,10 @@ namespace VR
         //         provider.GetEyeTrackingDataLocal(eyeTrackingData);
         //         var smoothMoveSpeed = true; 
         //         
-        //         var interpolatedGazeDirection = Vector3.Lerp(_lastGazeDirection, eyeTrackingData.GazeRay.Direction, 
+        //         var interpolatedGazeDirection = Vector3.Lerp(ExperimentController.Instance._lastGazeDirection, eyeTrackingData.GazeRay.Direction, 
         //             (smoothMove) * Time.unscaledDeltaTime);
         //         var usedDirection = smoothMoveSpeed ? interpolatedGazeDirection.normalized : eyeTrackingData.GazeRay.Direction.normalized;
-        //         _lastGazeDirection = usedDirection; 
+        //         ExperimentController.Instance._lastGazeDirection = usedDirection; 
         //         
         //         var screenPos = vrCamera.WorldToScreenPoint(vrCamera.transform.position + vrCamera.transform.rotation * usedDirection);
         //         

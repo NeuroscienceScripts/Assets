@@ -28,6 +28,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] public Canvas introCanvas;
     [SerializeField] GameObject stressCanvas;
     [SerializeField] private GameObject maze;
+    [SerializeField] private GameObject floor;
     [SerializeField] private GameObject footprints;
     [SerializeField] private GameObject moveForwardArrow;
     [SerializeField] public GameObject stressLevel;
@@ -38,6 +39,7 @@ public class ExperimentController : MonoBehaviour
     
     //[SerializeField] private GameObject subjectInput;
     //[SerializeField] private GameObject trialInput;
+    [SerializeField] private Canvas debugCanvas; 
     [SerializeField] private GameObject userText;
     [SerializeField] private RawImage redScreen;
     
@@ -60,6 +62,7 @@ public class ExperimentController : MonoBehaviour
 
     public int subjectNumber = 0;
 
+    public Vector3 _lastGazeDirection;
     public int phase = 0;
     public int stepInPhase = 0;
     public int currentTrial;
@@ -86,14 +89,15 @@ public class ExperimentController : MonoBehaviour
         new Vector3(-3.0f, -1.0f, 270.0f),
         new Vector3(-3.0f, 1.0f, 0.0f),
         new Vector3(-2.0f, 2.0f, 235.0f),
-        new Vector3(-2.5f, 3.0f, 0.0f),
+        new Vector3(-3.0f, 3.0f, 0.0f),
         new Vector3(1.0f, 3.0f, 0.0f),
         new Vector3(3.0f, 3.0f, 90.0f),
         new Vector3(3.0f, 1.0f, 180.0f),
         new Vector3(0.0f, 1.0f, 90.0f),
         new Vector3(0f, -1.0f, 0.0f),
         new Vector3(2.0f, -1.0f, 90.0f),
-        new Vector3(2.0f, -2.0f, 90.0f)
+        new Vector3(2.0f, -2.0f, 90.0f),
+        new Vector3(2.0f, -3.0f, 180.0f)
     };
 
     private Trial[] trialList =
@@ -170,6 +174,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject phaseDisplay;
     [SerializeField] private GameObject stepDisplay;
     [SerializeField] private GameObject trialDisplay;
+    [SerializeField] private GameObject gazeTrackingDisplay;
     [SerializeField] private GameObject pause;
 
     /// <summary>
@@ -226,10 +231,14 @@ public class ExperimentController : MonoBehaviour
                     split_lines[count] = sr.ReadLine().Split(',');} */ } } } 
 
     private GridLocation lastLoc;
-    void RecordNodes() {
-        if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)
+    void RecordNodes()
+    {
+        GridLocation currentLoc = NodeExtension.CurrentNode(player.transform.position);
+        if (currentLoc != lastLoc)
             fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv",
-                "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString()); }
+                "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString());
+        lastLoc = currentLoc;
+    }
 
     private StreamReader sr;
     private string[][] split_lines;
@@ -257,11 +266,13 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void DisplayDebugInfo()
     {
+        debugCanvas.enabled = XRSettings.enabled; 
         if (debugActive)
         {
             phaseDisplay.GetComponent<TextMeshProUGUI>().text = "Phase: " + phase.ToString();
             stepDisplay.GetComponent<TextMeshProUGUI>().text = "Step: " + stepInPhase.ToString();
             trialDisplay.GetComponent<TextMeshProUGUI>().text = "Trial: " + currentTrial;
+            gazeTrackingDisplay.GetComponent<TextMeshProUGUI>().text = "Gaze: " + _lastGazeDirection.ToString();
         }
         else
         {
@@ -365,23 +376,29 @@ public class ExperimentController : MonoBehaviour
         }
         else
         {
-            if (stepInPhase == 0)
+            // if (stepInPhase == 0)
+            // {
+            //     userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
+            //     maze.SetActive(false);
+            //     moveForwardArrow.SetActive(false);
+            //     footprints.SetActive(true);
+            //     footprints.transform.position =
+            //         new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
+            //     if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
+            //     {
+            //         recordCameraAndNodes = true;
+            //         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
+            //         stepInPhase++;
+            //     }
+            // }
+            if (stepInPhase < arrowPath.Length)
             {
-                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
-                maze.SetActive(false);
-                moveForwardArrow.SetActive(false);
-                footprints.SetActive(true);
-                footprints.transform.position =
-                    new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
-                if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
+                if (stepInPhase == 0)
                 {
+                    player.transform.position = new Vector3(arrowPath[0].x,arrowHeight,arrowPath[0].y);
                     recordCameraAndNodes = true;
                     fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
-                    stepInPhase++;
                 }
-            }
-            else if (stepInPhase < arrowPath.Length)
-            {
                 userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
                 maze.SetActive(true);
                 footprints.SetActive(false);
@@ -395,7 +412,7 @@ public class ExperimentController : MonoBehaviour
                 if (NodeExtension.SameNode(player, moveForwardArrow))
                 {
                     stepInPhase++;
-                    recordCameraAndNodes = false;
+                    // recordCameraAndNodes = false;
                 }
             }
 
@@ -407,6 +424,7 @@ public class ExperimentController : MonoBehaviour
             if (stepInPhase >= arrowPath.Length)
             {
                 Debug.Log("Increment current trial");
+                recordCameraAndNodes = false;
                 currentTrial++;
                 stepInPhase = 0;
             }
@@ -589,7 +607,7 @@ public class ExperimentController : MonoBehaviour
                             blockedWall = "N/A";
                         
                         fileHandler.AppendLine(subjectFile,
-                            PrintStepInfo() + "," + GetTrialInfo() + "," + NodeExtension.CurrentNode(player.transform.position)  + "," + blockedWall + "," + GetTrialInfo().stressTrial);
+                            PrintStepInfo() + "," + GetTrialInfo() + "," + NodeExtension.CurrentNode(player.transform.position).GetString()  + "," + blockedWall + "," + GetTrialInfo().stressTrial);
                         maze.SetActive(false);
                         stressLevel.GetComponent<TextMeshProUGUI>().text = "4";
                         dynamicBlock.enabled = false;
@@ -599,6 +617,7 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 4: // Rate stress
+                    floor.SetActive(false);
                     stressCanvas.SetActive(true); 
                     if (XRSettings.enabled && SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any) ||
                          Input.GetKeyDown(KeyCode.LeftArrow))
@@ -635,7 +654,8 @@ public class ExperimentController : MonoBehaviour
                     {
                         //move forward
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
-                        stressCanvas.SetActive(false); 
+                        stressCanvas.SetActive(false);
+                        floor.SetActive(true);
                         stepInPhase = 0;
                         footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
                             Random.Range(-3, 3));
