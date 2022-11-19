@@ -231,14 +231,11 @@ public class ExperimentController : MonoBehaviour
                     split_lines[count] = sr.ReadLine().Split(',');} */ } } } 
 
     private GridLocation lastLoc;
-    void RecordNodes()
-    {
-        GridLocation currentLoc = NodeExtension.CurrentNode(player.transform.position);
-        if (currentLoc != lastLoc)
-            fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv",
-                "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString());
-        lastLoc = currentLoc;
-    }
+   void RecordNodes() {
+           if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)
+               fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv",
+                   "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString()); }
+
 
     private StreamReader sr;
     private string[][] split_lines;
@@ -767,7 +764,7 @@ public class ExperimentController : MonoBehaviour
     /// <returns> if(trigger & >.5 seconds since last press){return true};</returns>
     private bool GetTrigger(bool forPainting)
     {
-        if (Time.realtimeSinceStartup-lastTrigger > triggerTimer && ((XRSettings.enabled && SteamControllerVR.Instance.TriggerPressed) || Input.GetKeyDown(KeyCode.Space) &
+        if (Time.time -lastTrigger > triggerTimer && ((XRSettings.enabled && SteamControllerVR.Instance.TriggerPressed) || Input.GetKeyDown(KeyCode.Space) &
             Time.time - triggerTimer > 1))
         {
             redScreen.enabled = true;
