@@ -30,6 +30,8 @@ public class NewReplay : MonoBehaviour
     public float averageEyeMovementMagnitude;
     public float averageMovementWallBlock;
     public float rawEyeMagnitude;
+    public float angularDiff;
+    public float cumAngleMagnitude;
     private int stepCount, wallStepCount;
 
 
@@ -370,6 +372,7 @@ public class NewReplay : MonoBehaviour
                 }
                 averageEyeMovementMagnitude = 0;
                 averageMovementWallBlock = 0;
+                cumAngleMagnitude = 0;
                 gazeVector = Vector3.forward;
                 trialDisplay.text = $"Trial: {x}";
                 prevTrialNum = x;
@@ -442,6 +445,7 @@ public class NewReplay : MonoBehaviour
                     if (paused || !processing) break;
                 }
                 averageEyeMovementMagnitude = 0;
+                cumAngleMagnitude = 0;
                 gazeVector = Vector3.forward;
                 trialDisplay.text = $"Trial: {x}";
                 prevTrialNum = x;
@@ -564,6 +568,7 @@ public class NewReplay : MonoBehaviour
                 fogOn = false;
             }
         }
+        Quaternion startRot = transform.rotation;
         Quaternion newRot = Quaternion.Euler(new Vector3(float.Parse(line[7]), float.Parse(line[8]), float.Parse(line[9])));
         Vector3 newPos = new(float.Parse(line[10]), float.Parse(line[11]), float.Parse(line[12]));
         Vector3 gaze = new(float.Parse(line[15]), float.Parse(line[16]), float.Parse(line[17]));
@@ -574,6 +579,9 @@ public class NewReplay : MonoBehaviour
         gazeVector = gaze;
         prevTime = float.Parse(line[timeIndex]);
         CheckWall(x);
+        float angle = Quaternion.Angle(startRot, newRot);
+        angularDiff = angle % 360;
+        cumAngleMagnitude += angularDiff;
         rawEyeMagnitude = eyeMovement;
         averageEyeMovementMagnitude += eyeMovement;
         if (!hidden)
@@ -597,7 +605,6 @@ public class NewReplay : MonoBehaviour
 
             Vector3 playerScale = new(0.3f, float.Parse(line[8]), 0.3f);
             float eyeMovement = Vector3.Distance(gazeVector.normalized, gaze.normalized);
-            
             while (timeElapsed <= time && time != 0)
             {
                 while (paused)
@@ -629,6 +636,9 @@ public class NewReplay : MonoBehaviour
             playerModel.transform.localPosition = new Vector3(0, playerModel.transform.localScale.y / -2f, 0);
             gazeVector = gaze;
             CheckWall(x);
+            float angle = Quaternion.Angle(startRot, newRot);
+            angularDiff = angle % 360;
+            cumAngleMagnitude += angularDiff;
             rawEyeMagnitude = eyeMovement;
             averageEyeMovementMagnitude += eyeMovement;
             if (!hidden)

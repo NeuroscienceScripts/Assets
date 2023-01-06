@@ -42,7 +42,7 @@ public class PaintingTracker : MonoBehaviour
         gazeTimes = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_painting_gaze.csv";
         fixationFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + "_fixations.csv";
         fileHandler.AppendLine(gazeTimes, "trialID,timeInTrial,A1,A6,B2,C6,C7,D1,D4,E6,F1,F6,G2,G5");
-        fileHandler.AppendLine(fixationFile, "trialID,timeInTrial,timeStep,painting,cumulativeEyeMagnitude,cumulativeEyeMagnitudeWall,eyeMagnitude");
+        fileHandler.AppendLine(fixationFile, "trialID,timeInTrial,timeStep,painting,cumulativeEyeMagnitude,cumulativeEyeMagnitudeWall,eyeMagnitude,cumulativeHeadRotation,headRotation");
     }
 
     private void Update()
@@ -119,7 +119,7 @@ public class PaintingTracker : MonoBehaviour
                 }
             }
         }
-        fileHandler.AppendLine(fixationFile, trialNum.ToString() + "," + currentTime.ToString() + "," + painting + "," + replay.averageEyeMovementMagnitude + "," + replay.averageMovementWallBlock + "," + replay.rawEyeMagnitude);
+        fileHandler.AppendLine(fixationFile, trialNum.ToString() + "," + currentTime.ToString() + "," + painting + "," + replay.averageEyeMovementMagnitude + "," + replay.averageMovementWallBlock + "," + replay.rawEyeMagnitude + "," + replay.cumAngleMagnitude + "," + replay.angularDiff);
     }
 
     private string PrintWatchTimes()
