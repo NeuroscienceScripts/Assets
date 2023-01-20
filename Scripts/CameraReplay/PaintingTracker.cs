@@ -101,7 +101,7 @@ public class PaintingTracker : MonoBehaviour
                 }
             }
         }
-        fileHandler.AppendLine(fixationFile, trialNum.ToString() + "," + timeInTrial.ToString() + "," + currentTime.ToString() + "," + painting + "," + replay.averageEyeMovementMagnitude + "," + replay.averageMovementWallBlock + "," + replay.rawEyeMagnitude);
+        fileHandler.AppendLine(fixationFile, trialNum.ToString() + "," + timeInTrial.ToString() + "," + currentTime.ToString() + "," + painting + "," + replay.averageEyeMovementMagnitude + "," + replay.averageMovementWallBlock + "," + replay.rawEyeMagnitude + "," + replay.cumAngleMagnitude + "," + replay.angularDiff);
     }
 
     private void NextFrame(int trialNum, float currentTime)
