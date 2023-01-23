@@ -38,6 +38,7 @@ public class ExperimentController : MonoBehaviour
     
     //[SerializeField] private GameObject subjectInput;
     //[SerializeField] private GameObject trialInput;
+    [SerializeField] private Canvas debugCanvas; 
     [SerializeField] private GameObject userText;
     [SerializeField] private RawImage redScreen;
     
@@ -60,6 +61,7 @@ public class ExperimentController : MonoBehaviour
 
     public int subjectNumber = 0;
 
+    public Vector3 _lastGazeDirection;
     public int phase = 0;
     public int stepInPhase = 0;
     public int currentTrial;
@@ -170,6 +172,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject phaseDisplay;
     [SerializeField] private GameObject stepDisplay;
     [SerializeField] private GameObject trialDisplay;
+    [SerializeField] private GameObject gazeTrackingDisplay;
     [SerializeField] private GameObject pause;
 
     /// <summary>
@@ -187,7 +190,7 @@ public class ExperimentController : MonoBehaviour
                         pause.SetActive(false);
                         Time.timeScale = 1f; } }
 
-                if (Time.time - redFlashTimer > redFlashTimeLimit)
+                if (Time.realtimeSinceStartup - redFlashTimer > redFlashTimeLimit)
                     redScreen.enabled = false;
                 DisplayDebugInfo();
 
@@ -225,6 +228,7 @@ public class ExperimentController : MonoBehaviour
                     // Should input every line split into the array
                     split_lines[count] = sr.ReadLine().Split(',');} */ } } } 
 
+    
     private GridLocation lastLoc;
     void RecordNodes() {
         if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)
@@ -257,11 +261,13 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void DisplayDebugInfo()
     {
+        debugCanvas.enabled = XRSettings.enabled; 
         if (debugActive)
         {
             phaseDisplay.GetComponent<TextMeshProUGUI>().text = "Phase: " + phase.ToString();
             stepDisplay.GetComponent<TextMeshProUGUI>().text = "Step: " + stepInPhase.ToString();
             trialDisplay.GetComponent<TextMeshProUGUI>().text = "Trial: " + currentTrial;
+            gazeTrackingDisplay.GetComponent<TextMeshProUGUI>().text = "Gaze: " + _lastGazeDirection.ToString();
         }
         else
         {
@@ -284,6 +290,10 @@ public class ExperimentController : MonoBehaviour
         Date_time = "_" + DateTime.Today.Month + "_" + DateTime.Today.Day + "-" + DateTime.Now.Hour + "_" + DateTime.Now.Minute;
         subjectFile = Application.dataPath + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar + subjectNumber + Date_time + ".csv";
         Debug.Log(subjectFile);
+        fileHandler.AppendLine(
+            ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
+                "_camera_tracker.csv"), "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
+                                        "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ");
         fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,goal,selected,blockedWall,isStressTrial");
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"),
             DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute);
@@ -448,7 +458,7 @@ public class ExperimentController : MonoBehaviour
                     Debug.Log("Start retracing phase");
                     fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_retrace");
                     recordCameraAndNodes = true;
-                    retraceTimer = Time.time;
+                    retraceTimer = Time.realtimeSinceStartup;
                 }
             }
             else if (stepInPhase < arrowPath.Length)
@@ -470,9 +480,9 @@ public class ExperimentController : MonoBehaviour
                 {
                     stepInPhase++;
                     retraceNodes = 0;
-                    retraceTimer = Time.time;
+                    retraceTimer = Time.realtimeSinceStartup;
                 }
-                if (Time.time - retraceTimer > retraceTimeLimit) //if (retraceNodes > 4)
+                if (Time.realtimeSinceStartup - retraceTimer > retraceTimeLimit) //if (retraceNodes > 4)
                 {
                     stepInPhase = 0;
                     phase--; // Need to relearn
@@ -563,13 +573,14 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 2: // Wait for them to touch painting
+                    Debug.Log("Touch painting"); 
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Touch the painting and press " + (XRSettings.enabled ? "trigger" : "space" ) + " to start trial";
                     if (GetTrigger(true) )
                     {
                         dynamicBlock.enabled = true;
                         stepInPhase++;
-                        trialStartTime = Time.time;
+                        trialStartTime = Time.realtimeSinceStartup;
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_Testing");
                         recordCameraAndNodes = true;
                     }
@@ -582,8 +593,8 @@ public class ExperimentController : MonoBehaviour
                         "Target Object: " + GetTrialInfo().end.GetTarget();
                     //Debug.Log("Walk to end");
                     if (GetTrigger(true)  ||
-                        (GetTrialInfo().stressTrial & Time.time - trialStartTime >= stressTimeLimit) ||
-                        Time.time - trialStartTime >= nonStressTimeLimit)
+                        (GetTrialInfo().stressTrial & Time.realtimeSinceStartup - trialStartTime >= stressTimeLimit) ||
+                        Time.realtimeSinceStartup - trialStartTime >= nonStressTimeLimit)
                     {
                         if (!GetTrialInfo().stressTrial || (subjectNumber % 2 != 0 && GetTrialInfo().isWallTrial) || (subjectNumber % 2 == 0 && !GetTrialInfo().isWallTrial))
                             blockedWall = "N/A";
@@ -739,7 +750,7 @@ public class ExperimentController : MonoBehaviour
 
 
     private float lastTrigger; 
-    private float triggerTimer = 0.75f;
+    private float triggerTimer = 1.5f;
     /// <summary>
     /// Checks if the trigger (or spacebar) is pressed, has a half second delay before it will read a subsequent
     /// trigger press.
@@ -747,12 +758,13 @@ public class ExperimentController : MonoBehaviour
     /// <returns> if(trigger & >.5 seconds since last press){return true};</returns>
     private bool GetTrigger(bool forPainting)
     {
-        if (Time.realtimeSinceStartup-lastTrigger > triggerTimer && ((XRSettings.enabled && SteamControllerVR.Instance.TriggerPressed) || Input.GetKeyDown(KeyCode.Space) &
-            Time.time - triggerTimer > 1))
+        if (Time.realtimeSinceStartup-lastTrigger > triggerTimer && ((XRSettings.enabled && SteamControllerVR.Instance.TriggerPressed) || Input.GetKeyDown(KeyCode.Space) ))
         {
+            Debug.Log(Time.realtimeSinceStartup);
+            Debug.Log(lastTrigger);
             redScreen.enabled = true;
-            redFlashTimer = Time.time;
-            triggerTimer = Time.time;
+            redFlashTimer = Time.realtimeSinceStartup;
+            lastTrigger = Time.realtimeSinceStartup;
             if (forPainting)
                 return NodeExtension.SameNode(player, GetTrialInfo().end) && stepInPhase == 3 ||
                        NodeExtension.SameNode(player, GetTrialInfo().start) && stepInPhase == 2;
@@ -777,8 +789,7 @@ public class ExperimentController : MonoBehaviour
     /// <returns></returns>
     public string PrintStepInfo()
     {
-        return trialOrder[currentTrial] + "," + (Time.time - trialStartTime) + "," + phase + "," + currentTrial + "," + stepInPhase;
-    }
+        return trialOrder[currentTrial] + "," + (Time.realtimeSinceStartup - trialStartTime) + "," + phase + "," + currentTrial + "," + stepInPhase; }
 
     public void ChangeBlockingOrder()
     {

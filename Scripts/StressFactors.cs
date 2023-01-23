@@ -33,18 +33,18 @@ namespace DefaultNamespace
                         stressSound.Play();
 
                     stressTimer.GetComponent<TextMeshProUGUI>().text = ExperimentController.Instance.stressTimeLimit -
-                        (Time.time - ExperimentController.Instance.trialStartTime) + " Seconds";
+                        (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime) + " Seconds";
                     stressTimer.SetActive(true);
 
                     // Beep plays every 5 seconds until less than 10 seconds left, then a beep a second until 5 seconds left, then two beeps a second
-                    float nextBeep = Time.time - ExperimentController.Instance.trialStartTime >
+                    float nextBeep = Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime >
                                      (ExperimentController.Instance.stressTimeLimit- 10)
-                        ? (Time.time - ExperimentController.Instance.trialStartTime > 5 ? 0.5f : 1.0f)
+                        ? (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime > 5 ? 0.5f : 1.0f)
                         : 5.0f;
-                    if (Time.time - lastBeep > nextBeep)
+                    if (Time.realtimeSinceStartup - lastBeep > nextBeep)
                     {
                         stressBeep.Play();
-                        lastBeep = Time.time;
+                        lastBeep = Time.realtimeSinceStartup;
                     }
                 }
                 
