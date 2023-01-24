@@ -28,6 +28,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] public Canvas introCanvas;
     [SerializeField] GameObject stressCanvas;
     [SerializeField] private GameObject maze;
+    [SerializeField] private GameObject floor;
     [SerializeField] private GameObject footprints;
     [SerializeField] private GameObject moveForwardArrow;
     [SerializeField] public GameObject stressLevel;
@@ -88,14 +89,15 @@ public class ExperimentController : MonoBehaviour
         new Vector3(-3.0f, -1.0f, 270.0f),
         new Vector3(-3.0f, 1.0f, 0.0f),
         new Vector3(-2.0f, 2.0f, 235.0f),
-        new Vector3(-2.5f, 3.0f, 0.0f),
+        new Vector3(-3.0f, 3.0f, 0.0f),
         new Vector3(1.0f, 3.0f, 0.0f),
         new Vector3(3.0f, 3.0f, 90.0f),
         new Vector3(3.0f, 1.0f, 180.0f),
         new Vector3(0.0f, 1.0f, 90.0f),
         new Vector3(0f, -1.0f, 0.0f),
         new Vector3(2.0f, -1.0f, 90.0f),
-        new Vector3(2.0f, -2.0f, 90.0f)
+        new Vector3(2.0f, -2.0f, 90.0f),
+        new Vector3(2.0f, -3.0f, 180.0f)
     };
 
     private Trial[] trialList =
@@ -230,10 +232,11 @@ public class ExperimentController : MonoBehaviour
 
     
     private GridLocation lastLoc;
-    void RecordNodes() {
-        if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)
-            fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv",
-                "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString()); }
+   void RecordNodes() {
+           if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)
+               fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv",
+                   "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString()); }
+
 
     private StreamReader sr;
     private string[][] split_lines;
@@ -423,6 +426,7 @@ public class ExperimentController : MonoBehaviour
             if (stepInPhase >= arrowPath.Length)
             {
                 Debug.Log("Increment current trial");
+                recordCameraAndNodes = false;
                 currentTrial++;
                 stepInPhase = 0;
             }
@@ -606,7 +610,7 @@ public class ExperimentController : MonoBehaviour
                             blockedWall = "N/A";
                         
                         fileHandler.AppendLine(subjectFile,
-                            PrintStepInfo() + "," + GetTrialInfo() + "," + NodeExtension.CurrentNode(player.transform.position)  + "," + blockedWall + "," + GetTrialInfo().stressTrial);
+                            PrintStepInfo() + "," + GetTrialInfo() + "," + NodeExtension.CurrentNode(player.transform.position).GetString()  + "," + blockedWall + "," + GetTrialInfo().stressTrial);
                         maze.SetActive(false);
                         stressLevel.GetComponent<TextMeshProUGUI>().text = "4";
                         dynamicBlock.enabled = false;
@@ -616,6 +620,7 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 4: // Rate stress
+                    floor.SetActive(false);
                     stressCanvas.SetActive(true); 
                     if (XRSettings.enabled && SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any) ||
                          Input.GetKeyDown(KeyCode.LeftArrow))
@@ -652,7 +657,8 @@ public class ExperimentController : MonoBehaviour
                     {
                         //move forward
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
-                        stressCanvas.SetActive(false); 
+                        stressCanvas.SetActive(false);
+                        floor.SetActive(true);
                         stepInPhase = 0;
                         footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
                             Random.Range(-3, 3));

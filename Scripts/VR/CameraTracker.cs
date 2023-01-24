@@ -17,7 +17,15 @@ namespace VR
         // public Material pointShader;
         public Camera vrCamera;
         public float smoothMove = 80;
-        
+
+
+        private void Start()
+        {
+            fileHandler.AppendLine(
+                ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
+                    "_camera_tracker.csv"), "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
+                                            "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ");
+        }
 
         private void OnRenderImage(RenderTexture src, RenderTexture dest)
         {
