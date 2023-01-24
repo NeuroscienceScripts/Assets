@@ -38,10 +38,10 @@ namespace VR
 
                 t.eulerAngles = (Vector2) rotation;
 
-                if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
+                if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W) || Input.GetMouseButton(0))
                     t.position += t.forward * Time.deltaTime * movementSpeed;
 
-                if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
+                if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S) || Input.GetMouseButton(1))
                     t.position += t.forward * Time.deltaTime * movementSpeed * -1.0f;
 
                 if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))

@@ -375,23 +375,29 @@ public class ExperimentController : MonoBehaviour
         }
         else
         {
-            if (stepInPhase == 0)
+            // if (stepInPhase == 0)
+            // {
+            //     userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
+            //     maze.SetActive(false);
+            //     moveForwardArrow.SetActive(false);
+            //     footprints.SetActive(true);
+            //     footprints.transform.position =
+            //         new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
+            //     if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
+            //     {
+            //         recordCameraAndNodes = true;
+            //         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
+            //         stepInPhase++;
+            //     }
+            // }
+            if (stepInPhase < arrowPath.Length)
             {
-                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
-                maze.SetActive(false);
-                moveForwardArrow.SetActive(false);
-                footprints.SetActive(true);
-                footprints.transform.position =
-                    new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
-                if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
+                if (stepInPhase == 0)
                 {
+                    player.transform.position = new Vector3(arrowPath[0].x,arrowHeight,arrowPath[0].y);
                     recordCameraAndNodes = true;
                     fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
-                    stepInPhase++;
                 }
-            }
-            else if (stepInPhase < arrowPath.Length)
-            {
                 userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
                 maze.SetActive(true);
                 footprints.SetActive(false);
@@ -405,7 +411,7 @@ public class ExperimentController : MonoBehaviour
                 if (NodeExtension.SameNode(player, moveForwardArrow))
                 {
                     stepInPhase++;
-                    recordCameraAndNodes = false;
+                    //recordCameraAndNodes = false;
                 }
             }
 
