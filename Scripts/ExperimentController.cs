@@ -42,6 +42,8 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private Canvas debugCanvas; 
     [SerializeField] private GameObject userText;
     [SerializeField] private RawImage redScreen;
+    [SerializeField] private Image blankScreen;
+    private bool resettingWall = false;
     
     [SerializeField] private GameObject paintings;
     [SerializeField] private GameObject node;
@@ -397,11 +399,33 @@ public class ExperimentController : MonoBehaviour
             {
                 if (stepInPhase == 0)
                 {
-                    player.transform.position = new Vector3(arrowPath[0].x,arrowHeight,arrowPath[0].y);
-                    recordCameraAndNodes = true;
-                    fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
+                    blankScreen.color = new Color(blankScreen.color.r, blankScreen.color.g, blankScreen.color.b, 1);
+                    userText.GetComponent<TextMeshProUGUI>().text = "Left-Click to Start";
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        stepInPhase++;
+                        player.transform.position = new Vector3(arrowPath[0].x,arrowHeight,arrowPath[0].y);
+                        // moveForwardArrow.transform.position = new Vector3(arrowPath[stepInPhase].x, arrowHeight, arrowPath[stepInPhase].y);
+                        // moveForwardArrow.transform.rotation = Quaternion.Euler(moveForwardArrow.transform.rotation.eulerAngles.x, arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
+                        StartCoroutine(FadeScreen());
+                        player.transform.localRotation = Quaternion.Euler(0,-90,0);
+                        recordCameraAndNodes = true;
+                        player.GetComponent<SimpleFirstPersonMovement>().active = true;
+                        userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
+                        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
+                        if (currentTrial >= 3)
+                        {
+                            dynamicBlock.enabled = true;
+                            resettingWall = false;
+                        }
+                    }
                 }
-                userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
+
+                if (dynamicBlock.enabled == false && currentTrial >= 3 && !resettingWall)
+                {
+                    StartCoroutine(ResetWall(2f));
+                }
+
                 maze.SetActive(true);
                 footprints.SetActive(false);
                 moveForwardArrow.SetActive(true);
@@ -423,16 +447,42 @@ public class ExperimentController : MonoBehaviour
                 userText.GetComponent<TextMeshProUGUI>().text = "";
             }
 
-            if (stepInPhase >= arrowPath.Length)
+            if (stepInPhase >= arrowPath.Length-1)
             {
                 Debug.Log("Increment current trial");
                 recordCameraAndNodes = false;
                 currentTrial++;
                 stepInPhase = 0;
+                player.GetComponent<SimpleFirstPersonMovement>().active = false;
+                player.transform.rotation = Quaternion.Euler(0, 0, 0);
             }
 
         }
 
+    }
+
+    private IEnumerator ResetWall(float duration)
+    {
+        resettingWall = true;
+        yield return new WaitForSecondsRealtime(duration);
+        dynamicBlock.DisableWalls();
+        
+    }
+
+    private IEnumerator FadeScreen()
+    {
+        float t = 0;
+        float duration = 0.5f;
+        Color start = blankScreen.color;
+        Color end = new Color(blankScreen.color.r, blankScreen.color.g, blankScreen.color.b, 0);
+        while (t <= duration)
+        {
+            t += Time.deltaTime;
+            blankScreen.color = Color.Lerp(start, end, t / duration);
+            yield return null;
+        }
+
+        blankScreen.color = end;
     }
 
     public int retraceNodes = 0;

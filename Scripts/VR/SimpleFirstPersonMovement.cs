@@ -31,12 +31,12 @@ namespace VR
             if (active)
             {
                 var t = transform;
-                rotation.y += Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+                rotation.y = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
                 rotation.x -= fixedVerticalHeadRotation
                     ? 0
                     : Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-                t.eulerAngles = (Vector2) rotation;
+                t.rotation = Quaternion.Euler(rotation.x, t.eulerAngles.y + rotation.y, 0);
 
                 if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W) || Input.GetMouseButton(0))
                     t.position += t.forward * Time.deltaTime * movementSpeed;

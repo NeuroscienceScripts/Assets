@@ -32,10 +32,13 @@ namespace DynamicBlocking
         {
             int num = ExperimentController.Instance.subjectNumber % 2;
             Trial t = ExperimentController.Instance.GetTrialInfo();
-            if (!t.stressTrial || (num != 0 && t.isWallTrial) || (num == 0 && !t.isWallTrial))
+            if (ExperimentController.Instance.phase == 3)
             {
-                enabled = false;
-                return;
+                if (!t.stressTrial || (num != 0 && t.isWallTrial) || (num == 0 && !t.isWallTrial))
+                {
+                    enabled = false;
+                    return;
+                }
             }
 
             ActivateWalls();
@@ -244,7 +247,7 @@ namespace DynamicBlocking
         {
             playedSound = false;
             GridLocation startLocation = ExperimentController.Instance.GetTrialInfo().start;
-
+            print("activate");
             foreach (GameObject go in possWalls)
             {
                 float dist = Vector2.Distance(new Vector2(startLocation.GetX(), startLocation.GetY()),
