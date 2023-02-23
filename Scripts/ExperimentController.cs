@@ -33,7 +33,8 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject moveForwardArrow;
     [SerializeField] public GameObject stressLevel;
     [SerializeField] public GameObject stressText;
-    [SerializeField] public GameObject player; 
+    [SerializeField] public GameObject player;
+    [SerializeField] private GameObject playerCam;
     [SerializeField] private DynamicBlock dynamicBlock;
     [SerializeField] private TMP_InputField subjectNum, trialNum; 
     
@@ -48,7 +49,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject paintings;
     [SerializeField] private GameObject node;
 
-    [SerializeField] private int learningRounds = 5;
+    [SerializeField] private int learningRounds = 6;
     [SerializeField] private int retraceRounds = 1;
     private int learningRedoRounds = 0;
     [SerializeField] private float retraceTimeLimit = 10.0f;
@@ -404,11 +405,11 @@ public class ExperimentController : MonoBehaviour
                     if (Input.GetMouseButtonDown(0))
                     {
                         stepInPhase++;
-                        player.transform.position = new Vector3(arrowPath[0].x,arrowHeight,arrowPath[0].y);
+                        playerCam.transform.position = new Vector3(arrowPath[0].x,arrowHeight,arrowPath[0].y);
                         // moveForwardArrow.transform.position = new Vector3(arrowPath[stepInPhase].x, arrowHeight, arrowPath[stepInPhase].y);
                         // moveForwardArrow.transform.rotation = Quaternion.Euler(moveForwardArrow.transform.rotation.eulerAngles.x, arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
                         StartCoroutine(FadeScreen());
-                        player.transform.localRotation = Quaternion.Euler(0,-90,0);
+                        playerCam.transform.rotation = Quaternion.Euler(0,-90,0);
                         recordCameraAndNodes = true;
                         player.GetComponent<SimpleFirstPersonMovement>().active = true;
                         userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
@@ -454,7 +455,7 @@ public class ExperimentController : MonoBehaviour
                 currentTrial++;
                 stepInPhase = 0;
                 player.GetComponent<SimpleFirstPersonMovement>().active = false;
-                player.transform.rotation = Quaternion.Euler(0, 0, 0);
+                playerCam.transform.rotation = Quaternion.Euler(0, 0, 0);
             }
 
         }

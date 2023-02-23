@@ -59,7 +59,7 @@ public class MazeHandler : MonoBehaviour
                 arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
             player.transform.localRotation = Quaternion.Euler(0,0,0);
             player.GetComponent<SimpleFirstPersonMovement>().active = true;
-            userText.text = "Left-click mouse to move forward.\n move mouse to left to turn left.\n move mouse forward to look up.\nUse the scroll-wheel to change the mouse sensitivity.\nGet to the yellow finish line";
+            userText.text = "Left-click mouse to move forward.\n move mouse to left to turn left.\n move mouse forward to look up.\nUse the scroll-wheel to change the mouse sensitivity.";
         }
     }
 
