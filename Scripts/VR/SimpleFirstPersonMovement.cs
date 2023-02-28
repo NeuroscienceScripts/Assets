@@ -9,7 +9,7 @@ namespace VR
     public class SimpleFirstPersonMovement : MonoBehaviour
     {
         Vector2 rotation = Vector2.zero;
-        [SerializeField] float mouseSensitivity = 100.0f;
+        [SerializeField] public float mouseSensitivity = 100.0f;
         [SerializeField] float movementSpeed = 5.0f;
         [SerializeField] bool fixedVerticalHeadRotation = true;
         [SerializeField] private bool lockHeight = true;

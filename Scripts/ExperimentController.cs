@@ -25,8 +25,9 @@ public class ExperimentController : MonoBehaviour
     public static ExperimentController Instance { get; private set; }
 
     //[SerializeField] public Canvas introCanvas;
+    [SerializeField] public bool isTraining = false;
     [SerializeField] public Canvas introCanvas;
-    [SerializeField] GameObject stressCanvas;
+    [SerializeField] public Canvas stressCanvas;
     [SerializeField] private GameObject maze;
     [SerializeField] private GameObject floor;
     [SerializeField] private GameObject footprints;
@@ -50,6 +51,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject node;
 
     [SerializeField] private int learningRounds = 6;
+    [SerializeField] public bool stressLearning = false;
     [SerializeField] private int retraceRounds = 1;
     private int learningRedoRounds = 0;
     [SerializeField] private float retraceTimeLimit = 10.0f;
@@ -185,7 +187,7 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (phase !=0) {   //Wait for start canvas to complete.
+        // if (phase !=0) {   //Wait for start canvas to complete.
             if (!replayMode) {
                 if (XRSettings.enabled && SteamVR.calibrating) {
                     pause.SetActive(true);
@@ -201,7 +203,7 @@ public class ExperimentController : MonoBehaviour
 
                 switch (phase) {
                     case 0:
-                        stressCanvas.SetActive(false); 
+                        stressCanvas.enabled = false; 
                         userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
                         break;
                     case 1:
@@ -220,18 +222,23 @@ public class ExperimentController : MonoBehaviour
                         break; }
 
                 if (recordCameraAndNodes) {
-                    RecordNodes(); } }
+                    RecordNodes(); } 
 
-            else {
-                /* "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
-                     "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ" 
-                split_lines = new string[System.IO.File.ReadAllLines(StartData.instance.replayFile).Length][];
-                int count = 0;
-                sr = new StreamReader(StartData.instance.replayFile);
-                
-                while (!sr.EndOfStream) {
-                    // Should input every line split into the array
-                    split_lines[count] = sr.ReadLine().Split(',');} */ } } } 
+            // else {
+            //     /* "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
+            //          "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ" 
+            //     split_lines = new string[System.IO.File.ReadAllLines(StartData.instance.replayFile).Length][];
+            //     int count = 0;
+            //     sr = new StreamReader(StartData.instance.replayFile);
+            //     
+            //     while (!sr.EndOfStream) {
+            //         // Should input every line split into the array
+            //         split_lines[count] = sr.ReadLine().Split(',');} */
+            //     // stressCanvas.enabled = false; 
+            //     // userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
+            // } 
+        } 
+    } 
 
     
     private GridLocation lastLoc;
@@ -368,6 +375,7 @@ public class ExperimentController : MonoBehaviour
     /// time the participant collides with it.  This repeats for how ever many learningRounds are
     /// specified. 
     /// </summary>
+    [SerializeField] private GameObject stressTimer;
     void RunLearning()
     {
         float arrowHeight = moveForwardArrow.transform.position.y;
@@ -377,6 +385,9 @@ public class ExperimentController : MonoBehaviour
             Debug.Log("Move to retracing phase");
             moveForwardArrow.SetActive(false);
             currentTrial = 0;
+            fileHandler.AppendLine(
+                subjectFile.Replace(Date_time + ".csv", "_desktop_Parameter.csv"),player.GetComponent<SimpleFirstPersonMovement>().mouseSensitivity.ToString());
+            Debug.Log("file");
             phase++;
         }
         else
@@ -404,17 +415,20 @@ public class ExperimentController : MonoBehaviour
                     userText.GetComponent<TextMeshProUGUI>().text = "Left-Click to Start";
                     if (Input.GetMouseButtonDown(0))
                     {
+                        trialStartTime = Time.realtimeSinceStartup;
                         stepInPhase++;
+                        // player.GetComponent<SimpleFirstPersonMovement>().active = false;
                         playerCam.transform.position = new Vector3(arrowPath[0].x,arrowHeight,arrowPath[0].y);
                         // moveForwardArrow.transform.position = new Vector3(arrowPath[stepInPhase].x, arrowHeight, arrowPath[stepInPhase].y);
                         // moveForwardArrow.transform.rotation = Quaternion.Euler(moveForwardArrow.transform.rotation.eulerAngles.x, arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
                         StartCoroutine(FadeScreen());
+                        startTimer = true;
                         playerCam.transform.rotation = Quaternion.Euler(0,-90,0);
                         recordCameraAndNodes = true;
                         player.GetComponent<SimpleFirstPersonMovement>().active = true;
                         userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
-                        if (currentTrial >= 3)
+                        if (currentTrial >= 3 & stressLearning)
                         {
                             dynamicBlock.enabled = true;
                             resettingWall = false;
@@ -422,7 +436,7 @@ public class ExperimentController : MonoBehaviour
                     }
                 }
 
-                if (dynamicBlock.enabled == false && currentTrial >= 3 && !resettingWall)
+                if (dynamicBlock.enabled == false && currentTrial >= 3 && !resettingWall && stressLearning)
                 {
                     StartCoroutine(ResetWall(2f));
                 }
@@ -436,7 +450,7 @@ public class ExperimentController : MonoBehaviour
                     moveForwardArrow.transform.rotation.eulerAngles.x,
                     arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
 
-                if (NodeExtension.SameNode(player, moveForwardArrow))
+                if (NodeExtension.SameNode(player, moveForwardArrow) & stepInPhase!=0)
                 {
                     stepInPhase++;
                     //recordCameraAndNodes = false;
@@ -446,13 +460,16 @@ public class ExperimentController : MonoBehaviour
             if (stepInPhase > 1)
             {
                 userText.GetComponent<TextMeshProUGUI>().text = "";
+                
             }
 
             if (stepInPhase >= arrowPath.Length-1)
             {
                 Debug.Log("Increment current trial");
+                stressTimer.SetActive(false);
                 recordCameraAndNodes = false;
                 currentTrial++;
+                startTimer = false;
                 stepInPhase = 0;
                 player.GetComponent<SimpleFirstPersonMovement>().active = false;
                 playerCam.transform.rotation = Quaternion.Euler(0, 0, 0);
@@ -483,7 +500,7 @@ public class ExperimentController : MonoBehaviour
             yield return null;
         }
 
-        blankScreen.color = end;
+        // blankScreen.color = end;
     }
 
     public int retraceNodes = 0;
@@ -672,7 +689,7 @@ public class ExperimentController : MonoBehaviour
 
                 case 4: // Rate stress
                     floor.SetActive(false);
-                    stressCanvas.SetActive(true); 
+                    stressCanvas.enabled = true; 
                     if (XRSettings.enabled && SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any) ||
                          Input.GetKeyDown(KeyCode.LeftArrow))
                     {
@@ -708,7 +725,7 @@ public class ExperimentController : MonoBehaviour
                     {
                         //move forward
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
-                        stressCanvas.SetActive(false);
+                        stressCanvas.enabled = false; 
                         floor.SetActive(true);
                         stepInPhase = 0;
                         footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
@@ -814,6 +831,9 @@ public class ExperimentController : MonoBehaviour
 
     private float lastTrigger; 
     private float triggerTimer = 1.5f;
+    public bool startTimer = false;
+
+
     /// <summary>
     /// Checks if the trigger (or spacebar) is pressed, has a half second delay before it will read a subsequent
     /// trigger press.
@@ -857,7 +877,11 @@ public class ExperimentController : MonoBehaviour
     public void ChangeBlockingOrder()
     {
         stressFirst = !stressFirst;
-
+    }
+    
+    public void ChangeLearning()
+    {
+        stressLearning = !stressLearning;
     }
 
     void RandomizeTrialOrder()

@@ -42,54 +42,14 @@ namespace VR
         {
             if (Time.time - recordHeadTimer > timeInterval & ExperimentController.Instance.recordCameraAndNodes)
             {
-                
-                if (!GetComponent<SimpleFirstPersonMovement>().enabled)
-                {
-                    if (!headerWritten)
-                    {
-                        headerWritten = true; 
-                        WriteHeader();
-                    }
-                    var provider = TobiiXR.Internal.Provider;
-                    var eyeTrackingData = new TobiiXR_EyeTrackingData();
-                    provider.GetEyeTrackingDataLocal(eyeTrackingData);
-                    var smoothMoveSpeed = true;
-
-                    var interpolatedGazeDirection = Vector3.Lerp(ExperimentController.Instance._lastGazeDirection, eyeTrackingData.GazeRay.Direction,
-                        (smoothMove) * Time.unscaledDeltaTime);
-                    var usedDirection = smoothMoveSpeed
-                        ? interpolatedGazeDirection.normalized
-                        : eyeTrackingData.GazeRay.Direction.normalized;
-                    ExperimentController.Instance._lastGazeDirection = usedDirection;
-
-                    var screenPos =
-                        vrCamera.WorldToScreenPoint(vrCamera.transform.position +
-                                                    vrCamera.transform.rotation * usedDirection);
-
-                    float gazeX = screenPos.x / src.width;
-                    float gazeY = screenPos.y / src.height;
-                    
-                    fileHandler.AppendLine(
-                        ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
-                            "_camera_tracker.csv"),
-                        ExperimentController.Instance.PrintStepInfo() + "," +
-                        ExperimentController.Instance.GetTrialInfo().ToString() +
-                        "," + gameObject.transform.rotation.eulerAngles.x.ToString() + "," +
-                        gameObject.transform.rotation.eulerAngles.y.ToString() +
-                        "," + gameObject.transform.rotation.eulerAngles.z.ToString() + "," +
-                        gameObject.transform.position.x.ToString() + "," +
-                        gameObject.transform.position.y.ToString() + "," + gameObject.transform.position.z.ToString() +
-                        "," +
-                        gazeX + "," + gazeY + "," + usedDirection.x + "," + usedDirection.y + "," + usedDirection.z);
-                    recordHeadTimer = Time.time;
-                }
-                else
+                if (ExperimentController.Instance.isTraining)
                 {
                     if (!headerWrittenMouse)
                     {
-                        headerWrittenMouse = true; 
+                        headerWrittenMouse = true;
                         WriteHeaderMouse();
                     }
+
                     fileHandler.AppendLine(
                         MazeHandler.Instance.subjectFile.Replace(MazeHandler.Instance.Date_time + ".csv",
                             "_mouse_camera_tracker.csv"),
@@ -98,11 +58,80 @@ namespace VR
                         gameObject.transform.rotation.eulerAngles.y.ToString() +
                         "," + gameObject.transform.rotation.eulerAngles.z.ToString() + "," +
                         gameObject.transform.position.x.ToString() + "," +
-                        gameObject.transform.position.y.ToString() + "," + gameObject.transform.position.z.ToString());
+                        gameObject.transform.position.y.ToString() + "," +
+                        gameObject.transform.position.z.ToString());
                     recordHeadTimer = Time.time;
                 }
-                
-                
+                else
+                {
+                    if (!GetComponent<SimpleFirstPersonMovement>().enabled)
+                    {
+                        if (!headerWritten)
+                        {
+                            headerWritten = true;
+                            WriteHeader();
+                        }
+
+                        var provider = TobiiXR.Internal.Provider;
+                        var eyeTrackingData = new TobiiXR_EyeTrackingData();
+                        provider.GetEyeTrackingDataLocal(eyeTrackingData);
+                        var smoothMoveSpeed = true;
+
+                        var interpolatedGazeDirection = Vector3.Lerp(ExperimentController.Instance._lastGazeDirection,
+                            eyeTrackingData.GazeRay.Direction,
+                            (smoothMove) * Time.unscaledDeltaTime);
+                        var usedDirection = smoothMoveSpeed
+                            ? interpolatedGazeDirection.normalized
+                            : eyeTrackingData.GazeRay.Direction.normalized;
+                        ExperimentController.Instance._lastGazeDirection = usedDirection;
+
+                        var screenPos =
+                            vrCamera.WorldToScreenPoint(vrCamera.transform.position +
+                                                        vrCamera.transform.rotation * usedDirection);
+
+                        float gazeX = screenPos.x / src.width;
+                        float gazeY = screenPos.y / src.height;
+
+                        fileHandler.AppendLine(
+                            ExperimentController.Instance.subjectFile.Replace(
+                                ExperimentController.Instance.Date_time + ".csv",
+                                "_camera_tracker.csv"),
+                            ExperimentController.Instance.PrintStepInfo() + "," +
+                            ExperimentController.Instance.GetTrialInfo().ToString() +
+                            "," + gameObject.transform.rotation.eulerAngles.x.ToString() + "," +
+                            gameObject.transform.rotation.eulerAngles.y.ToString() +
+                            "," + gameObject.transform.rotation.eulerAngles.z.ToString() + "," +
+                            gameObject.transform.position.x.ToString() + "," +
+                            gameObject.transform.position.y.ToString() + "," +
+                            gameObject.transform.position.z.ToString() +
+                            "," +
+                            gazeX + "," + gazeY + "," + usedDirection.x + "," + usedDirection.y + "," +
+                            usedDirection.z);
+                        recordHeadTimer = Time.time;
+                    }
+                    else
+                    {
+                        if (!headerWritten)
+                        {
+                            headerWritten = true;
+                            WriteHeader();
+                        }
+
+                        fileHandler.AppendLine(
+                            ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
+                                "_camera_tracker.csv"),
+                            Time.realtimeSinceStartup + "," + ExperimentController.Instance.stepInPhase +
+                            "," + gameObject.transform.rotation.eulerAngles.x.ToString() + "," +
+                            gameObject.transform.rotation.eulerAngles.y.ToString() +
+                            "," + gameObject.transform.rotation.eulerAngles.z.ToString() + "," +
+                            gameObject.transform.position.x.ToString() + "," +
+                            gameObject.transform.position.y.ToString() + "," +
+                            gameObject.transform.position.z.ToString());
+                        recordHeadTimer = Time.time;
+                    }
+                }
+
+
 
             }
 
