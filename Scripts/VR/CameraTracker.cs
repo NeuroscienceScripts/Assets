@@ -76,7 +76,6 @@ namespace VR
                         var eyeTrackingData = new TobiiXR_EyeTrackingData();
                         provider.GetEyeTrackingDataLocal(eyeTrackingData);
                         var smoothMoveSpeed = true;
-
                         var interpolatedGazeDirection = Vector3.Lerp(ExperimentController.Instance._lastGazeDirection,
                             eyeTrackingData.GazeRay.Direction,
                             (smoothMove) * Time.unscaledDeltaTime);

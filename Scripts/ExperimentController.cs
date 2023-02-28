@@ -67,7 +67,7 @@ public class ExperimentController : MonoBehaviour
 
     public int subjectNumber = 0;
 
-    public Vector3 _lastGazeDirection;
+    public Vector3 _lastGazeDirection = new Vector3(.5f, .5f, 1f);
     public int phase = 0;
     public int stepInPhase = 0;
     public int currentTrial;
@@ -213,6 +213,8 @@ public class ExperimentController : MonoBehaviour
                         RunRetrace();
                         break;
                     case 3:
+                        // Debug.Log(_lastGazeDirection);
+                        // DisplayDebugInfo();
                         RunTesting();
                         break;
                     default:

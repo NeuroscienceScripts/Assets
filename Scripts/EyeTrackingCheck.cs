@@ -15,7 +15,7 @@ public class EyeTrackingCheck : MonoBehaviour {
         // if (ec.recordCameraAndNodes && (ec._lastGazeDirection.x == 0.0f &&
         //                                 ec._lastGazeDirection.y == 0.0f &&
         //                                 ec._lastGazeDirection.z == 1.0f)) {
-        if (Vector3.Distance(ec._lastGazeDirection, preveye) < 0.1 & ExperimentController.Instance.phase==3)
+        if (ec.recordCameraAndNodes & Vector3.Distance(ec._lastGazeDirection, preveye) < 0.1 & ExperimentController.Instance.phase==3)
         {
             framesWithoutGazeUpdate++;
             eyeError.enabled = framesWithoutGazeUpdate > maxFramesWithoutUpdate;
