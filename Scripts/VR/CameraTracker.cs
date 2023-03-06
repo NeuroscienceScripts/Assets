@@ -19,6 +19,7 @@ namespace VR
         public float smoothMove = 80;
         private bool headerWritten = false;
         private bool headerWrittenMouse = false;
+        public GameObject playerCam;
 
 
         private void WriteHeader()
@@ -64,7 +65,7 @@ namespace VR
                 }
                 else
                 {
-                    if (!GetComponent<SimpleFirstPersonMovement>().enabled)
+                    if (!playerCam.GetComponent<SimpleFirstPersonMovement>().enabled)
                     {
                         if (!headerWritten)
                         {

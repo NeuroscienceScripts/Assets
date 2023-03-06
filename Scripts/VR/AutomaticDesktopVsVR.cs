@@ -20,12 +20,13 @@ namespace VR
     {
         [SerializeField] private int checkHeadsetFrequency = 30000;
         private float lastCheck;
+        [SerializeField] private GameObject playerCam;
         private SimpleFirstPersonMovement firstPerson;
         private SteamVR_CameraHelper cameraHelper;
 
         void Start()
         {
-            firstPerson = gameObject.GetComponent<SimpleFirstPersonMovement>();
+            firstPerson = playerCam.GetComponent<SimpleFirstPersonMovement>();
             cameraHelper = gameObject.GetComponent<SteamVR_CameraHelper>();
             CheckHeadset();
         }

@@ -388,7 +388,7 @@ public class ExperimentController : MonoBehaviour
             moveForwardArrow.SetActive(false);
             currentTrial = 0;
             fileHandler.AppendLine(
-                subjectFile.Replace(Date_time + ".csv", "_desktop_Parameter.csv"),player.GetComponent<SimpleFirstPersonMovement>().mouseSensitivity.ToString());
+                subjectFile.Replace(Date_time + ".csv", "_desktop_Parameter.csv"),playerCam.GetComponent<SimpleFirstPersonMovement>().mouseSensitivity.ToString());
             Debug.Log("file");
             phase++;
         }
@@ -419,7 +419,7 @@ public class ExperimentController : MonoBehaviour
                     {
                         trialStartTime = Time.realtimeSinceStartup;
                         stepInPhase++;
-                        // player.GetComponent<SimpleFirstPersonMovement>().active = false;
+                        player.GetComponent<SimpleFirstPersonMovement>().active = false;
                         playerCam.transform.position = new Vector3(arrowPath[0].x,arrowHeight,arrowPath[0].y);
                         // moveForwardArrow.transform.position = new Vector3(arrowPath[stepInPhase].x, arrowHeight, arrowPath[stepInPhase].y);
                         // moveForwardArrow.transform.rotation = Quaternion.Euler(moveForwardArrow.transform.rotation.eulerAngles.x, arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
@@ -474,7 +474,9 @@ public class ExperimentController : MonoBehaviour
                 startTimer = false;
                 stepInPhase = 0;
                 player.GetComponent<SimpleFirstPersonMovement>().active = false;
-                playerCam.transform.rotation = Quaternion.Euler(0, 0, 0);
+                player.GetComponent<SimpleFirstPersonMovement>().rotation = Vector2.zero;
+                // playerCam.transform.rotation = Quaternion.Euler(0,-90,0);
+                // player.transform.rotation = Quaternion.Euler(0, 0, 0);
             }
 
         }
@@ -523,22 +525,42 @@ public class ExperimentController : MonoBehaviour
         {
             if (stepInPhase == 0)
             {
-                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
-                maze.SetActive(false);
-                moveForwardArrow.SetActive(false);
-                footprints.SetActive(true);
-                footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
-
-                if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
+                // userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
+                // maze.SetActive(false);
+                // moveForwardArrow.SetActive(false);
+                // footprints.SetActive(true);
+                // footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
+                //
+                // if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
+                // {
+                //     stepInPhase++;
+                //     recordCameraAndNodes = true;
+                //     retraceNodes = 0;
+                //     footprints.SetActive(false);
+                //     Debug.Log("Start retracing phase");
+                //     fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_retrace");
+                //     recordCameraAndNodes = true;
+                //     retraceTimer = Time.realtimeSinceStartup;
+                // }
+                blankScreen.color = new Color(blankScreen.color.r, blankScreen.color.g, blankScreen.color.b, 1);
+                userText.GetComponent<TextMeshProUGUI>().text = "Left-Click to Start";
+                footprints.SetActive(false);
+                if (Input.GetMouseButtonDown(0))
                 {
+                    trialStartTime = Time.realtimeSinceStartup;
                     stepInPhase++;
-                    recordCameraAndNodes = true;
+                    // player.GetComponent<SimpleFirstPersonMovement>().active = false;
+                    playerCam.transform.position = new Vector3(arrowPath[0].x,moveForwardArrow.transform.position.y,arrowPath[0].y);
+                    // moveForwardArrow.transfor  m.position = new Vector3(arrowPath[stepInPhase].x, arrowHeight, arrowPath[stepInPhase].y);
+                    // moveForwardArrow.transform.rotation = Quaternion.Euler(moveForwardArrow.transform.rotation.eulerAngles.x, arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
+                    StartCoroutine(FadeScreen());
                     retraceNodes = 0;
-                    footprints.SetActive(false);
-                    Debug.Log("Start retracing phase");
-                    fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_retrace");
-                    recordCameraAndNodes = true;
                     retraceTimer = Time.realtimeSinceStartup;
+                    playerCam.transform.rotation = Quaternion.Euler(0,-90,0);
+                    recordCameraAndNodes = true;
+                    player.GetComponent<SimpleFirstPersonMovement>().active = true;
+                    fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_retrace");
+                    
                 }
             }
             else if (stepInPhase < arrowPath.Length)
@@ -573,6 +595,10 @@ public class ExperimentController : MonoBehaviour
                     {
                         arrowPart.enabled = true;
                     }
+                    player.GetComponent<SimpleFirstPersonMovement>().active = false;
+                    // playerCam.transform.position = new Vector3(arrowPath[0].x,moveForwardArrow.transform.position.y,arrowPath[0].y);
+                    player.GetComponent<SimpleFirstPersonMovement>().rotation = Vector2.zero;
+                    // playerCam.transform.rotation = Quaternion.Euler(0, 0, 0);
                 }
             }
             else
@@ -580,6 +606,9 @@ public class ExperimentController : MonoBehaviour
                 currentTrial++;
                 recordCameraAndNodes = false;
                 stepInPhase = 0;
+                player.GetComponent<SimpleFirstPersonMovement>().active = false;
+                player.GetComponent<SimpleFirstPersonMovement>().rotation = Vector2.zero;
+                // playerCam.transform.rotation = Quaternion.Euler(0, 0, 0);
             }
 
 
