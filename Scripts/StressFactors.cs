@@ -28,6 +28,7 @@ namespace DefaultNamespace
                     RenderSettings.fogEndDistance = endFog;
                     RenderSettings.fogColor = Color.black;
                     RenderSettings.fog = true;
+                    nonStressSound.Stop();
                     if (!stressSound.isPlaying)
                         stressSound.Play();
                     if (ExperimentController.Instance.startTimer)

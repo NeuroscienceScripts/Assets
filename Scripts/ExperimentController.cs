@@ -388,7 +388,7 @@ public class ExperimentController : MonoBehaviour
             moveForwardArrow.SetActive(false);
             currentTrial = 0;
             fileHandler.AppendLine(
-                subjectFile.Replace(Date_time + ".csv", "_desktop_Parameter.csv"),playerCam.GetComponent<SimpleFirstPersonMovement>().mouseSensitivity.ToString());
+                subjectFile.Replace(Date_time + ".csv", "_desktop_Parameter.csv"),player.GetComponent<SimpleFirstPersonMovement>().mouseSensitivity.ToString());
             Debug.Log("file");
             phase++;
         }
