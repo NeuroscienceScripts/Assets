@@ -632,6 +632,7 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void RunTesting()
     {
+        playerCam.transform.position = Vector3.zero;
         foreach (var textMesh in paintings.GetComponentsInChildren<TextMeshPro>())
         {
             textMesh.enabled = false;
