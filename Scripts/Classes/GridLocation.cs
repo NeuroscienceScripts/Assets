@@ -28,7 +28,7 @@ namespace Classes
         }
 
         /// <summary>
-        /// Casts Coordinate to Grid Location where (0,0) is the lower left corner A1
+        /// Casts Coordinate to Grid Location where (0,0) is the lower left corner G1
         /// </summary>
         public GridLocation ToGridLocation()
         {

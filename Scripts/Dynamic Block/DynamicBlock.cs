@@ -10,11 +10,14 @@ namespace DynamicBlocking
     public class DynamicBlock : MonoBehaviour
     {
         [SerializeField] private WallInfoObject wallInfo;
+        [SerializeField] private WallInfoObject learningWallInfo;
         private GameObject temp;
 
         [SerializeField] private GameObject[] walls; // 0 is north, 1 is south, 2 is east, 3 is west
 
-        private List<GameObject> possWalls;
+        [SerializeField] private List<GameObject> possWalls;
+
+        [SerializeField] private List<GameObject> learningWalls;
         //[SerializeField] private List<MeshRenderer> renderers;
         //[SerializeField] private List<BoxCollider> colliders;
 
@@ -27,6 +30,10 @@ namespace DynamicBlocking
         private Dictionary<GridLocation, GameObject[]> vertWalls;
 
         public bool wallActivated;
+        public string testWall;
+        
+
+        public event System.Action onWallActivated;
 
         private void OnEnable()
         {
@@ -41,7 +48,11 @@ namespace DynamicBlocking
                 }
             }
 
-            ActivateWalls();
+            if (ExperimentController.Instance.phase == 1)
+            {
+                ActivateWalls(testWall);
+            }
+            else ActivateWalls();
         }
 
         private void Awake()
@@ -49,6 +60,7 @@ namespace DynamicBlocking
             vertWalls = new();
             horizWalls = new();
             possWalls = new();
+            learningWalls = new();
             //renderers = new();
             //colliders = new();
             wallActivated = false;
@@ -177,21 +189,12 @@ namespace DynamicBlocking
                     possWalls.Add(temp);
                     horizWalls.Add(gridLoc, new GameObject[2] {temp, null});
 
-                    //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
-                    //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
-
-
                     temp = Instantiate(walls[3], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()),
                         walls[3].transform.rotation);
                     temp.name = gridLoc.GetString() + "West";
                     temp.transform.parent = parent.transform;
                     possWalls.Add(temp);
                     horizWalls[gridLoc][1] = temp;
-
-                    //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
-                    //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
-
-
                 }
                 else
                 {
@@ -201,8 +204,6 @@ namespace DynamicBlocking
                     temp.transform.parent = parent.transform;
                     possWalls.Add(temp);
                     vertWalls.Add(gridLoc, new GameObject[2] {temp, null});
-                    //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
-                    //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
 
                     temp = Instantiate(walls[1], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()),
                         walls[1].transform.rotation);
@@ -210,9 +211,44 @@ namespace DynamicBlocking
                     temp.transform.parent = parent.transform;
                     possWalls.Add(temp);
                     vertWalls[gridLoc][1] = temp;
+                }
+            }
+            foreach (WallPosition wp in learningWallInfo.wallPositions)
+            {
+                gridLoc = wp.position.ToGridLocation();
+                if (wp.direction == WallDirection.Horizontal)
+                {
+                    if (horizWalls.ContainsKey(gridLoc)) continue;
+                    temp = Instantiate(walls[2], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()),
+                        walls[2].transform.rotation);
+                    temp.name = gridLoc.GetString() + "East";
+                    temp.transform.parent = parent.transform;
+                    learningWalls.Add(temp);
+                    horizWalls.Add(gridLoc, new GameObject[2] {temp, null});
 
-                    //renderers.Add(temp.transform.GetComponentInChildren<MeshRenderer>());
-                    //colliders.Add(temp.transform.GetComponentInChildren<BoxCollider>());
+                    temp = Instantiate(walls[3], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()),
+                        walls[3].transform.rotation);
+                    temp.name = gridLoc.GetString() + "West";
+                    temp.transform.parent = parent.transform;
+                    learningWalls.Add(temp);
+                    horizWalls[gridLoc][1] = temp;
+                }
+                else
+                {
+                    if (vertWalls.ContainsKey(gridLoc)) continue;
+                    temp = Instantiate(walls[0], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()),
+                        walls[0].transform.rotation);
+                    temp.name = gridLoc.GetString() + "North";
+                    temp.transform.parent = parent.transform;
+                    learningWalls.Add(temp);
+                    vertWalls.Add(gridLoc, new GameObject[2] {temp, null});
+
+                    temp = Instantiate(walls[1], new Vector3(gridLoc.GetX(), 1, gridLoc.GetY()),
+                        walls[1].transform.rotation);
+                    temp.name = gridLoc.GetString() + "South";
+                    temp.transform.parent = parent.transform;
+                    learningWalls.Add(temp);
+                    vertWalls[gridLoc][1] = temp;
                 }
             }
         }
@@ -220,6 +256,12 @@ namespace DynamicBlocking
         public void DisableWalls()
         {
             foreach (GameObject go in possWalls)
+            {
+                go.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+                go.transform.GetChild(0).GetComponent<Collider>().isTrigger = true;
+                go.SetActive(false);
+            }
+            foreach (GameObject go in learningWalls)
             {
                 go.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
                 go.transform.GetChild(0).GetComponent<Collider>().isTrigger = true;
@@ -240,6 +282,7 @@ namespace DynamicBlocking
             wallActivated = true;
             wall.transform.GetChild(0).GetComponent<Collider>().isTrigger = false;
             ExperimentController.Instance.blockedWall = wall.name;
+            onWallActivated?.Invoke();
             enabled = false;
         }
 
@@ -268,38 +311,23 @@ namespace DynamicBlocking
                     }
                 }
             }
-
-            //for (int i = 0; i < wallInfo.GetPositions().Count; i++)
-            //{
-            //    WallDirection dir = wallInfo.GetDirections()[i];
-            //    switch (dir)
-            //    {
-            //        case WallDirection.Vertical:
-            //            if (!startTrial.GetString().Contains("A") & !startTrial.GetString().Contains("G") & !wallInfo.GetPositions()[i].GetString().Contains("A1")) //watch out for top and bottom start
-            //            {
-            //                temp = Instantiate(walls[2], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[2].transform.rotation) as GameObject;
-            //                temp.name = wallInfo.GetPositions()[i].GetString() + "E";
-            //                temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
-            //                possWalls.Add(temp);
-            //                temp = Instantiate(walls[3], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[3].transform.rotation) as GameObject;
-            //                temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
-            //                temp.name = wallInfo.GetPositions()[i].GetString() + "W";
-            //                possWalls.Add(temp);
-            //            }
-            //            break;
-            //        case WallDirection.Horizontal:
-            //            temp = Instantiate(walls[0], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[0].transform.rotation) as GameObject;
-            //            temp.name = wallInfo.GetPositions()[i].GetString() + "N";
-            //            temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
-            //            possWalls.Add(temp);
-            //            temp = Instantiate(walls[1], new Vector3(wallInfo.GetPositions()[i].GetX(), 1, wallInfo.GetPositions()[i].GetY()), walls[1].transform.rotation) as GameObject;
-            //            temp.name = wallInfo.GetPositions()[i].GetString() + "S";
-            //            temp.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
-            //            possWalls.Add(temp);
-            //            break;
-            //    }
-            //}
         }
 
+        private void ActivateWalls(string wallName)
+        {
+            playedSound = false;
+            foreach (GameObject go in learningWalls)
+            {
+                if (go.name.Contains(wallName))
+                {
+                    go.SetActive(true);
+                }
+            }
+
+            foreach (GameObject go in possWalls)
+            {
+                if(go.name.Contains(wallName)) go.SetActive(true);
+            }
+        }
     }
 }

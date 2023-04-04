@@ -17,7 +17,7 @@ namespace DynamicBlocking
         public WallDirection direction;
         public Coordinate position;
     }
-
+    [CreateAssetMenu(menuName = "ScriptableObjects/Wall Info")]
     public class WallInfoObject : ScriptableObject
     {
 
