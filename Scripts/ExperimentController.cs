@@ -507,6 +507,15 @@ public class ExperimentController : MonoBehaviour
                 stepInPhase = 0;
                 player.GetComponent<SimpleFirstPersonMovement>().active = false;
                 player.GetComponent<SimpleFirstPersonMovement>().rotation = Vector2.zero;
+                if (learningRedoRounds>0)
+                {
+                    Debug.Log("Move to retracing phase");
+                    moveForwardArrow.SetActive(false);
+                    currentTrial = 0;
+                    fileHandler.AppendLine(
+                        subjectFile.Replace(Date_time + ".csv", "_desktop_Parameter.csv"),player.GetComponent<SimpleFirstPersonMovement>().mouseSensitivity.ToString());
+                    phase++;
+                }
                 // playerCam.transform.rotation = Quaternion.Euler(0,-90,0);
                 // player.transform.rotation = Quaternion.Euler(0, 0, 0);
             }
@@ -633,7 +642,7 @@ public class ExperimentController : MonoBehaviour
                     stepInPhase = 0;
                     phase--; // Need to relearn
                     learningRedoRounds++;
-                    currentTrial = learningRounds - 1;
+                    currentTrial = 0;
                     moveForwardArrow.GetComponent<MeshRenderer>().enabled = true;
                     foreach (var arrowPart in moveForwardArrow.GetComponentsInChildren<MeshRenderer>())
                     {
