@@ -9,6 +9,7 @@ namespace DynamicBlocking
 {
     public class DynamicBlock : MonoBehaviour
     {
+        private FileHandler fileHandler = new FileHandler();
         [SerializeField] private WallInfoObject wallInfo;
         [SerializeField] private WallInfoObject learningWallInfo;
         private GameObject temp;
@@ -68,6 +69,12 @@ namespace DynamicBlocking
             DisableWalls();
             enabled = false;
             playedSound = false;
+            if (ExperimentController.Instance.phase == 1)
+            {
+                fileHandler.AppendLine(
+                    ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
+                        "_learning.csv"), "Lap, Wall, Time");
+            }
         }
 
         private void OnDisable()
@@ -282,6 +289,12 @@ namespace DynamicBlocking
             wallActivated = true;
             wall.transform.GetChild(0).GetComponent<Collider>().isTrigger = false;
             ExperimentController.Instance.blockedWall = wall.name;
+            if (ExperimentController.Instance.phase == 1)
+            {
+                fileHandler.AppendLine(
+                    ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
+                        "_learning.csv"), ExperimentController.Instance.currentTrial + "," + wall.name + "," + Time.realtimeSinceStartup);
+            }
             onWallActivated?.Invoke();
             enabled = false;
         }
