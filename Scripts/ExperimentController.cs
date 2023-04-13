@@ -335,20 +335,44 @@ public class ExperimentController : MonoBehaviour
             trialOrder[i] = i;
         }
 
-        List<int> stress = new List<int>();
+        List<int> stress_b = new List<int>();
+        List<int> stress_nb = new List<int>();
+        List<int> fixedstress = new List<int>();
         List<int> nonStress = new List<int>();
         for (int i = number_practice_trials; i < trialList.Length; i++) {
             if (trialList[i].stressTrial)
-                stress.Add(i);
+                if((subjectNumber % 2 != 0 && trialList[i].isWallTrial) || (subjectNumber % 2 == 0 && !trialList[i].isWallTrial))
+                    stress_nb.Add(i);
+                else
+                    stress_b.Add(i);
             else
                 nonStress.Add(i); }
 
         Random.InitState(subjectNumber * 10);
-        stress = stress.ToArray().OrderBy(x => Random.Range(0, stress.Count)).ToList();
 
-        nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0, nonStress.Count)).ToList();
+        int x = Random.Range(0,stress_b.Count);
+        Debug.Log(x);
+        fixedstress.Add(stress_b[x]);
+        List<int> stress = new List<int>();
+        for (int i = 0; i < stress_b.Count; i++)
+        {
+            if (i == x)
+                continue;
+            stress.Add(i);
+        }
+        stress = stress.Concat(stress_nb).ToList();
         
-
+        stress = stress.ToArray().OrderBy(x => Random.Range(0, stress.Count)).ToList();
+        nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0, nonStress.Count)).ToList();
+        stress = fixedstress.Concat(stress).ToList();
+        
+        string cresult = "List contents: ";
+        foreach (var item in stress)
+        {
+            cresult += item.ToString() + ", ";
+        }
+        Debug.Log(cresult);
+        
         if (stressFirst){
             for (int i = 0; i < stress.Count; i++)
                 trialOrder[number_practice_trials + i] = stress[i];
@@ -540,8 +564,10 @@ public class ExperimentController : MonoBehaviour
 
     private void ActivateNextWall()
     {
-        //print("activated");
-        StartCoroutine(ResetWall(2f));
+        if (phase == 1)
+        {
+            StartCoroutine(ResetWall(2f));
+        }
     }
 
     private IEnumerator FadeScreen()
