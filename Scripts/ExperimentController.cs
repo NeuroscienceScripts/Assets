@@ -333,6 +333,7 @@ public class ExperimentController : MonoBehaviour
         for (int i = 0; i < number_practice_trials; i++)
         {
             trialOrder[i] = i;
+            Debug.Log(trialOrder[i]);
         }
 
         List<int> stress_b = new List<int>();
@@ -351,12 +352,11 @@ public class ExperimentController : MonoBehaviour
         Random.InitState(subjectNumber * 10);
 
         int x = Random.Range(0,stress_b.Count);
-        Debug.Log(x);
         fixedstress.Add(stress_b[x]);
         List<int> stress = new List<int>();
-        for (int i = 0; i < stress_b.Count; i++)
+        for (int i = stress_b[0]; i < (stress_b[0] + stress_b.Count); i++)
         {
-            if (i == x)
+            if (i == (stress_b[0] + x))
                 continue;
             stress.Add(i);
         }
@@ -366,12 +366,6 @@ public class ExperimentController : MonoBehaviour
         nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0, nonStress.Count)).ToList();
         stress = fixedstress.Concat(stress).ToList();
         
-        string cresult = "List contents: ";
-        foreach (var item in stress)
-        {
-            cresult += item.ToString() + ", ";
-        }
-        Debug.Log(cresult);
         
         if (stressFirst){
             for (int i = 0; i < stress.Count; i++)
