@@ -20,6 +20,7 @@ namespace VR
         private bool headerWritten = false;
         private bool headerWrittenMouse = false;
         public GameObject playerCam;
+        private float startTime;
 
 
         private void WriteHeader()
@@ -29,6 +30,14 @@ namespace VR
                 ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
                     "_camera_tracker.csv"), "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
                                             "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ");
+        }
+        
+        private void WriteHeaderLearning()
+        {
+            Debug.Log(ExperimentController.Instance.subjectFile);
+            fileHandler.AppendLine(
+                ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
+                    "_learning_camera_tracker.csv"), "Phase,LapNumber,StepInPhase,TrialTime,CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ");
         }
         
         private void WriteHeaderMouse()
@@ -114,13 +123,19 @@ namespace VR
                         if (!headerWritten)
                         {
                             headerWritten = true;
-                            WriteHeader();
+                            WriteHeaderLearning();
+                        }
+
+                        if ((ExperimentController.Instance.phase==1)&((ExperimentController.Instance.currentTrial == 0) ||
+                            (ExperimentController.Instance.currentTrial == 3)))
+                        {
+                            startTime = ExperimentController.Instance.trialStartTime;
                         }
 
                         fileHandler.AppendLine(
                             ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
-                                "_camera_tracker.csv"),
-                            Time.realtimeSinceStartup + "," + ExperimentController.Instance.stepInPhase +
+                                "_learning_camera_tracker.csv"),
+                            ExperimentController.Instance.phase + "," + ExperimentController.Instance.currentTrial + "," + ExperimentController.Instance.stepInPhase + "," + (Time.realtimeSinceStartup-startTime) +
                             "," + gameObject.transform.rotation.eulerAngles.x.ToString() + "," +
                             gameObject.transform.rotation.eulerAngles.y.ToString() +
                             "," + gameObject.transform.rotation.eulerAngles.z.ToString() + "," +

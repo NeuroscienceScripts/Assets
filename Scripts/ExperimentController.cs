@@ -41,6 +41,7 @@ public class ExperimentController : MonoBehaviour
     
     //[SerializeField] private GameObject subjectInput;
     //[SerializeField] private GameObject trialInput;
+    [SerializeField] private GameObject Panel;
     [SerializeField] private Canvas debugCanvas; 
     [SerializeField] private GameObject userText;
     [SerializeField] private RawImage redScreen;
@@ -215,6 +216,8 @@ public class ExperimentController : MonoBehaviour
 
                 switch (phase) {
                     case 0:
+                        Panel.SetActive(true);
+                        maze.SetActive(false);
                         stressCanvas.enabled = false; 
                         userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
                         break;
@@ -397,6 +400,8 @@ public class ExperimentController : MonoBehaviour
                     nodes[currentPos].SetActive(false); // To avoid erroneous recordings from inside walls
             } }
         introCanvas.enabled = false;
+        Panel.SetActive(false);
+        maze.SetActive(true);
         phase = phaseNumberStart; 
     }
 

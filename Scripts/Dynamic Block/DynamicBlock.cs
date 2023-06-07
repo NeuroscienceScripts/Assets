@@ -32,7 +32,8 @@ namespace DynamicBlocking
 
         public bool wallActivated;
         public string testWall;
-        
+        private float startTime;
+
 
         public event System.Action onWallActivated;
 
@@ -289,11 +290,16 @@ namespace DynamicBlocking
             wallActivated = true;
             wall.transform.GetChild(0).GetComponent<Collider>().isTrigger = false;
             ExperimentController.Instance.blockedWall = wall.name;
+            if ((ExperimentController.Instance.phase==1)&((ExperimentController.Instance.currentTrial == 0) || (ExperimentController.Instance.currentTrial == 3)))
+            {
+                startTime = ExperimentController.Instance.trialStartTime;
+            }
             if (ExperimentController.Instance.phase == 1)
             {
                 fileHandler.AppendLine(
                     ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
-                        "_learning.csv"), ExperimentController.Instance.currentTrial + "," + wall.name + "," + Time.realtimeSinceStartup);
+                        "_learning.csv"), ExperimentController.Instance.currentTrial + "," + wall.name + "," +
+                                          (Time.realtimeSinceStartup - startTime));
             }
             onWallActivated?.Invoke();
             enabled = false;
