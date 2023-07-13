@@ -59,8 +59,8 @@ namespace Classes
     public struct GridLocation
     {
         private Coordinate pos;
-        private string y;
-        private int x;
+        public string y;
+        public int x;
 
         public GridLocation(string y, int x)
         {
