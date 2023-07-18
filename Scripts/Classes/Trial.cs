@@ -3,39 +3,47 @@ using UnityEngine;
 namespace Classes
 {
     /// <summary>
-     /// A simple pair of start/end locations using GridLocation
-     /// </summary>
-     /// <param name="start">Starting GridLocation</param>
-     /// <param name="end">Ending GridLocation</param>
+    /// A simple pair of start/end locations using GridLocation
+    /// </summary>
+    /// <param name="start">Starting GridLocation</param>
+    /// <param name="end">Ending GridLocation</param>
     public struct Trial
     {
         public GridLocation start;
         public GridLocation end;
         public bool stressTrial;
         public bool isWallTrial;
+        // ADDED
+        public bool hasAudio;
+        public bool hasExplosion;
         
-        public Trial(GridLocation start, GridLocation end)
+        
+        public void Trial1(GridLocation start, GridLocation end)
         {
             this.start = start;
             this.end = end;
-            this.stressTrial = false;
+            stressTrial = false;
             isWallTrial = false;
         }
         
-        public Trial(GridLocation start, GridLocation end, bool stressTrial)
+        public Trial(GridLocation start, GridLocation end, bool stressTrial, bool hasAudio, bool hasExplosion)
         {
             this.start = start;
             this.end = end;
             this.stressTrial = stressTrial;
             isWallTrial = false;
+            this.hasAudio = hasAudio;
+            this.hasExplosion = hasExplosion;
         }
-        public Trial(GridLocation start, GridLocation end, bool stressTrial, bool isWallTrial)
-        {
-            this.start = start;
-            this.end = end;
-            this.stressTrial = stressTrial;
-            this.isWallTrial = isWallTrial;
-        }
+        
+        // public Trial(GridLocation start, GridLocation end, bool stressTrial, bool isWallTrial, bool hasAudio) 
+        // {
+        //     this.start = start;
+        //     this.end = end;
+        //     this.stressTrial = stressTrial;
+        //     this.isWallTrial = isWallTrial;
+        //     this.hasAudio = hasAudio;
+        // }
         
 
         public override string ToString()
