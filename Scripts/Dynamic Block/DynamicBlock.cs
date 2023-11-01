@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,6 +36,8 @@ namespace DynamicBlocking
         public string testWall;
         private float startTime;
         private U3 u3;
+        private Action oneTimeAction;
+        private bool triggered = false;
 
 
         public event System.Action onWallActivated;
@@ -75,6 +78,14 @@ namespace DynamicBlocking
             if (ExperimentController.Instance.phase == 1)
             {
                 u3 = new U3(LJUD.CONNECTION.USB, "0", true);
+                oneTimeAction = () =>
+                {
+                    if (!triggered)
+                    {
+                        LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 100, 12);
+                        triggered = true;
+                    }
+                };
                 fileHandler.AppendLine(
                     ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
                         "_learning.csv"), "Lap, Wall, Time");
@@ -299,7 +310,9 @@ namespace DynamicBlocking
             }
             if (ExperimentController.Instance.phase == 1)
             {
-                LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 100, 12);
+                oneTimeAction?.Invoke();
+                triggered = false;
+
                 fileHandler.AppendLine(
                     ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
                         "_learning.csv"), ExperimentController.Instance.currentTrial + "," + wall.name + "," +
