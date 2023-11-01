@@ -416,6 +416,7 @@ public class ExperimentController : MonoBehaviour
     void RunLearning()
     {
         float arrowHeight = moveForwardArrow.transform.position.y;
+        Debug.Log(arrowHeight);
 
         if (currentTrial >= learningRounds)
         {

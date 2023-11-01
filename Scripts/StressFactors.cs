@@ -52,7 +52,7 @@ namespace DefaultNamespace
             {
                 if (ExperimentController.Instance.phase == 3 & ExperimentController.Instance.stepInPhase == 3)
                 {
-                    if (ExperimentController.Instance.GetTrialInfo().stressTrial)
+                    if (ExperimentController.Instance.GetTrialInfo().stressTrial) 
                     {
                         RenderSettings.fogMode = FogMode.Linear;
                         RenderSettings.fogStartDistance = startFog;

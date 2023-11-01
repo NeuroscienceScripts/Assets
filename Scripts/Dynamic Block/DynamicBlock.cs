@@ -4,6 +4,7 @@ using UnityEngine;
 using Classes;
 using DefaultNamespace;
 using TMPro;
+using LabJack.LabJackUD;
 
 namespace DynamicBlocking
 {
@@ -33,6 +34,7 @@ namespace DynamicBlocking
         public bool wallActivated;
         public string testWall;
         private float startTime;
+        private U3 u3;
 
 
         public event System.Action onWallActivated;
@@ -72,6 +74,7 @@ namespace DynamicBlocking
             playedSound = false;
             if (ExperimentController.Instance.phase == 1)
             {
+                u3 = new U3(LJUD.CONNECTION.USB, "0", true);
                 fileHandler.AppendLine(
                     ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
                         "_learning.csv"), "Lap, Wall, Time");
@@ -296,6 +299,7 @@ namespace DynamicBlocking
             }
             if (ExperimentController.Instance.phase == 1)
             {
+                LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 100, 12);
                 fileHandler.AppendLine(
                     ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
                         "_learning.csv"), ExperimentController.Instance.currentTrial + "," + wall.name + "," +
