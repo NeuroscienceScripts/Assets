@@ -13,6 +13,7 @@ using UnityEngine.UI;
 using UnityEngine.XR;
 using Valve.VR;
 using Random = UnityEngine.Random;
+using LabJack.LabJackUD;
 
 //TODO: Fix paintings to be on wall, fix footprints to rotate toward next target 
 /// <summary>
@@ -184,6 +185,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject trialDisplay;
     [SerializeField] private GameObject gazeTrackingDisplay;
     [SerializeField] private GameObject pause;
+    public U3 u3;
 
     private void OnEnable()
     {
@@ -416,7 +418,7 @@ public class ExperimentController : MonoBehaviour
     void RunLearning()
     {
         float arrowHeight = moveForwardArrow.transform.position.y;
-        Debug.Log(arrowHeight);
+        //Debug.Log(arrowHeight);
 
         if (currentTrial >= learningRounds)
         {
@@ -425,7 +427,7 @@ public class ExperimentController : MonoBehaviour
             currentTrial = 0;
             fileHandler.AppendLine(
                 subjectFile.Replace(Date_time + ".csv", "_desktop_Parameter.csv"),player.GetComponent<SimpleFirstPersonMovement>().mouseSensitivity.ToString());
-            Debug.Log("file");
+            //Debug.Log("file");
             phase++;
         }
         else
@@ -466,6 +468,8 @@ public class ExperimentController : MonoBehaviour
                         player.GetComponent<SimpleFirstPersonMovement>().active = true;
                         userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
+                        Debug.Log("trial starts");
+                        LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 0, 12);
                         if (currentTrial >= 3 & stressLearning)
                         {
                             testWalls = new();
@@ -945,6 +949,7 @@ public class ExperimentController : MonoBehaviour
     public bool startTimer = false;
 
 
+
     /// <summary>
     /// Checks if the trigger (or spacebar) is pressed, has a half second delay before it will read a subsequent
     /// trigger press.
@@ -954,8 +959,8 @@ public class ExperimentController : MonoBehaviour
     {
         if (Time.realtimeSinceStartup-lastTrigger > triggerTimer && ((XRSettings.enabled && SteamControllerVR.Instance.TriggerPressed) || Input.GetKeyDown(KeyCode.Space) ))
         {
-            Debug.Log(Time.realtimeSinceStartup);
-            Debug.Log(lastTrigger);
+            //Debug.Log(Time.realtimeSinceStartup);
+            //Debug.Log(lastTrigger);
             redScreen.enabled = true;
             redFlashTimer = Time.realtimeSinceStartup;
             lastTrigger = Time.realtimeSinceStartup;
@@ -1023,6 +1028,7 @@ public class ExperimentController : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            u3 = new U3(LJUD.CONNECTION.USB, "0", true);
             DontDestroyOnLoad(gameObject);
         }
         else

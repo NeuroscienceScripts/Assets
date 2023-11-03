@@ -36,8 +36,9 @@ namespace DynamicBlocking
         public string testWall;
         private float startTime;
         private U3 u3;
-        private Action oneTimeAction;
+        private event System.Action oneTimeAction;
         private bool triggered = false;
+        private int code = 100;
 
 
         public event System.Action onWallActivated;
@@ -77,19 +78,16 @@ namespace DynamicBlocking
             playedSound = false;
             if (ExperimentController.Instance.phase == 1)
             {
-                u3 = new U3(LJUD.CONNECTION.USB, "0", true);
-                oneTimeAction = () =>
-                {
-                    if (!triggered)
-                    {
-                        LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 100, 12);
-                        triggered = true;
-                    }
-                };
                 fileHandler.AppendLine(
                     ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
                         "_learning.csv"), "Lap, Wall, Time");
             }
+        }
+
+
+        private void Start()
+        {
+            u3 = ExperimentController.Instance.u3;
         }
 
         private void OnDisable()
@@ -310,8 +308,11 @@ namespace DynamicBlocking
             }
             if (ExperimentController.Instance.phase == 1)
             {
-                oneTimeAction?.Invoke();
-                triggered = false;
+                Debug.Log("wall");
+                LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, code, 12);
+                Debug.Log(code);
+                code += 10;
+                
 
                 fileHandler.AppendLine(
                     ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
