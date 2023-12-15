@@ -263,9 +263,13 @@ public class ExperimentController : MonoBehaviour
     
     private GridLocation lastLoc;
    void RecordNodes() {
-           if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)             //TODO update lastlocation to players last position, OR use samenode() function to check if the node is same or not
-               fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv",
-                   "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString()); }
+       if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)
+       {
+           lastLoc = NodeExtension.CurrentNode(player.transform.position);
+           fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv",
+               "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString());
+       }
+   }
 
 
     private StreamReader sr;
