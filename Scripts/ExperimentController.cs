@@ -180,6 +180,7 @@ public class ExperimentController : MonoBehaviour
 
     /* Debug */
     [SerializeField] bool debugActive = true;
+    [SerializeField] private GameObject lbj;
     [SerializeField] private GameObject phaseDisplay;
     [SerializeField] private GameObject stepDisplay;
     [SerializeField] private GameObject trialDisplay;
@@ -262,7 +263,7 @@ public class ExperimentController : MonoBehaviour
     
     private GridLocation lastLoc;
    void RecordNodes() {
-           if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)
+           if (NodeExtension.CurrentNode(player.transform.position) != lastLoc)             //TODO update lastlocation to players last position, OR use samenode() function to check if the node is same or not
                fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv",
                    "_nodePath.csv"), NodeExtension.CurrentNode(player.transform.position).GetString()); }
 
@@ -300,6 +301,7 @@ public class ExperimentController : MonoBehaviour
             stepDisplay.GetComponent<TextMeshProUGUI>().text = "Step: " + stepInPhase.ToString();
             trialDisplay.GetComponent<TextMeshProUGUI>().text = "Trial: " + currentTrial;
             gazeTrackingDisplay.GetComponent<TextMeshProUGUI>().text = "Gaze: " + _lastGazeDirection.ToString();
+            lbj.GetComponent<TextMeshProUGUI>().text = "Labjack Connected: " + labjack.ToString();
         }
         else
         {
@@ -469,7 +471,12 @@ public class ExperimentController : MonoBehaviour
                         userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
                         Debug.Log("trial starts");
-                        LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 0, 12);
+                        if (labjack)
+                        {
+                            LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 0,
+                                12);
+                        }
+
                         if (currentTrial >= 3 & stressLearning)
                         {
                             testWalls = new();
@@ -947,7 +954,7 @@ public class ExperimentController : MonoBehaviour
     private float lastTrigger; 
     private float triggerTimer = 1.5f;
     public bool startTimer = false;
-
+    public bool labjack = true;
 
 
     /// <summary>
@@ -1028,7 +1035,18 @@ public class ExperimentController : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            u3 = new U3(LJUD.CONNECTION.USB, "0", true);
+            
+            try
+            {
+                u3 = new U3(LJUD.CONNECTION.USB, "0", true);
+                labjack = true;
+            }
+            catch (LabJackUDException e)
+            {
+                Debug.Log(e.ToString());
+                labjack = false;
+            }
+            
             DontDestroyOnLoad(gameObject);
         }
         else
