@@ -475,10 +475,14 @@ public class ExperimentController : MonoBehaviour
                         userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
                         Debug.Log("trial starts");
-                        if (labjack)
+                        
+                        if (currentTrial==0 || currentTrial==3)
                         {
-                            LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 0,
-                                12);
+                            if (labjack)
+                            {
+                                LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 1,
+                                    12);
+                            }
                         }
 
                         if (currentTrial >= 3 & stressLearning)
@@ -539,6 +543,14 @@ public class ExperimentController : MonoBehaviour
             if (stepInPhase >= arrowPath.Length-1)
             {
                 Debug.Log("Increment current trial");
+                if (currentTrial==2 || currentTrial==5)
+                {
+                    if (labjack)
+                    {
+                        LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 0,
+                            12);
+                    }
+                }
                 stressTimer.SetActive(false);
                 recordCameraAndNodes = false;
                 currentTrial++;
