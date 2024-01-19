@@ -81,7 +81,14 @@ namespace DefaultNamespace
                             lastBeep = Time.realtimeSinceStartup;
                         }
                     }
-
+                    else
+                    {
+                        RenderSettings.fogMode = FogMode.Linear;
+                        RenderSettings.fogStartDistance = startFog;
+                        RenderSettings.fogEndDistance = endFog;
+                        RenderSettings.fogColor = Color.gray;
+                        RenderSettings.fog = true;
+                    }
                 }
                 else
                 {

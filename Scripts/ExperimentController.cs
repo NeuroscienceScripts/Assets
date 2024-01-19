@@ -547,7 +547,7 @@ public class ExperimentController : MonoBehaviour
                 {
                     if (labjack)
                     {
-                        LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 0,
+                        LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 2,
                             12);
                     }
                 }
@@ -726,6 +726,10 @@ public class ExperimentController : MonoBehaviour
             phase++;
             stepInPhase = 0;
             moveForwardArrow.SetActive(false);
+            if (labjack)
+            {
+                LJUD.Close();
+            }
         }
     }
 
@@ -1054,8 +1058,12 @@ public class ExperimentController : MonoBehaviour
             
             try
             {
+                LJUD.Close();
                 u3 = new U3(LJUD.CONNECTION.USB, "0", true);
+                LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 0,
+                    12);
                 labjack = true;
+                Debug.Log(u3.ljhandle);
             }
             catch (LabJackUDException e)
             {
