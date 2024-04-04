@@ -112,14 +112,16 @@ public class ExperimentController : MonoBehaviour
     private Trial[] trialList =
     {
         // Practice trials
-        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
-        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
+        // new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
+        // new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
 
         // Stress trials
         // blockedList = {7,6,5,11,3,9};
         // IsWallTrial = true --> even id participants will have these trials blocked, odd will be opposite
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, false),
+        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true),
         new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true),
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
         // new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true),
         // new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
         // new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
@@ -228,7 +230,8 @@ public class ExperimentController : MonoBehaviour
                         RunLearning();
                         break;
                     case 2:
-                        RunRetrace();
+                        //RunRetrace();
+                        phase++;
                         break;
                     case 3:
                         // Debug.Log(_lastGazeDirection);
