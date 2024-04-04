@@ -425,6 +425,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject stressTimer;
     void RunLearning()
     {
+        playerCam.transform.position = Vector3.zero;
         float arrowHeight = moveForwardArrow.transform.position.y;
 
         if (currentTrial >= learningRounds)
