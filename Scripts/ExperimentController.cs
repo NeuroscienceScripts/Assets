@@ -52,7 +52,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject paintings;
     [SerializeField] private GameObject node;
 
-    [SerializeField] private int learningRounds = 6;
+    [SerializeField] private int learningRounds = 2;
     [SerializeField] public bool stressLearning = false;
     [SerializeField] private int retraceRounds = 1;
     private int learningRedoRounds = 0;
@@ -118,32 +118,32 @@ public class ExperimentController : MonoBehaviour
         // Stress trials
         // blockedList = {7,6,5,11,3,9};
         // IsWallTrial = true --> even id participants will have these trials blocked, odd will be opposite
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true),
+        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, false),
         new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true),
-        new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true),
-        new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
-        new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
-        new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
-        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
-        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
-        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
-        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true),
-        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true),
-        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true),
-        
-        // Non-stress trials 
-        new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
-        new Trial(new GridLocation("B", 2), new GridLocation("G", 5), false),
-        new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
-        new Trial(new GridLocation("C", 6), new GridLocation("F", 1), false),
-        new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
-        new Trial(new GridLocation("G", 2), new GridLocation("C", 6), false),
-        new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
-        new Trial(new GridLocation("C", 7), new GridLocation("D", 1), false),
-        new Trial(new GridLocation("D", 1), new GridLocation("D", 4), false),
-        new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
-        new Trial(new GridLocation("A", 6), new GridLocation("E", 6), false),
-        new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
+        // new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true),
+        // new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
+        // new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
+        // new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
+        // new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
+        // new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
+        // new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
+        // new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true),
+        // new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true),
+        // new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true),
+        //
+        // // Non-stress trials 
+        // new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
+        // new Trial(new GridLocation("B", 2), new GridLocation("G", 5), false),
+        // new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
+        // new Trial(new GridLocation("C", 6), new GridLocation("F", 1), false),
+        // new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
+        // new Trial(new GridLocation("G", 2), new GridLocation("C", 6), false),
+        // new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
+        // new Trial(new GridLocation("C", 7), new GridLocation("D", 1), false),
+        // new Trial(new GridLocation("D", 1), new GridLocation("D", 4), false),
+        // new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
+        // new Trial(new GridLocation("A", 6), new GridLocation("E", 6), false),
+        // new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
         //
         // new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true),
         // new Trial(new GridLocation("A", 6), new GridLocation("E", 6), true),
@@ -222,7 +222,7 @@ public class ExperimentController : MonoBehaviour
                         Panel.SetActive(true);
                         maze.SetActive(false);
                         stressCanvas.enabled = false; 
-                        userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
+                        userText.GetComponent<TextMeshProUGUI>().text = "Welcome to Stress DSP Demo!";
                         break;
                     case 1:
                         RunLearning();
@@ -341,54 +341,53 @@ public class ExperimentController : MonoBehaviour
 
         // Blocking
         trialOrder = new int[trialList.Length];
-        for (int i = 0; i < number_practice_trials; i++)
+        for (int i = 0; i < trialList.Length; i++)
         {
             trialOrder[i] = i;
             Debug.Log(trialOrder[i]);
         }
 
-        List<int> stress_b = new List<int>();
-        List<int> stress_nb = new List<int>();
-        List<int> fixedstress = new List<int>();
-        List<int> nonStress = new List<int>();
-        for (int i = number_practice_trials; i < trialList.Length; i++) {
-            if (trialList[i].stressTrial)
-                if((subjectNumber % 2 != 0 && trialList[i].isWallTrial) || (subjectNumber % 2 == 0 && !trialList[i].isWallTrial))
-                    stress_nb.Add(i);
-                else
-                    stress_b.Add(i);
-            else
-                nonStress.Add(i); }
-
-        Random.InitState(subjectNumber * 10);
-
-        int x = Random.Range(0,stress_b.Count);
-        fixedstress.Add(stress_b[x]);
-        List<int> stress = new List<int>();
-        for (int i = stress_b[0]; i < (stress_b[0] + stress_b.Count); i++)
-        {
-            if (i == (stress_b[0] + x))
-                continue;
-            stress.Add(i);
-        }
-        stress = stress.Concat(stress_nb).ToList();
+        // List<int> stress_b = new List<int>();
+        // List<int> stress_nb = new List<int>();
+        // List<int> fixedstress = new List<int>();
+        // List<int> nonStress = new List<int>();
+        // for (int i = number_practice_trials; i < trialList.Length; i++) {
+        //     if (trialList[i].stressTrial)
+        //         if((subjectNumber % 2 != 0 && trialList[i].isWallTrial) || (subjectNumber % 2 == 0 && !trialList[i].isWallTrial))
+        //             stress_nb.Add(i);
+        //         else
+        //             stress_b.Add(i);
+        //     else
+        //         nonStress.Add(i); }
+        //
+        // Random.InitState(subjectNumber * 10);
+        //
+        // int x = Random.Range(0,stress_b.Count);
+        // fixedstress.Add(stress_b[x]);
+        // List<int> stress = new List<int>();
+        // for (int i = stress_b[0]; i < (stress_b[0] + stress_b.Count); i++)
+        // {
+        //     if (i == (stress_b[0] + x))
+        //         continue;
+        //     stress.Add(i);
+        // }
+        // stress = stress.Concat(stress_nb).ToList();
+        //
+        // stress = stress.ToArray().OrderBy(x => Random.Range(0, stress.Count)).ToList();
+        // nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0, nonStress.Count)).ToList();
+        // stress = fixedstress.Concat(stress).ToList();
         
-        stress = stress.ToArray().OrderBy(x => Random.Range(0, stress.Count)).ToList();
-        nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0, nonStress.Count)).ToList();
-        stress = fixedstress.Concat(stress).ToList();
-        
-        
-        if (stressFirst){
-            for (int i = 0; i < stress.Count; i++)
-                trialOrder[number_practice_trials + i] = stress[i];
-            for (int i = 0; i < nonStress.Count; i++)
-                trialOrder[number_practice_trials + stress.Count + i] = nonStress[i]; }
-        else {
-            for (int i = 0; i < nonStress.Count; i++)
-                trialOrder[number_practice_trials + i] = nonStress[i];
-            for (int i = 0; i < stress.Count; i++)
-                trialOrder[number_practice_trials + nonStress.Count + i] = stress[i];
-        }
+        // if (stressFirst){
+        //     for (int i = 0; i < stress.Count; i++)
+        //         trialOrder[number_practice_trials + i] = stress[i];
+        //     for (int i = 0; i < nonStress.Count; i++)
+        //         trialOrder[number_practice_trials + stress.Count + i] = nonStress[i]; }
+        // else {
+        //     for (int i = 0; i < nonStress.Count; i++)
+        //         trialOrder[number_practice_trials + i] = nonStress[i];
+        //     for (int i = 0; i < stress.Count; i++)
+        //         trialOrder[number_practice_trials + nonStress.Count + i] = stress[i];
+        // }
 
         // Create a web of invisible node colliders to track position
         string[] letters = { "A", "B", "C", "D", "E", "F", "G" };
@@ -424,100 +423,34 @@ public class ExperimentController : MonoBehaviour
     void RunLearning()
     {
         float arrowHeight = moveForwardArrow.transform.position.y;
-        //Debug.Log(arrowHeight);
 
         if (currentTrial >= learningRounds)
         {
             Debug.Log("Move to retracing phase");
             moveForwardArrow.SetActive(false);
             currentTrial = 0;
-            fileHandler.AppendLine(
-                subjectFile.Replace(Date_time + ".csv", "_desktop_Parameter.csv"),player.GetComponent<SimpleFirstPersonMovement>().mouseSensitivity.ToString());
-            //Debug.Log("file");
             phase++;
         }
         else
         {
-            // if (stepInPhase == 0)
-            // {
-            //     userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
-            //     maze.SetActive(false);
-            //     moveForwardArrow.SetActive(false);
-            //     footprints.SetActive(true);
-            //     footprints.transform.position =
-            //         new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
-            //     if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
-            //     {
-            //         recordCameraAndNodes = true;
-            //         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
-            //         stepInPhase++;
-            //     }
-            // }
-            if (stepInPhase < arrowPath.Length)
+            if (stepInPhase == 0)
             {
-                if (stepInPhase == 0)
+                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
+                maze.SetActive(false);
+                moveForwardArrow.SetActive(false);
+                footprints.SetActive(true);
+                footprints.transform.position =
+                    new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
+                if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
                 {
-                    blankScreen.color = new Color(blankScreen.color.r, blankScreen.color.g, blankScreen.color.b, 1);
-                    userText.GetComponent<TextMeshProUGUI>().text = "Left-Click to Start";
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        trialStartTime = Time.realtimeSinceStartup;
-                        stepInPhase++;
-                        player.GetComponent<SimpleFirstPersonMovement>().active = false;
-                        playerCam.transform.position = new Vector3(arrowPath[0].x,arrowHeight,arrowPath[0].y);
-                        // moveForwardArrow.transform.position = new Vector3(arrowPath[stepInPhase].x, arrowHeight, arrowPath[stepInPhase].y);
-                        // moveForwardArrow.transform.rotation = Quaternion.Euler(moveForwardArrow.transform.rotation.eulerAngles.x, arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
-                        StartCoroutine(FadeScreen());
-                        startTimer = true;
-                        playerCam.transform.rotation = Quaternion.Euler(0,-90,0);
-                        recordCameraAndNodes = true;
-                        player.GetComponent<SimpleFirstPersonMovement>().active = true;
-                        userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
-                        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
-                        Debug.Log("trial starts");
-                        
-                        // if (currentTrial==0 || currentTrial==3)
-                        // {
-                        //     if (labjack)
-                        //     {
-                        //         LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 1,
-                        //             12);
-                        //     }
-                        // }
-
-                        if (currentTrial >= 3 & stressLearning)
-                        {
-                            testWalls = new();
-                            switch (currentTrial)
-                            {
-                                case 3:
-                                    dynamicBlock.testWall = "E1";
-                                    testWalls.Enqueue("C5");
-                                    break;
-                                case 4:
-                                    dynamicBlock.testWall = "G3";
-                                    testWalls.Enqueue("A3");
-                                    testWalls.Enqueue("E5");
-                                    break;
-                                case 5:
-                                    dynamicBlock.testWall = "B7";
-                                    testWalls.Enqueue("E5");
-                                    break;
-                                default:
-                                    dynamicBlock.testWall = "";
-                                    break;
-                            }
-                            dynamicBlock.enabled = true;
-                            resettingWall = false;
-                        }
-                    }
+                    recordCameraAndNodes = true;
+                    fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
+                    stepInPhase++;
                 }
-
-                // if (dynamicBlock.enabled == false && currentTrial >= 3 && !resettingWall && stressLearning)
-                // {
-                //     StartCoroutine(ResetWall(2f));
-                // }
-
+            }
+            else if (stepInPhase < arrowPath.Length)
+            {
+                userText.GetComponent<TextMeshProUGUI>().text = "Learn the path by following the arrow";
                 maze.SetActive(true);
                 footprints.SetActive(false);
                 moveForwardArrow.SetActive(true);
@@ -537,38 +470,13 @@ public class ExperimentController : MonoBehaviour
             if (stepInPhase > 1)
             {
                 userText.GetComponent<TextMeshProUGUI>().text = "";
-                
             }
-
-            if (stepInPhase >= arrowPath.Length-1)
+            if (stepInPhase >= arrowPath.Length)
             {
                 Debug.Log("Increment current trial");
-                // if (currentTrial==2 || currentTrial==5)
-                // {
-                //     if (labjack)
-                //     {
-                //         LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 2,
-                //             12);
-                //     }
-                // }
-                stressTimer.SetActive(false);
                 recordCameraAndNodes = false;
                 currentTrial++;
-                startTimer = false;
                 stepInPhase = 0;
-                player.GetComponent<SimpleFirstPersonMovement>().active = false;
-                player.GetComponent<SimpleFirstPersonMovement>().rotation = Vector2.zero;
-                if (learningRedoRounds>0)
-                {
-                    Debug.Log("Move to retracing phase");
-                    moveForwardArrow.SetActive(false);
-                    currentTrial = 0;
-                    fileHandler.AppendLine(
-                        subjectFile.Replace(Date_time + ".csv", "_desktop_Parameter.csv"),player.GetComponent<SimpleFirstPersonMovement>().mouseSensitivity.ToString());
-                    phase++;
-                }
-                // playerCam.transform.rotation = Quaternion.Euler(0,-90,0);
-                // player.transform.rotation = Quaternion.Euler(0, 0, 0);
             }
 
         }
@@ -631,42 +539,22 @@ public class ExperimentController : MonoBehaviour
         {
             if (stepInPhase == 0)
             {
-                // userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
-                // maze.SetActive(false);
-                // moveForwardArrow.SetActive(false);
-                // footprints.SetActive(true);
-                // footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
-                //
-                // if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
-                // {
-                //     stepInPhase++;
-                //     recordCameraAndNodes = true;
-                //     retraceNodes = 0;
-                //     footprints.SetActive(false);
-                //     Debug.Log("Start retracing phase");
-                //     fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_retrace");
-                //     recordCameraAndNodes = true;
-                //     retraceTimer = Time.realtimeSinceStartup;
-                // }
-                blankScreen.color = new Color(blankScreen.color.r, blankScreen.color.g, blankScreen.color.b, 1);
-                userText.GetComponent<TextMeshProUGUI>().text = "Left-Click to Start";
-                footprints.SetActive(false);
-                if (Input.GetMouseButtonDown(0))
+                userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the trigger button";
+                maze.SetActive(false);
+                moveForwardArrow.SetActive(false);
+                footprints.SetActive(true);
+                footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
+
+                if (NodeExtension.SameNode(player, moveForwardArrow))
                 {
-                    trialStartTime = Time.realtimeSinceStartup;
                     stepInPhase++;
-                    // player.GetComponent<SimpleFirstPersonMovement>().active = false;
-                    playerCam.transform.position = new Vector3(arrowPath[0].x,moveForwardArrow.transform.position.y,arrowPath[0].y);
-                    // moveForwardArrow.transfor  m.position = new Vector3(arrowPath[stepInPhase].x, arrowHeight, arrowPath[stepInPhase].y);
-                    // moveForwardArrow.transform.rotation = Quaternion.Euler(moveForwardArrow.transform.rotation.eulerAngles.x, arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
-                    StartCoroutine(FadeScreen());
-                    retraceNodes = 0;
-                    retraceTimer = Time.realtimeSinceStartup;
-                    playerCam.transform.rotation = Quaternion.Euler(0,-90,0);
                     recordCameraAndNodes = true;
-                    player.GetComponent<SimpleFirstPersonMovement>().active = true;
+                    retraceNodes = 0;
+                    footprints.SetActive(false);
+                    Debug.Log("Start retracing phase");
                     fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_retrace");
-                    
+                    recordCameraAndNodes = true;
+                    retraceTimer = Time.time;
                 }
             }
             else if (stepInPhase < arrowPath.Length)
@@ -681,30 +569,26 @@ public class ExperimentController : MonoBehaviour
                     arrowChild.enabled = false;
                 }
 
-                if(stepInPhase < arrowPath.Length-1)
-                    moveForwardArrow.transform.position =
-                        new Vector3(arrowPath[stepInPhase].x, moveForwardArrow.transform.position.y, arrowPath[stepInPhase].y);
+                moveForwardArrow.transform.position =
+                    new Vector3(arrowPath[stepInPhase].x, moveForwardArrow.transform.position.y, arrowPath[stepInPhase].y);
                 if (NodeExtension.SameNode(player, moveForwardArrow))
                 {
                     stepInPhase++;
+                    // ControllerCollider.Instance.controllerSelection = "Not selected";
                     retraceNodes = 0;
-                    retraceTimer = Time.realtimeSinceStartup;
+                    retraceTimer = Time.time;
                 }
-                if (Time.realtimeSinceStartup - retraceTimer > retraceTimeLimit) //if (retraceNodes > 4)
+                if (Time.time - retraceTimer > retraceTimeLimit) //if (retraceNodes > 4)
                 {
                     stepInPhase = 0;
                     phase--; // Need to relearn
                     learningRedoRounds++;
-                    currentTrial = 0;
+                    currentTrial = learningRounds - 1;
                     moveForwardArrow.GetComponent<MeshRenderer>().enabled = true;
                     foreach (var arrowPart in moveForwardArrow.GetComponentsInChildren<MeshRenderer>())
                     {
                         arrowPart.enabled = true;
                     }
-                    player.GetComponent<SimpleFirstPersonMovement>().active = false;
-                    // playerCam.transform.position = new Vector3(arrowPath[0].x,moveForwardArrow.transform.position.y,arrowPath[0].y);
-                    player.GetComponent<SimpleFirstPersonMovement>().rotation = Vector2.zero;
-                    // playerCam.transform.rotation = Quaternion.Euler(0, 0, 0);
                 }
             }
             else
@@ -712,9 +596,6 @@ public class ExperimentController : MonoBehaviour
                 currentTrial++;
                 recordCameraAndNodes = false;
                 stepInPhase = 0;
-                player.GetComponent<SimpleFirstPersonMovement>().active = false;
-                player.GetComponent<SimpleFirstPersonMovement>().rotation = Vector2.zero;
-                // playerCam.transform.rotation = Quaternion.Euler(0, 0, 0);
             }
 
 
@@ -726,12 +607,120 @@ public class ExperimentController : MonoBehaviour
             phase++;
             stepInPhase = 0;
             moveForwardArrow.SetActive(false);
-            // if (labjack)
-            // {
-            //     LJUD.Close();
-            // }
         }
     }
+    // void RunRetrace()
+    // {
+    //     if (stepInPhase > 1)
+    //     {
+    //         userText.GetComponent<TextMeshProUGUI>().text = "";
+    //     }
+    //
+    //     if (currentTrial < retraceRounds)
+    //     {
+    //         if (stepInPhase == 0)
+    //         {
+    //             // userText.GetComponent<TextMeshProUGUI>().text = "Walk to the target and hit the" + (XRSettings.enabled ? " trigger " : " space " ) + "button";
+    //             // maze.SetActive(false);
+    //             // moveForwardArrow.SetActive(false);
+    //             // footprints.SetActive(true);
+    //             // footprints.transform.position = new Vector3(arrowPath[0].x, footprints.transform.position.y, arrowPath[0].y);
+    //             //
+    //             // if (GetTrigger(false) & NodeExtension.SameNode(player, footprints))
+    //             // {
+    //             //     stepInPhase++;
+    //             //     recordCameraAndNodes = true;
+    //             //     retraceNodes = 0;
+    //             //     footprints.SetActive(false);
+    //             //     Debug.Log("Start retracing phase");
+    //             //     fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_retrace");
+    //             //     recordCameraAndNodes = true;
+    //             //     retraceTimer = Time.realtimeSinceStartup;
+    //             // }
+    //             blankScreen.color = new Color(blankScreen.color.r, blankScreen.color.g, blankScreen.color.b, 1);
+    //             userText.GetComponent<TextMeshProUGUI>().text = "Left-Click to Start";
+    //             footprints.SetActive(false);
+    //             if (Input.GetMouseButtonDown(0))
+    //             {
+    //                 trialStartTime = Time.realtimeSinceStartup;
+    //                 stepInPhase++;
+    //                 // player.GetComponent<SimpleFirstPersonMovement>().active = false;
+    //                 playerCam.transform.position = new Vector3(arrowPath[0].x,moveForwardArrow.transform.position.y,arrowPath[0].y);
+    //                 // moveForwardArrow.transfor  m.position = new Vector3(arrowPath[stepInPhase].x, arrowHeight, arrowPath[stepInPhase].y);
+    //                 // moveForwardArrow.transform.rotation = Quaternion.Euler(moveForwardArrow.transform.rotation.eulerAngles.x, arrowPath[stepInPhase].z, moveForwardArrow.transform.rotation.eulerAngles.z);
+    //                 StartCoroutine(FadeScreen());
+    //                 retraceNodes = 0;
+    //                 retraceTimer = Time.realtimeSinceStartup;
+    //                 playerCam.transform.rotation = Quaternion.Euler(0,-90,0);
+    //                 recordCameraAndNodes = true;
+    //                 player.GetComponent<SimpleFirstPersonMovement>().active = true;
+    //                 fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_retrace");
+    //                 
+    //             }
+    //         }
+    //         else if (stepInPhase < arrowPath.Length)
+    //         {
+    //
+    //
+    //             maze.SetActive(true);
+    //             userText.GetComponent<TextMeshProUGUI>().text = "Retrace your learned route.";
+    //             moveForwardArrow.SetActive(true);
+    //             foreach (var arrowChild in moveForwardArrow.GetComponentsInChildren<MeshRenderer>())
+    //             {
+    //                 arrowChild.enabled = false;
+    //             }
+    //
+    //             if(stepInPhase < arrowPath.Length-1)
+    //                 moveForwardArrow.transform.position =
+    //                     new Vector3(arrowPath[stepInPhase].x, moveForwardArrow.transform.position.y, arrowPath[stepInPhase].y);
+    //             if (NodeExtension.SameNode(player, moveForwardArrow))
+    //             {
+    //                 stepInPhase++;
+    //                 retraceNodes = 0;
+    //                 retraceTimer = Time.realtimeSinceStartup;
+    //             }
+    //             if (Time.realtimeSinceStartup - retraceTimer > retraceTimeLimit) //if (retraceNodes > 4)
+    //             {
+    //                 stepInPhase = 0;
+    //                 phase--; // Need to relearn
+    //                 learningRedoRounds++;
+    //                 currentTrial = 0;
+    //                 moveForwardArrow.GetComponent<MeshRenderer>().enabled = true;
+    //                 foreach (var arrowPart in moveForwardArrow.GetComponentsInChildren<MeshRenderer>())
+    //                 {
+    //                     arrowPart.enabled = true;
+    //                 }
+    //                 player.GetComponent<SimpleFirstPersonMovement>().active = false;
+    //                 // playerCam.transform.position = new Vector3(arrowPath[0].x,moveForwardArrow.transform.position.y,arrowPath[0].y);
+    //                 player.GetComponent<SimpleFirstPersonMovement>().rotation = Vector2.zero;
+    //                 // playerCam.transform.rotation = Quaternion.Euler(0, 0, 0);
+    //             }
+    //         }
+    //         else
+    //         {
+    //             currentTrial++;
+    //             recordCameraAndNodes = false;
+    //             stepInPhase = 0;
+    //             player.GetComponent<SimpleFirstPersonMovement>().active = false;
+    //             player.GetComponent<SimpleFirstPersonMovement>().rotation = Vector2.zero;
+    //             // playerCam.transform.rotation = Quaternion.Euler(0, 0, 0);
+    //         }
+    //
+    //
+    //     }
+    //     if (phase == 2 & currentTrial >= retraceRounds)
+    //     {
+    //         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_numLearning.csv"), learningRedoRounds.ToString());
+    //         currentTrial = 0;
+    //         phase++;
+    //         stepInPhase = 0;
+    //         moveForwardArrow.SetActive(false);
+    //         // if (labjack)
+    //         // {
+    //         //     LJUD.Close();
+    //         // }
+    //     }
+    // }
 
     /// <summary>
     /// Runs the testing phase.

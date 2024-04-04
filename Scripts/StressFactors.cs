@@ -21,32 +21,32 @@ namespace DefaultNamespace
         {
             if (ExperimentController.Instance.phase == 1 & ExperimentController.Instance.currentTrial >= 3)
             {
-                if (ExperimentController.Instance.stressLearning)
-                {
-                    RenderSettings.fogMode = FogMode.Linear;
-                    RenderSettings.fogStartDistance = startFog;
-                    RenderSettings.fogEndDistance = endFog;
-                    RenderSettings.fogColor = Color.black;
-                    RenderSettings.fog = true;
-                    nonStressSound.Stop();
-                    if (!stressSound.isPlaying)
-                        stressSound.Play();
-                    if (ExperimentController.Instance.startTimer)
-                    {
-                        stressTimer.GetComponent<TextMeshProUGUI>().text = (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime) + " Seconds";
-                        stressTimer.SetActive(true);
-                    }
-                }
-                else
-                {
-                    RenderSettings.fogMode = FogMode.Linear;
-                    RenderSettings.fogStartDistance = startFog;
-                    RenderSettings.fogEndDistance = endFog;
-                    RenderSettings.fogColor = Color.gray;
-                    RenderSettings.fog = true;
-                    stressSound.Stop();
-                    stressTimer.SetActive(false);
-                }
+                // if (ExperimentController.Instance.stressLearning)
+                // {
+                //     RenderSettings.fogMode = FogMode.Linear;
+                //     RenderSettings.fogStartDistance = startFog;
+                //     RenderSettings.fogEndDistance = endFog;
+                //     RenderSettings.fogColor = Color.black;
+                //     RenderSettings.fog = true;
+                //     nonStressSound.Stop();
+                //     if (!stressSound.isPlaying)
+                //         stressSound.Play();
+                //     if (ExperimentController.Instance.startTimer)
+                //     {
+                //         stressTimer.GetComponent<TextMeshProUGUI>().text = (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime) + " Seconds";
+                //         stressTimer.SetActive(true);
+                //     }
+                // }
+                // else
+                // {
+                //     RenderSettings.fogMode = FogMode.Linear;
+                //     RenderSettings.fogStartDistance = startFog;
+                //     RenderSettings.fogEndDistance = endFog;
+                //     RenderSettings.fogColor = Color.gray;
+                //     RenderSettings.fog = true;
+                //     stressSound.Stop();
+                //     stressTimer.SetActive(false);
+                // }
             }
             else
             {
@@ -83,11 +83,11 @@ namespace DefaultNamespace
                     }
                     else
                     {
-                        RenderSettings.fogMode = FogMode.Linear;
-                        RenderSettings.fogStartDistance = startFog;
-                        RenderSettings.fogEndDistance = endFog;
-                        RenderSettings.fogColor = Color.gray;
-                        RenderSettings.fog = true;
+                        RenderSettings.fog = false;
+                        stressSound.Stop();
+                        if (!nonStressSound.isPlaying & !ExperimentController.Instance.GetTrialInfo().stressTrial)
+                            nonStressSound.Play();
+                        stressTimer.SetActive(false);
                     }
                 }
                 else
