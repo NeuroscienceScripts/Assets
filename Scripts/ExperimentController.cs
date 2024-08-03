@@ -13,7 +13,7 @@ using UnityEngine.UI;
 using UnityEngine.XR;
 using Valve.VR;
 using Random = UnityEngine.Random;
-using LabJack.LabJackUD;
+// using LabJack.LabJackUD;
 
 //TODO: Fix paintings to be on wall, fix footprints to rotate toward next target 
 /// <summary>
@@ -186,7 +186,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject trialDisplay;
     [SerializeField] private GameObject gazeTrackingDisplay;
     [SerializeField] private GameObject pause;
-    public U3 u3;
+    // public U3 u3;
 
     private void OnEnable()
     {
@@ -305,7 +305,7 @@ public class ExperimentController : MonoBehaviour
             stepDisplay.GetComponent<TextMeshProUGUI>().text = "Step: " + stepInPhase.ToString();
             trialDisplay.GetComponent<TextMeshProUGUI>().text = "Trial: " + currentTrial;
             gazeTrackingDisplay.GetComponent<TextMeshProUGUI>().text = "Gaze: " + _lastGazeDirection.ToString();
-            lbj.GetComponent<TextMeshProUGUI>().text = "Labjack Connected: " + labjack.ToString();
+            // lbj.GetComponent<TextMeshProUGUI>().text = "Labjack Connected: " + labjack.ToString();
         }
         else
         {
@@ -476,14 +476,14 @@ public class ExperimentController : MonoBehaviour
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Learning Phase");
                         Debug.Log("trial starts");
                         
-                        if (currentTrial==0 || currentTrial==3)
-                        {
-                            if (labjack)
-                            {
-                                LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 1,
-                                    12);
-                            }
-                        }
+                        // if (currentTrial==0 || currentTrial==3)
+                        // {
+                        //     if (labjack)
+                        //     {
+                        //         LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 1,
+                        //             12);
+                        //     }
+                        // }
 
                         if (currentTrial >= 3 & stressLearning)
                         {
@@ -543,14 +543,14 @@ public class ExperimentController : MonoBehaviour
             if (stepInPhase >= arrowPath.Length-1)
             {
                 Debug.Log("Increment current trial");
-                if (currentTrial==2 || currentTrial==5)
-                {
-                    if (labjack)
-                    {
-                        LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 2,
-                            12);
-                    }
-                }
+                // if (currentTrial==2 || currentTrial==5)
+                // {
+                //     if (labjack)
+                //     {
+                //         LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 2,
+                //             12);
+                //     }
+                // }
                 stressTimer.SetActive(false);
                 recordCameraAndNodes = false;
                 currentTrial++;
@@ -726,10 +726,10 @@ public class ExperimentController : MonoBehaviour
             phase++;
             stepInPhase = 0;
             moveForwardArrow.SetActive(false);
-            if (labjack)
-            {
-                LJUD.Close();
-            }
+            // if (labjack)
+            // {
+            //     LJUD.Close();
+            // }
         }
     }
 
@@ -974,7 +974,7 @@ public class ExperimentController : MonoBehaviour
     private float lastTrigger; 
     private float triggerTimer = 1.5f;
     public bool startTimer = false;
-    public bool labjack = true;
+    // public bool labjack = true;
 
 
     /// <summary>
@@ -1056,20 +1056,20 @@ public class ExperimentController : MonoBehaviour
         {
             Instance = this;
             
-            try
-            {
-                LJUD.Close();
-                u3 = new U3(LJUD.CONNECTION.USB, "0", true);
-                LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 0,
-                    12);
-                labjack = true;
-                Debug.Log(u3.ljhandle);
-            }
-            catch (LabJackUDException e)
-            {
-                Debug.Log(e.ToString());
-                labjack = false;
-            }
+            // try
+            // {
+            //     LJUD.Close();
+            //     u3 = new U3(LJUD.CONNECTION.USB, "0", true);
+            //     LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, 0,
+            //         12);
+            //     labjack = true;
+            //     Debug.Log(u3.ljhandle);
+            // }
+            // catch (LabJackUDException e)
+            // {
+            //     Debug.Log(e.ToString());
+            //     labjack = false;
+            // }
             
             DontDestroyOnLoad(gameObject);
         }

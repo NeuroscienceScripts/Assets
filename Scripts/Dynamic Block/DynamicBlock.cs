@@ -87,10 +87,10 @@ namespace DynamicBlocking
 
         private void Start()
         {
-            if (ExperimentController.Instance.labjack)
-            {
-                u3 = ExperimentController.Instance.u3;
-            }
+            // if (ExperimentController.Instance.labjack)
+            // {
+            //     u3 = ExperimentController.Instance.u3;
+            // }
         }
 
         private void OnDisable()
@@ -312,10 +312,10 @@ namespace DynamicBlocking
             if (ExperimentController.Instance.phase == 1)
             {
                 Debug.Log("wall");
-                if (ExperimentController.Instance.labjack)
-                {
-                    LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, code, 12);
-                }
+                // if (ExperimentController.Instance.labjack)
+                // {
+                //     LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, code, 12);
+                // }
                 Debug.Log(code);
                 code += 10;
                 
