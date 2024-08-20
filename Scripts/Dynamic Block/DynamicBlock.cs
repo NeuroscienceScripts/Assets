@@ -33,7 +33,7 @@ namespace DynamicBlocking
         private Dictionary<GridLocation, GameObject[]> vertWalls;
 
         public bool wallActivated;
-        public string testWall;
+        // public string testWall;
         private float startTime;
         private U3 u3;
         private event System.Action oneTimeAction;
@@ -55,12 +55,7 @@ namespace DynamicBlocking
                     return;
                 }
             }
-
-            if (ExperimentController.Instance.phase == 1)
-            {
-                ActivateWalls(testWall);
-            }
-            else ActivateWalls();
+            ActivateWalls();
         }
 
         private void Awake()
@@ -144,52 +139,6 @@ namespace DynamicBlocking
 
                 prevNode = currentNode;
             }
-
-
-            //if (ControllerCollider.Instance.wallActivated)
-            //{
-            //    if (!wallSound.isPlaying & !playedSound)
-            //    {
-            //        wallSound.Play();
-            //        playedSound = true;
-            //    }
-            //    for (int i = 0; i < possWalls.Count; i++)
-            //    {
-            //        if (possWalls[i].name == ControllerCollider.Instance.currWall)
-            //        {
-
-            //            if (possWalls[i].name.Contains("North"))
-            //            {
-            //                ExperimentController.Instance.blockedWall = possWalls[i + 1].name;
-            //                renderers[i + 1].enabled = true;
-            //                colliders[i + 1].isTrigger = false;
-            //                enabled = false;
-            //            }
-            //            else if (possWalls[i].name.Contains("South"))
-            //            {
-            //                ExperimentController.Instance.blockedWall = possWalls[i - 1].name;
-            //                renderers[i - 1].enabled = true;
-            //                colliders[i - 1].isTrigger = false;
-            //                enabled = false;
-            //            }
-            //            else if (possWalls[i].name.Contains("East"))
-            //            {
-            //                ExperimentController.Instance.blockedWall = possWalls[i + 1].name;
-            //                renderers[i + 1].enabled = true;
-            //                colliders[i + 1].isTrigger = false;
-            //                enabled = false;
-            //            }
-            //            else if (possWalls[i].name.Contains("West"))
-            //            {
-            //                ExperimentController.Instance.blockedWall = possWalls[i - 1].name;
-            //                renderers[i - 1].enabled = true;
-            //                colliders[i - 1].isTrigger = false;
-            //                enabled = false;
-            //            }
-            //            break;
-            //        }
-            //    }
-            //}
         }
 
 
@@ -312,10 +261,6 @@ namespace DynamicBlocking
             if (ExperimentController.Instance.phase == 1)
             {
                 Debug.Log("wall");
-                // if (ExperimentController.Instance.labjack)
-                // {
-                //     LJUD.ePut(u3.ljhandle, LJUD.IO.PUT_DIGITAL_PORT, 8, code, 12);
-                // }
                 Debug.Log(code);
                 code += 10;
                 

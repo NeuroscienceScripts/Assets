@@ -19,37 +19,37 @@ namespace DefaultNamespace
 
         private void Update()
         {
-            if (ExperimentController.Instance.phase == 1 & ExperimentController.Instance.currentTrial >= 3)
-            {
-                if (ExperimentController.Instance.stressLearning)
-                {
-                    RenderSettings.fogMode = FogMode.Linear;
-                    RenderSettings.fogStartDistance = startFog;
-                    RenderSettings.fogEndDistance = endFog;
-                    RenderSettings.fogColor = Color.black;
-                    RenderSettings.fog = true;
-                    nonStressSound.Stop();
-                    if (!stressSound.isPlaying)
-                        stressSound.Play();
-                    if (ExperimentController.Instance.startTimer)
-                    {
-                        stressTimer.GetComponent<TextMeshProUGUI>().text = (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime) + " Seconds";
-                        stressTimer.SetActive(true);
-                    }
-                }
-                else
-                {
-                    RenderSettings.fogMode = FogMode.Linear;
-                    RenderSettings.fogStartDistance = startFog;
-                    RenderSettings.fogEndDistance = endFog;
-                    RenderSettings.fogColor = Color.gray;
-                    RenderSettings.fog = true;
-                    stressSound.Stop();
-                    stressTimer.SetActive(false);
-                }
-            }
-            else
-            {
+            // if (ExperimentController.Instance.phase == 1 & ExperimentController.Instance.currentTrial >= 3)
+            // {
+            //     if (ExperimentController.Instance.stressLearning)
+            //     {
+            //         RenderSettings.fogMode = FogMode.Linear;
+            //         RenderSettings.fogStartDistance = startFog;
+            //         RenderSettings.fogEndDistance = endFog;
+            //         RenderSettings.fogColor = Color.black;
+            //         RenderSettings.fog = true;
+            //         nonStressSound.Stop();
+            //         if (!stressSound.isPlaying)
+            //             stressSound.Play();
+            //         if (ExperimentController.Instance.startTimer)
+            //         {
+            //             stressTimer.GetComponent<TextMeshProUGUI>().text = (Time.realtimeSinceStartup - ExperimentController.Instance.trialStartTime) + " Seconds";
+            //             stressTimer.SetActive(true);
+            //         }
+            //     }
+            //     else
+            //     {
+            //         RenderSettings.fogMode = FogMode.Linear;
+            //         RenderSettings.fogStartDistance = startFog;
+            //         RenderSettings.fogEndDistance = endFog;
+            //         RenderSettings.fogColor = Color.gray;
+            //         RenderSettings.fog = true;
+            //         stressSound.Stop();
+            //         stressTimer.SetActive(false);
+            //     }
+            // }
+            // else
+            // {
                 if (ExperimentController.Instance.phase == 3 & ExperimentController.Instance.stepInPhase == 3)
                 {
                     if (ExperimentController.Instance.GetTrialInfo().stressTrial) 
@@ -81,14 +81,14 @@ namespace DefaultNamespace
                             lastBeep = Time.realtimeSinceStartup;
                         }
                     }
-                    else
-                    {
-                        RenderSettings.fogMode = FogMode.Linear;
-                        RenderSettings.fogStartDistance = startFog;
-                        RenderSettings.fogEndDistance = endFog;
-                        RenderSettings.fogColor = Color.gray;
-                        RenderSettings.fog = true;
-                    }
+                    // else
+                    // {
+                    //     RenderSettings.fogMode = FogMode.Linear;
+                    //     RenderSettings.fogStartDistance = startFog;
+                    //     RenderSettings.fogEndDistance = endFog;
+                    //     RenderSettings.fogColor = Color.gray;
+                    //     RenderSettings.fog = true;
+                    // }
                 }
                 else
                 {
@@ -98,7 +98,7 @@ namespace DefaultNamespace
                         nonStressSound.Play();
                     stressTimer.SetActive(false);
                 }
-            }
+            // }
         }
     }
 }
