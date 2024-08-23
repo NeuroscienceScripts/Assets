@@ -57,7 +57,7 @@ namespace VR
                 mouseSensitivity += adjustableSensitivity ? 2.5f * Input.mouseScrollDelta.y : 0.0f;
 
                 if (lockHeight)
-                    t.parent.position = new Vector3(t.parent.position.x, lockedHeight, t.parent.position.z); 
+                    t.parent.position = new Vector3(t.parent.position.x, 0, t.parent.position.z); 
             }
         }
 

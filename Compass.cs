@@ -6,18 +6,18 @@ public class Compass : MonoBehaviour
 {
     public RectTransform compassBarTransform;
     public RectTransform objectiveMarkerTransform;
-    public RectTransform northMarkerTransform;
-    public RectTransform southMarkerTransform;
+    // public RectTransform northMarkerTransform;
+    // public RectTransform southMarkerTransform;
     public Transform cameraObjectTransform;
-    public Transform objectiveObjectTransform;
+    // public Transform objectiveObjectTransform;
     public Camera cam;
 
     // Update is called once per frame
     void Update()
     {
-        SetMarkerPosition(objectiveMarkerTransform, objectiveObjectTransform.position);
-        SetMarkerPosition(northMarkerTransform, Vector3.forward * 1000);
-        SetMarkerPosition(southMarkerTransform, Vector3.back * 1000);
+        SetMarkerPosition(objectiveMarkerTransform, ExperimentController.Instance.GetTrialInfo().end.GetTargetObject().transform.position);
+        // SetMarkerPosition(northMarkerTransform, Vector3.forward * 1000);
+        // SetMarkerPosition(southMarkerTransform, Vector3.back * 1000);
     }
 
     private void SetMarkerPosition(RectTransform markerTransform, Vector3 worldPosition)

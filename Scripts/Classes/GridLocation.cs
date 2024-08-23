@@ -106,6 +106,11 @@ namespace Classes
             return pos.Y;
         }
 
+        public GameObject GetTargetObject() 
+        {
+            return GameObject.Find(y+x+"-targ");
+        }
+        
         public string GetTarget() 
         {
             //TODO: Update with paintings

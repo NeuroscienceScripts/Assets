@@ -5,7 +5,7 @@ using UnityEngine;
 using Classes;
 using DefaultNamespace;
 using TMPro;
-using LabJack.LabJackUD;
+// using LabJack.LabJackUD;
 
 namespace DynamicBlocking
 {
@@ -35,7 +35,7 @@ namespace DynamicBlocking
         public bool wallActivated;
         // public string testWall;
         private float startTime;
-        private U3 u3;
+        // private U3 u3;
         private event System.Action oneTimeAction;
         private bool triggered = false;
         private int code = 100;

@@ -13,6 +13,7 @@ namespace Classes
         public GridLocation end;
         public bool stressTrial;
         public bool isWallTrial;
+        public int augmentation;
         
         public Trial(GridLocation start, GridLocation end)
         {
@@ -20,6 +21,7 @@ namespace Classes
             this.end = end;
             this.stressTrial = false;
             isWallTrial = false;
+            this.augmentation = 0;
         }
         
         public Trial(GridLocation start, GridLocation end, bool stressTrial)
@@ -28,6 +30,7 @@ namespace Classes
             this.end = end;
             this.stressTrial = stressTrial;
             isWallTrial = false;
+            this.augmentation = 0;
         }
         public Trial(GridLocation start, GridLocation end, bool stressTrial, bool isWallTrial)
         {
@@ -35,6 +38,16 @@ namespace Classes
             this.end = end;
             this.stressTrial = stressTrial;
             this.isWallTrial = isWallTrial;
+            this.augmentation = 0;
+        }
+        
+        public Trial(GridLocation start, GridLocation end, bool stressTrial, bool isWallTrial, int augmentation)
+        {
+            this.start = start;
+            this.end = end;
+            this.stressTrial = stressTrial;
+            this.isWallTrial = isWallTrial;
+            this.augmentation = augmentation;
         }
         
 

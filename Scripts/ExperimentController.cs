@@ -7,7 +7,7 @@ using TMPro;
 using Classes;
 using VR; 
 using DynamicBlocking;
-
+using NUnit.Framework.Constraints;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR;
@@ -39,6 +39,9 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject playerCam;
     [SerializeField] private DynamicBlock dynamicBlock;
     [SerializeField] private TMP_InputField subjectNum, trialNum; 
+    [SerializeField] private GameObject minimap,arrow,compass;
+    private GameObject augmentation;
+    private Transform goal;
     
     //[SerializeField] private GameObject subjectInput;
     //[SerializeField] private GameObject trialInput;
@@ -52,7 +55,7 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject paintings;
     [SerializeField] private GameObject node;
 
-    [SerializeField] private int learningRounds = 6;
+    [SerializeField] private int learningRounds = 2;
     [SerializeField] public bool stressLearning = false;
     [SerializeField] private int retraceRounds = 1;
     private int learningRedoRounds = 0;
@@ -112,10 +115,13 @@ public class ExperimentController : MonoBehaviour
     private Trial[] trialList =
     {
         // Practice trials
-        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false),
-        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false),
+        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,1),
+        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,1),
+        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false,false,2),
+        new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true,2),
+        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false,false,3),
+        new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true,3),
 
-        // Stress trials
         // blockedList = {7,6,5,11,3,9};
         // IsWallTrial = true --> even id participants will have these trials blocked, odd will be opposite
         new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true),
@@ -625,6 +631,31 @@ public class ExperimentController : MonoBehaviour
         {
             textMesh.enabled = false;
         }
+        switch (GetTrialInfo().augmentation)
+        {
+            case 0:
+                minimap.SetActive(false);
+                arrow.SetActive(false);
+                compass.SetActive(false);
+                break;
+            case 1: //minimap
+                arrow.SetActive(false);
+                compass.SetActive(false);
+                augmentation = minimap;
+                break;
+            case 2: //arrow
+                minimap.SetActive(false);
+                compass.SetActive(false);
+                augmentation = arrow;
+                break;
+            case 3: //compass
+                minimap.SetActive(false);
+                arrow.SetActive(false);
+                augmentation = compass;
+                break;
+            default:
+                break;
+        }
 
         if (currentTrial < trialList.Length)
         {
@@ -681,12 +712,21 @@ public class ExperimentController : MonoBehaviour
                         trialStartTime = Time.realtimeSinceStartup;
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"), "Start_Testing");
                         recordCameraAndNodes = true;
+                        if (GetTrialInfo().augmentation != 0)
+                        {
+                            augmentation.SetActive(true);
+                        }
                     }
 
                     break;
 
                 case 3: // Walk to end
                     recordCameraAndNodes = true;
+                    if (GetTrialInfo().augmentation == 1)   //update goalmarker for minimap
+                    {
+                        goal = GetTrialInfo().end.GetTargetObject().transform.Find("Canvas");
+                        goal.gameObject.SetActive(true);
+                    }
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Target Object: " + GetTrialInfo().end.GetTarget();
                     //Debug.Log("Walk to end");
@@ -708,6 +748,12 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 4: // Rate stress
+                    if (GetTrialInfo().augmentation != 0)
+                    {
+                        augmentation.SetActive(false);
+                        if (GetTrialInfo().augmentation == 1)
+                            goal.gameObject.SetActive(false);
+                    }
                     floor.SetActive(false);
                     stressCanvas.enabled = true; 
                     if (XRSettings.enabled && SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any) ||
@@ -933,7 +979,9 @@ public class ExperimentController : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            
+            minimap.SetActive(false);
+            arrow.SetActive(false);
+            compass.SetActive(false);
             // try
             // {
             //     LJUD.Close();
