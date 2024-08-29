@@ -33,12 +33,12 @@ namespace VR
 
         void CheckHeadset()
         {
-            Debug.Log(SteamVR.connected.ToArray().ToCommaSeparatedString());
+            // Debug.Log(SteamVR.connected.ToArray().ToCommaSeparatedString());
             bool headsetConnected = SteamVR.connected[0];
             XRSettings.enabled = headsetConnected;
             cameraHelper.enabled = headsetConnected;
             firstPerson.enabled = !headsetConnected;
-            Debug.Log(SteamVR.connected[0]);
+            // Debug.Log(SteamVR.connected[0]);
         }
 
         private void Update()

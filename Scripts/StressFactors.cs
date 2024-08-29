@@ -92,7 +92,7 @@ namespace DefaultNamespace
                 }
                 else
                 {
-                    RenderSettings.fog = false;
+                    // RenderSettings.fog = false;
                     stressSound.Stop();
                     if (!nonStressSound.isPlaying & !ExperimentController.Instance.GetTrialInfo().stressTrial)
                         nonStressSound.Play();

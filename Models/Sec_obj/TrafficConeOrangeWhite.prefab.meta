@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bc93e504405c8a7449afe3081ffe736a
+timeCreated: 1429292852
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 34912
+  packageName: Traffic Cones
+  packageVersion: 1.0
+  assetPath: Assets/IndustrialEnvironment/TrafficCone/Prefabs/TrafficConeOrangeWhite.prefab
+  uploadId: 59796

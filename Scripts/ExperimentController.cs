@@ -11,6 +11,7 @@ using NUnit.Framework.Constraints;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR;
+using Valve.Newtonsoft.Json.Utilities;
 using Valve.VR;
 using Random = UnityEngine.Random;
 // using LabJack.LabJackUD;
@@ -226,6 +227,7 @@ public class ExperimentController : MonoBehaviour
                 switch (phase) {
                     case 0:
                         Panel.SetActive(true);
+                        secondary.SetActive(false);
                         maze.SetActive(false);
                         stressCanvas.enabled = false; 
                         userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
@@ -344,6 +346,8 @@ public class ExperimentController : MonoBehaviour
         
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"),
             "start,end,stress_level");
+        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobj.csv"),
+            "trialNumber,A3,A7,C1,C5,E3,E7,G1,G5");
 
         // Blocking
         trialOrder = new int[trialList.Length];
@@ -692,6 +696,8 @@ public class ExperimentController : MonoBehaviour
                     {
 
                         footprints.SetActive(false);
+                        secondary.SetActive(true);
+                        RemoveSecondaryObjects();
                         maze.SetActive(true);
                         stepInPhase++;
                         fileHandler.AppendLine(
@@ -707,6 +713,7 @@ public class ExperimentController : MonoBehaviour
                         "Touch the painting and press " + (XRSettings.enabled ? "trigger" : "space" ) + " to start trial";
                     if (GetTrigger(true) )
                     {
+                        SecondaryObject();
                         dynamicBlock.enabled = true;
                         stepInPhase++;
                         trialStartTime = Time.realtimeSinceStartup;
@@ -820,6 +827,57 @@ public class ExperimentController : MonoBehaviour
         else
         {
             phase++;
+        }
+    }
+    public List<GameObject> selecedSecondaryObjects = new List<GameObject>();
+    [SerializeField] public GameObject[] parentGameObjects;
+    [SerializeField] public GameObject secondary;
+    private void SecondaryObject()
+    {
+        // List<GameObject> selectedChildren = new List<GameObject>();
+        List<string> selectedChildrenNames = new List<string>();
+
+        foreach (GameObject parent in parentGameObjects)
+        {
+            int childCount = parent.transform.childCount;
+
+            // Set all immediate children inactive initially
+            for (int i = 0; i < childCount; i++)
+            {
+                parent.transform.GetChild(i).gameObject.SetActive(false);
+            }
+
+            Transform selectedChild = null;
+            do
+            {
+                int randomIndex = Random.Range(0, childCount);
+                selectedChild = parent.transform.GetChild(randomIndex);
+            } while (selectedChildrenNames.Contains(selectedChild.name));
+
+            selectedChildrenNames.Add(selectedChild.name);
+            selecedSecondaryObjects.Add(selectedChild.gameObject);
+            Debug.Log("Selected child for " + parent.name + ": " + selectedChild.name);
+
+            selectedChild.gameObject.SetActive(true);
+        }
+        // Join the names with commas
+        string namesLine = string.Join(", ", selectedChildrenNames);
+        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobj.csv"),
+            GetTrialInfo() + "," + namesLine);
+    }
+
+    private void RemoveSecondaryObjects()
+    {
+        foreach (GameObject parent in parentGameObjects)
+        {
+            Transform[] children = parent.GetComponentsInChildren<Transform>();
+            List<Transform> childList = new List<Transform>(children);
+            childList.RemoveAt(0);
+
+            foreach (Transform child in childList)
+            {
+                child.gameObject.SetActive(false);
+            }
         }
     }
 
