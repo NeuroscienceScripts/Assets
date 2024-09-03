@@ -48,7 +48,7 @@ public class ExperimentController : MonoBehaviour
     //[SerializeField] private GameObject trialInput;
     [SerializeField] private GameObject Panel;
     [SerializeField] private Canvas debugCanvas; 
-    [SerializeField] private GameObject userText;
+    [SerializeField] public GameObject userText;
     [SerializeField] private RawImage redScreen;
     [SerializeField] private Image blankScreen;
     private bool resettingWall = false;
@@ -347,7 +347,9 @@ public class ExperimentController : MonoBehaviour
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"),
             "start,end,stress_level");
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobj.csv"),
-            "trialNumber,A3,A7,C1,C5,E3,E7,G1,G5");
+            "start,end,Ahall,Acorner,Ccorner,Chall,Ehall,Ecorner,Gcorner,Ghall");
+        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobjSeen.csv"),
+            "start,end");
 
         // Blocking
         trialOrder = new int[trialList.Length];
@@ -708,12 +710,13 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 2: // Wait for them to touch painting
-                    Debug.Log("Touch painting"); 
+                    // Debug.Log("Touch painting"); 
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Touch the painting and press " + (XRSettings.enabled ? "trigger" : "space" ) + " to start trial";
                     if (GetTrigger(true) )
                     {
                         SecondaryObject();
+                        trackv3.Instance.objectsInView.Clear();
                         dynamicBlock.enabled = true;
                         stepInPhase++;
                         trialStartTime = Time.realtimeSinceStartup;
@@ -723,20 +726,21 @@ public class ExperimentController : MonoBehaviour
                         {
                             augmentation.SetActive(true);
                         }
+                        if (GetTrialInfo().augmentation == 1)   //update goalmarker for minimap
+                        {
+                            goal = GetTrialInfo().end.GetTargetObject().transform.Find("Canvas");
+                            goal.gameObject.SetActive(true);
+                        }
+                        userText.GetComponent<TextMeshProUGUI>().text = "";
                     }
 
                     break;
 
                 case 3: // Walk to end
+                    trackv3.Instance.trackSecObjects();
                     recordCameraAndNodes = true;
-                    if (GetTrialInfo().augmentation == 1)   //update goalmarker for minimap
-                    {
-                        goal = GetTrialInfo().end.GetTargetObject().transform.Find("Canvas");
-                        goal.gameObject.SetActive(true);
-                    }
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Target Object: " + GetTrialInfo().end.GetTarget();
-                    //Debug.Log("Walk to end");
                     if (GetTrigger(true)  ||
                         (GetTrialInfo().stressTrial & Time.realtimeSinceStartup - trialStartTime >= stressTimeLimit) ||
                         Time.realtimeSinceStartup - trialStartTime >= nonStressTimeLimit)
@@ -746,6 +750,10 @@ public class ExperimentController : MonoBehaviour
                         
                         fileHandler.AppendLine(subjectFile,
                             PrintStepInfo() + "," + GetTrialInfo() + "," + NodeExtension.CurrentNode(player.transform.position).GetString()  + "," + blockedWall + "," + GetTrialInfo().stressTrial);
+                        // Join the names with commas
+                        string objectsSeen = string.Join(", ", trackv3.Instance.objectsInView);
+                        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobjSeen.csv"),
+                            GetTrialInfo() + "," + objectsSeen);
                         maze.SetActive(false);
                         stressLevel.GetComponent<TextMeshProUGUI>().text = "4";
                         dynamicBlock.enabled = false;
@@ -836,7 +844,7 @@ public class ExperimentController : MonoBehaviour
     {
         // List<GameObject> selectedChildren = new List<GameObject>();
         List<string> selectedChildrenNames = new List<string>();
-
+        selecedSecondaryObjects = new List<GameObject>();
         foreach (GameObject parent in parentGameObjects)
         {
             int childCount = parent.transform.childCount;
@@ -856,7 +864,7 @@ public class ExperimentController : MonoBehaviour
 
             selectedChildrenNames.Add(selectedChild.name);
             selecedSecondaryObjects.Add(selectedChild.gameObject);
-            Debug.Log("Selected child for " + parent.name + ": " + selectedChild.name);
+            // Debug.Log("Selected child for " + parent.name + ": " + selectedChild.name);
 
             selectedChild.gameObject.SetActive(true);
         }
@@ -870,13 +878,12 @@ public class ExperimentController : MonoBehaviour
     {
         foreach (GameObject parent in parentGameObjects)
         {
-            Transform[] children = parent.GetComponentsInChildren<Transform>();
-            List<Transform> childList = new List<Transform>(children);
-            childList.RemoveAt(0);
+            int childCount = parent.transform.childCount;
 
-            foreach (Transform child in childList)
+            // Set all immediate children inactive initially
+            for (int i = 0; i < childCount; i++)
             {
-                child.gameObject.SetActive(false);
+                parent.transform.GetChild(i).gameObject.SetActive(false);
             }
         }
     }
