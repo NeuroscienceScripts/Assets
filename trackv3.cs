@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,8 @@ public class trackv3 : MonoBehaviour
 {
     public static trackv3 Instance { get; private set; }
     public Camera playerCamera;  // Assign the player's camera in the Inspector
-    public List<GameObject> objectsToTrack, objectsInView;  // List of objects to track for visibility
+    public List<GameObject> objectsToTrack;
+    public List<String> objectsInView, secObjectsInView;  // List of objects to track for visibility
     private Plane[] frustumPlanes;
     void Awake()
     {
@@ -25,7 +27,8 @@ public class trackv3 : MonoBehaviour
     {
         // Initialize the list of objects to track (you can populate this via the Inspector)
         objectsToTrack = new List<GameObject>(GameObject.FindGameObjectsWithTag("Trackable"));  // Assumes objects have a "Trackable" tag
-        objectsInView = new List<GameObject>();
+        objectsInView = new List<String>();
+        secObjectsInView = new List<String>();
     }
 
     public void trackSecObjects()
@@ -40,9 +43,19 @@ public class trackv3 : MonoBehaviour
             if (IsObjectInView(obj) && !IsObjectOccluded(obj))
             {
                 // Object is in view and not occluded
-                if (!objectsInView.Contains(obj))
+                if (!objectsInView.Contains(obj.name))  //object not added yet
                 {
-                    objectsInView.Add(obj);
+                    objectsInView.Add(obj.name);
+                    foreach (Transform child in obj.transform)
+                    {
+                        if (child.gameObject.activeSelf)
+                        {
+                            // Found the active child
+                            GameObject activeChild = child.gameObject;
+                            secObjectsInView.Add(activeChild.name);
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -76,7 +89,7 @@ public class trackv3 : MonoBehaviour
         // Perform the raycast
         if (Physics.Raycast(campos, directionToObj*10, out hit))
         {
-            // // Get the GameObject that was hit
+            // // // Get the GameObject that was hit
             // GameObject hitObject = hit.collider.gameObject;
             // Debug.Log("Hit GameObject: " + hitObject.name);
             // If the ray hits the object first, it's not occluded

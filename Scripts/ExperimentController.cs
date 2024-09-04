@@ -29,13 +29,13 @@ public class ExperimentController : MonoBehaviour
     //[SerializeField] public Canvas introCanvas;
     [SerializeField] public bool isTraining = false;
     [SerializeField] public Canvas introCanvas;
-    [SerializeField] public Canvas stressCanvas;
+    [SerializeField] public Canvas stressCanvas,secobjectcanvas;
     [SerializeField] private GameObject maze;
     [SerializeField] private GameObject floor;
     [SerializeField] private GameObject footprints;
     [SerializeField] private GameObject moveForwardArrow;
     [SerializeField] public GameObject stressLevel;
-    [SerializeField] public GameObject stressText;
+    [SerializeField] public GameObject stressText,sectext;
     [SerializeField] public GameObject player;
     [SerializeField] private GameObject playerCam;
     [SerializeField] private DynamicBlock dynamicBlock;
@@ -116,6 +116,8 @@ public class ExperimentController : MonoBehaviour
     private Trial[] trialList =
     {
         // Practice trials
+        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,0),
+        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,0),
         new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,1),
         new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,1),
         new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false,false,2),
@@ -323,6 +325,7 @@ public class ExperimentController : MonoBehaviour
         }
     }
 
+    public List<String> objectList;
     /// <summary>
     /// Gets starting point/subject number and starts the experiment
     /// Which phase you're starting on is inputted by the buttons in the startup GUI, then trial# and session# are
@@ -340,7 +343,7 @@ public class ExperimentController : MonoBehaviour
             ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
                 "_camera_tracker.csv"), "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
                                         "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ");
-        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,goal,selected,blockedWall,isStressTrial");
+        fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,goal,selected,blockedWall,isStressTrial,augmentation");
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"),
             DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute);
         
@@ -349,8 +352,14 @@ public class ExperimentController : MonoBehaviour
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobj.csv"),
             "start,end,Ahall,Acorner,Ccorner,Chall,Ehall,Ecorner,Gcorner,Ghall");
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobjSeen.csv"),
-            "start,end");
-
+            "start,end,1,2,3,4,5,6,7,8,9,10,11,12");
+        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secselected.csv"), 
+            "start,end,1,2,3,4,5,6,7,8,9,10,11,12");
+        objectList = new List<string>();
+        for (int i = 1; i <= 12; i++)
+        {
+            objectList.Add(i.ToString()); 
+        }
         // Blocking
         trialOrder = new int[trialList.Length];
         for (int i = 0; i < number_practice_trials; i++)
@@ -632,7 +641,7 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void RunTesting()
     {
-        playerCam.transform.position = Vector3.zero;
+        // playerCam.transform.position = Vector3.zero;
         foreach (var textMesh in paintings.GetComponentsInChildren<TextMeshPro>())
         {
             textMesh.enabled = false;
@@ -717,6 +726,7 @@ public class ExperimentController : MonoBehaviour
                     {
                         SecondaryObject();
                         trackv3.Instance.objectsInView.Clear();
+                        trackv3.Instance.secObjectsInView.Clear();
                         dynamicBlock.enabled = true;
                         stepInPhase++;
                         trialStartTime = Time.realtimeSinceStartup;
@@ -749,9 +759,13 @@ public class ExperimentController : MonoBehaviour
                             blockedWall = "N/A";
                         
                         fileHandler.AppendLine(subjectFile,
-                            PrintStepInfo() + "," + GetTrialInfo() + "," + NodeExtension.CurrentNode(player.transform.position).GetString()  + "," + blockedWall + "," + GetTrialInfo().stressTrial);
-                        // Join the names with commas
-                        string objectsSeen = string.Join(", ", trackv3.Instance.objectsInView);
+                            PrintStepInfo() + "," + GetTrialInfo() + "," + NodeExtension.CurrentNode(player.transform.position).GetString()  + "," + blockedWall + "," + GetTrialInfo().stressTrial + "," + GetTrialInfo().augmentation);
+                        // add the objects that should have been seen
+                        string objectsSeen = "";
+                        foreach (string obj in objectList)
+                        {
+                            objectsSeen += trackv3.Instance.secObjectsInView.Contains(obj) ? "true," : "false,"; 
+                        }
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobjSeen.csv"),
                             GetTrialInfo() + "," + objectsSeen);
                         maze.SetActive(false);
@@ -791,7 +805,7 @@ public class ExperimentController : MonoBehaviour
                     dynamicBlock.DisableWalls();
                     userText.GetComponent<TextMeshProUGUI>().text = "";
 
-                    recordCameraAndNodes = false;
+                    // recordCameraAndNodes = false;
                     recordCameraAndNodes = false;
 
                     // select stress, once selected disable stress UI and move phase forward
@@ -806,16 +820,10 @@ public class ExperimentController : MonoBehaviour
                     {
                         //move forward
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
-                        stressCanvas.enabled = false; 
-                        floor.SetActive(true);
-                        stepInPhase = 0;
-                        footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
-                            Random.Range(-3, 3));
-
-
+                        stressCanvas.enabled = false;
+                        ToggleAllOff();
+                        stepInPhase++;
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text);
-
-                        currentTrial++;
                         Debug.Log("Current trial: " + currentTrial);
                     }
                     else if (XRSettings.enabled && SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
@@ -824,6 +832,54 @@ public class ExperimentController : MonoBehaviour
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
                     }
 
+                    break;
+                case 6://secondary task selection
+                    secobjectcanvas.enabled = true;
+                    if (XRSettings.enabled && SteamVR_Actions._default.SnapTurnLeft.GetStateDown(SteamVR_Input_Sources.Any) ||
+                        Input.GetKeyDown(KeyCode.LeftArrow))
+                    {
+                        Left();
+                    }
+                    if (XRSettings.enabled && SteamVR_Actions._default.SnapTurnRight.GetStateDown(SteamVR_Input_Sources.Any)||
+                        Input.GetKeyDown(KeyCode.RightArrow))
+                    {
+                        Right();
+                    }
+                    if (XRSettings.enabled && SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
+                    {
+                        myToggle.isOn = !myToggle.isOn;
+                    }
+                    if (GetTrigger(false))
+                    {
+                        sectext.GetComponent<TextMeshProUGUI>().text = "Confirm?";
+                        stepInPhase++;
+                    }
+                    break;
+                case 7:
+                    if (GetTrigger(false))
+                    {
+                        //move forward
+                        sectext.GetComponent<TextMeshProUGUI>().text = "Select objects that you saw";
+                        secobjectcanvas.enabled = false;
+                        floor.SetActive(true);
+                        stepInPhase = 0;
+                        string selectedobjects = GetTrialInfo() + "";
+                        foreach (Toggle toggle in toggles)
+                        {
+                            selectedobjects = selectedobjects + "," + toggle.isOn;
+                        }
+                        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secselected.csv"), selectedobjects);
+                        footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
+                            Random.Range(-3, 3));
+                        ToggleAllOff();
+                        currentTrial++;
+                        Debug.Log("Current trial: " + currentTrial);
+                    }
+                    else if (XRSettings.enabled && SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
+                    {
+                        stepInPhase--;
+                        sectext.GetComponent<TextMeshProUGUI>().text = "Select objects that you saw";
+                    }
                     break;
 
 
@@ -837,6 +893,45 @@ public class ExperimentController : MonoBehaviour
             phase++;
         }
     }
+
+    public Toggle myToggle;
+    public List<Toggle> toggles;
+    public int currentIndex = 0;
+    public void ToggleAllOff()
+    {
+        foreach (Toggle toggle in toggles)
+        {
+            toggle.isOn = false; 
+        }
+    }
+    private void HighlightToggle()
+    {
+        ColorBlock colors = myToggle.colors;
+        colors.normalColor = colors.highlightedColor;
+        myToggle.colors = colors;
+    }
+    private void Left()
+    {
+        ResetToggleColor();
+        currentIndex = Mathf.Clamp(currentIndex - 1, 0, toggles.Count - 1);
+        myToggle = toggles[currentIndex];
+        HighlightToggle();
+    }
+    private void Right()
+    {
+        ResetToggleColor();
+        currentIndex = Mathf.Clamp(currentIndex + 1, 0, toggles.Count - 1);
+        myToggle = toggles[currentIndex];
+        HighlightToggle();
+    }
+    private void ResetToggleColor()
+    {
+        ColorBlock colors = myToggle.colors;
+        colors.normalColor = Color.white;
+        myToggle.colors = colors;
+    }
+    
+    
     public List<GameObject> selecedSecondaryObjects = new List<GameObject>();
     [SerializeField] public GameObject[] parentGameObjects;
     [SerializeField] public GameObject secondary;

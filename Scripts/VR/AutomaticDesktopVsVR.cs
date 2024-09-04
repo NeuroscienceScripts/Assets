@@ -37,8 +37,9 @@ namespace VR
             bool headsetConnected = SteamVR.connected[0];
             XRSettings.enabled = headsetConnected;
             cameraHelper.enabled = headsetConnected;
-            firstPerson.enabled = !headsetConnected;
+            // firstPerson.enabled = !headsetConnected;
             // Debug.Log(SteamVR.connected[0]);
+            firstPerson.enabled = false;
         }
 
         private void Update()
