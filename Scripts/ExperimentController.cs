@@ -231,7 +231,8 @@ public class ExperimentController : MonoBehaviour
                         Panel.SetActive(true);
                         secondary.SetActive(false);
                         maze.SetActive(false);
-                        stressCanvas.enabled = false; 
+                        stressCanvas.enabled = false;
+                        secobjectcanvas.enabled = false;
                         userText.GetComponent<TextMeshProUGUI>().text = "Input subject/trial number and select phase";
                         break;
                     case 1:
@@ -822,6 +823,9 @@ public class ExperimentController : MonoBehaviour
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
                         stressCanvas.enabled = false;
                         ToggleAllOff();
+                        myToggle = toggles[0];
+                        HighlightToggle();
+                        currentIndex = 0;
                         stepInPhase++;
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text);
                         Debug.Log("Current trial: " + currentTrial);
@@ -845,7 +849,17 @@ public class ExperimentController : MonoBehaviour
                     {
                         Right();
                     }
-                    if (XRSettings.enabled && SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
+                    if (XRSettings.enabled && SteamVR_Actions._default.downUI.GetStateDown(SteamVR_Input_Sources.Any) ||
+                        Input.GetKeyDown(KeyCode.DownArrow))
+                    {
+                        Down();
+                    }
+                    if (XRSettings.enabled && SteamVR_Actions._default.upUI.GetStateDown(SteamVR_Input_Sources.Any)||
+                        Input.GetKeyDown(KeyCode.UpArrow))
+                    {
+                        Up();
+                    }
+                    if (XRSettings.enabled && SteamVR_Actions._default.selectUI.GetStateDown(SteamVR_Input_Sources.Any))
                     {
                         myToggle.isOn = !myToggle.isOn;
                     }
@@ -921,6 +935,20 @@ public class ExperimentController : MonoBehaviour
     {
         ResetToggleColor();
         currentIndex = Mathf.Clamp(currentIndex + 1, 0, toggles.Count - 1);
+        myToggle = toggles[currentIndex];
+        HighlightToggle();
+    }
+    private void Down()
+    {
+        ResetToggleColor();
+        currentIndex = Mathf.Clamp(currentIndex + 3, 0, toggles.Count - 1);
+        myToggle = toggles[currentIndex];
+        HighlightToggle();
+    }
+    private void Up()
+    {
+        ResetToggleColor();
+        currentIndex = Mathf.Clamp(currentIndex - 3, 0, toggles.Count - 1);
         myToggle = toggles[currentIndex];
         HighlightToggle();
     }
