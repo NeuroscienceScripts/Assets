@@ -116,7 +116,7 @@ public class ExperimentController : MonoBehaviour
     private Trial[] trialList =
     {
         // Practice trials
-        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,0),
+        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,3),
         new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,0),
         new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,1),
         new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,1),
@@ -874,6 +874,7 @@ public class ExperimentController : MonoBehaviour
                     {
                         //move forward
                         sectext.GetComponent<TextMeshProUGUI>().text = "Select objects that you saw";
+                        ResetToggleColor();
                         secobjectcanvas.enabled = false;
                         floor.SetActive(true);
                         stepInPhase = 0;
