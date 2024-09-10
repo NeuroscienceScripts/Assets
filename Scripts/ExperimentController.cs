@@ -218,7 +218,7 @@ public class ExperimentController : MonoBehaviour
                         // DisplayDebugInfo();
                         RunTesting();
                         break;
-                    default:
+                    case 4:
                         FinishExperiment();
                         StartCoroutine(WaitCoroutine());
                         Application.Quit();
@@ -720,7 +720,7 @@ public class ExperimentController : MonoBehaviour
                         (GetTrialInfo().stressTrial & Time.realtimeSinceStartup - trialStartTime >= stressTimeLimit) ||
                         Time.realtimeSinceStartup - trialStartTime >= nonStressTimeLimit)
                     {
-                        if (!GetTrialInfo().stressTrial || (subjectNumber % 2 != 0 && GetTrialInfo().isWallTrial) || (subjectNumber % 2 == 0 && !GetTrialInfo().isWallTrial))
+                        if (!GetTrialInfo().stressTrial || !GetTrialInfo().isWallTrial)
                             blockedWall = "N/A";
                         
                         fileHandler.AppendLine(subjectFile,
@@ -1008,7 +1008,7 @@ public class ExperimentController : MonoBehaviour
     /// </summary>
     void FinishExperiment()
     {
-        userText.GetComponent<TextMeshProUGUI>().text = "THE END\nThanks for participating!!";
+        userText.GetComponent<TextMeshProUGUI>().text = "THE END of this block\nLet experimenter know you are done with this block!!";
         //TODO update for VR (have a screenSpace canvas and worldSpace canvas)
     }
 

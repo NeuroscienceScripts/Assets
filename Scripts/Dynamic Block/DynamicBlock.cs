@@ -45,11 +45,11 @@ namespace DynamicBlocking
 
         private void OnEnable()
         {
-            int num = ExperimentController.Instance.subjectNumber % 2;
+            // int num = ExperimentController.Instance.subjectNumber % 2;
             Trial t = ExperimentController.Instance.GetTrialInfo();
             if (ExperimentController.Instance.phase == 3)
             {
-                if (!t.stressTrial || (num != 0 && t.isWallTrial) || (num == 0 && !t.isWallTrial))
+                if (!t.stressTrial && !t.isWallTrial)
                 {
                     enabled = false;
                     return;
