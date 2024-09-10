@@ -153,78 +153,7 @@ public class ExperimentController : MonoBehaviour
         new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true,true,3),
         new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true,true,3),
     };
-
-    // private Trial[] trialList =
-    // {
-    //     // Practice trials
-    //     new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,0),
-    //     new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,0),
-    //     new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,1),
-    //     new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,1),
-    //     new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false,false,2),
-    //     new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true,2),
-    //     new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false,false,3),
-    //     new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true,3),
-    //
-    //     // blockedList = {7,6,5,11,3,9};
-    //     // IsWallTrial = true --> even id participants will have these trials blocked, odd will be opposite
-    //     new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true),
-    //     new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true),
-    //     new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true),
-    //     new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
-    //     new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
-    //     new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
-    //     new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
-    //     new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
-    //     new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
-    //     new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true),
-    //     new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true),
-    //     new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true),
-    //     
-    //     // Non-stress trials 
-    //     new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
-    //     new Trial(new GridLocation("B", 2), new GridLocation("G", 5), false),
-    //     new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
-    //     new Trial(new GridLocation("C", 6), new GridLocation("F", 1), false),
-    //     new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
-    //     new Trial(new GridLocation("G", 2), new GridLocation("C", 6), false),
-    //     new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
-    //     new Trial(new GridLocation("C", 7), new GridLocation("D", 1), false),
-    //     new Trial(new GridLocation("D", 1), new GridLocation("D", 4), false),
-    //     new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
-    //     new Trial(new GridLocation("A", 6), new GridLocation("E", 6), false),
-    //     new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
-    //     //
-    //     // new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true),
-    //     // new Trial(new GridLocation("A", 6), new GridLocation("E", 6), true),
-    //     // new Trial(new GridLocation("B", 2), new GridLocation("G", 5), true),
-    //     // new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
-    //     // new Trial(new GridLocation("C", 6), new GridLocation("F", 1), true),
-    //     // new Trial(new GridLocation("C", 7), new GridLocation("D", 1), true, true),
-    //     // new Trial(new GridLocation("D", 1), new GridLocation("D", 4), true, true),
-    //     // new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
-    //     // new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true),
-    //     // new Trial(new GridLocation("F", 6), new GridLocation("B", 2), true, true),
-    //     // new Trial(new GridLocation("G", 2), new GridLocation("C", 6), true),
-    //     // new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
-    //     //
-    //     // // Non-stress trials 
-    //     // new Trial(new GridLocation("A", 1), new GridLocation("D", 4), false),
-    //     // new Trial(new GridLocation("A", 6), new GridLocation("G", 2), false),
-    //     // new Trial(new GridLocation("B", 2), new GridLocation("C", 6), false),
-    //     // new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
-    //     // new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
-    //     // new Trial(new GridLocation("C", 7), new GridLocation("B", 2), false),
-    //     // new Trial(new GridLocation("D", 1), new GridLocation("F", 6), false),
-    //     // new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
-    //     // new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
-    //     // new Trial(new GridLocation("F", 6), new GridLocation("A", 6), false),
-    //     // new Trial(new GridLocation("G", 2), new GridLocation("C", 7), false),
-    //     // new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
-    // };
     
-    
-
     private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
 
     [SerializeField] private int[] trialOrder = { 0 }; //Randomized at start
@@ -232,7 +161,7 @@ public class ExperimentController : MonoBehaviour
 
     /* Debug */
     [SerializeField] bool debugActive = true;
-    [SerializeField] private GameObject lbj;
+    // [SerializeField] private GameObject lbj;
     [SerializeField] private GameObject phaseDisplay;
     [SerializeField] private GameObject stepDisplay;
     [SerializeField] private GameObject trialDisplay;
