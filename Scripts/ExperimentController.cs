@@ -56,17 +56,17 @@ public class ExperimentController : MonoBehaviour
     [SerializeField] private GameObject paintings;
     [SerializeField] private GameObject node;
 
-    [SerializeField] private int learningRounds = 2;
-    [SerializeField] public bool stressLearning = false;
+    [SerializeField] private int learningRounds = 5;
+    // [SerializeField] public bool stressLearning = false;
     [SerializeField] private int retraceRounds = 1;
     private int learningRedoRounds = 0;
     [SerializeField] private float retraceTimeLimit = 10.0f;
-    [SerializeField] public float stressTimeLimit = 15.0f;
+    [SerializeField] public float stressTimeLimit = 20.0f;
     [SerializeField] private float nonStressTimeLimit = 30.0f;
 
     [SerializeField] private int number_practice_trials = 2;
     private int numTrials = 24;
-    [SerializeField] private bool stressFirst = false;
+    // [SerializeField] private bool stressFirst = false;
 
     #region StressVars
     #endregion
@@ -115,72 +115,115 @@ public class ExperimentController : MonoBehaviour
 
     private Trial[] trialList =
     {
-        // Practice trials
-        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,3),
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,0),
-        new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,1),
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,1),
-        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false,false,2),
-        new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true,2),
-        new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false,false,3),
-        new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true,3),
-
-        // blockedList = {7,6,5,11,3,9};
-        // IsWallTrial = true --> even id participants will have these trials blocked, odd will be opposite
-        new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true),
-        new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true),
-        new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true),
-        new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
-        new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
-        new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
-        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
-        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
-        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
-        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true),
-        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true),
-        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true),
-        
-        // Non-stress trials 
-        new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
-        new Trial(new GridLocation("B", 2), new GridLocation("G", 5), false),
-        new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
-        new Trial(new GridLocation("C", 6), new GridLocation("F", 1), false),
-        new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
-        new Trial(new GridLocation("G", 2), new GridLocation("C", 6), false),
-        new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
-        new Trial(new GridLocation("C", 7), new GridLocation("D", 1), false),
-        new Trial(new GridLocation("D", 1), new GridLocation("D", 4), false),
-        new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
-        new Trial(new GridLocation("A", 6), new GridLocation("E", 6), false),
-        new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
-        //
-        // new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true),
-        // new Trial(new GridLocation("A", 6), new GridLocation("E", 6), true),
-        // new Trial(new GridLocation("B", 2), new GridLocation("G", 5), true),
-        // new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
-        // new Trial(new GridLocation("C", 6), new GridLocation("F", 1), true),
-        // new Trial(new GridLocation("C", 7), new GridLocation("D", 1), true, true),
-        // new Trial(new GridLocation("D", 1), new GridLocation("D", 4), true, true),
-        // new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
-        // new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true),
-        // new Trial(new GridLocation("F", 6), new GridLocation("B", 2), true, true),
-        // new Trial(new GridLocation("G", 2), new GridLocation("C", 6), true),
-        // new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
-        //
-        // // Non-stress trials 
-        // new Trial(new GridLocation("A", 1), new GridLocation("D", 4), false),
-        // new Trial(new GridLocation("A", 6), new GridLocation("G", 2), false),
-        // new Trial(new GridLocation("B", 2), new GridLocation("C", 6), false),
-        // new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
-        // new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
-        // new Trial(new GridLocation("C", 7), new GridLocation("B", 2), false),
-        // new Trial(new GridLocation("D", 1), new GridLocation("F", 6), false),
-        // new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
-        // new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
-        // new Trial(new GridLocation("F", 6), new GridLocation("A", 6), false),
-        // new Trial(new GridLocation("G", 2), new GridLocation("C", 7), false),
-        // new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
+        new Trial(new GridLocation("B", 2), new GridLocation("F", 6), false, false, 0),//practice
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true,true,0),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true,true,0),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true,true,0),
+        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true,true,0),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true,true,0),
+        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true,true,0),
     };
+    private Trial[] trialList1 =
+    {
+        new Trial(new GridLocation("B", 2), new GridLocation("F", 6), false, false, 1),//practice
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true,true,1),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true,true,1),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true,true,1),
+        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true,true,1),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true,true,1),
+        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true,true,1),
+    };
+    private Trial[] trialList2 =
+    {
+        new Trial(new GridLocation("B", 2), new GridLocation("F", 6), false, false, 2),//practice
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true,true,2),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true,true,2),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true,true,2),
+        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true,true,2),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true,true,2),
+        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true,true,2),
+    };
+    private Trial[] trialList3 =
+    {
+        new Trial(new GridLocation("B", 2), new GridLocation("F", 6), false, false, 3),//practice
+        new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true,true,3),
+        new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true,true,3),
+        new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true,true,3),
+        new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true,true,3),
+        new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true,true,3),
+        new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true,true,3),
+    };
+
+    // private Trial[] trialList =
+    // {
+    //     // Practice trials
+    //     new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,0),
+    //     new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,0),
+    //     new Trial(new GridLocation("A", 1), new GridLocation("A", 6), false,false,1),
+    //     new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true,1),
+    //     new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false,false,2),
+    //     new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true,2),
+    //     new Trial(new GridLocation("G", 2), new GridLocation("B", 2), false,false,3),
+    //     new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true,3),
+    //
+    //     // blockedList = {7,6,5,11,3,9};
+    //     // IsWallTrial = true --> even id participants will have these trials blocked, odd will be opposite
+    //     new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true, true),
+    //     new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true, true),
+    //     new Trial(new GridLocation("D", 1), new GridLocation("F", 6), true, true),
+    //     new Trial(new GridLocation("B", 2), new GridLocation("C", 6), true, true),
+    //     new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
+    //     new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
+    //     new Trial(new GridLocation("A", 6), new GridLocation("G", 2), true),
+    //     new Trial(new GridLocation("G", 2), new GridLocation("C", 7), true),
+    //     new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true),
+    //     new Trial(new GridLocation("C", 7), new GridLocation("B", 2), true),
+    //     new Trial(new GridLocation("A", 1), new GridLocation("D", 4), true),
+    //     new Trial(new GridLocation("F", 6), new GridLocation("A", 6), true),
+    //     
+    //     // Non-stress trials 
+    //     new Trial(new GridLocation("F", 6), new GridLocation("B", 2), false),
+    //     new Trial(new GridLocation("B", 2), new GridLocation("G", 5), false),
+    //     new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
+    //     new Trial(new GridLocation("C", 6), new GridLocation("F", 1), false),
+    //     new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
+    //     new Trial(new GridLocation("G", 2), new GridLocation("C", 6), false),
+    //     new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
+    //     new Trial(new GridLocation("C", 7), new GridLocation("D", 1), false),
+    //     new Trial(new GridLocation("D", 1), new GridLocation("D", 4), false),
+    //     new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
+    //     new Trial(new GridLocation("A", 6), new GridLocation("E", 6), false),
+    //     new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
+    //     //
+    //     // new Trial(new GridLocation("A", 1), new GridLocation("F", 6), true),
+    //     // new Trial(new GridLocation("A", 6), new GridLocation("E", 6), true),
+    //     // new Trial(new GridLocation("B", 2), new GridLocation("G", 5), true),
+    //     // new Trial(new GridLocation("F", 1), new GridLocation("E", 6), true, true),
+    //     // new Trial(new GridLocation("C", 6), new GridLocation("F", 1), true),
+    //     // new Trial(new GridLocation("C", 7), new GridLocation("D", 1), true, true),
+    //     // new Trial(new GridLocation("D", 1), new GridLocation("D", 4), true, true),
+    //     // new Trial(new GridLocation("D", 4), new GridLocation("G", 2), true, true),
+    //     // new Trial(new GridLocation("E", 6), new GridLocation("A", 1), true),
+    //     // new Trial(new GridLocation("F", 6), new GridLocation("B", 2), true, true),
+    //     // new Trial(new GridLocation("G", 2), new GridLocation("C", 6), true),
+    //     // new Trial(new GridLocation("G", 5), new GridLocation("C", 7), true, true),
+    //     //
+    //     // // Non-stress trials 
+    //     // new Trial(new GridLocation("A", 1), new GridLocation("D", 4), false),
+    //     // new Trial(new GridLocation("A", 6), new GridLocation("G", 2), false),
+    //     // new Trial(new GridLocation("B", 2), new GridLocation("C", 6), false),
+    //     // new Trial(new GridLocation("F", 1), new GridLocation("C", 7), false),
+    //     // new Trial(new GridLocation("C", 6), new GridLocation("A", 1), false),
+    //     // new Trial(new GridLocation("C", 7), new GridLocation("B", 2), false),
+    //     // new Trial(new GridLocation("D", 1), new GridLocation("F", 6), false),
+    //     // new Trial(new GridLocation("D", 4), new GridLocation("F", 1), false),
+    //     // new Trial(new GridLocation("E", 6), new GridLocation("D", 1), false),
+    //     // new Trial(new GridLocation("F", 6), new GridLocation("A", 6), false),
+    //     // new Trial(new GridLocation("G", 2), new GridLocation("C", 7), false),
+    //     // new Trial(new GridLocation("G", 5), new GridLocation("A", 6), false),
+    // };
+    
+    
 
     private string[] obstaclesList = { "B1", "B3", "B5", "B6", "D2", "D3", "D5", "D6", "F2", "F4", "F5", "F7" };
 
@@ -326,6 +369,29 @@ public class ExperimentController : MonoBehaviour
         }
     }
 
+    public int augNumber;
+    public void ChangeTrialList(int aug)
+    {
+        augNumber = aug;
+        switch (aug)
+        {
+            case 0:
+                break;
+            case 1:
+                trialList = trialList1;
+                break;
+            case 2:
+                trialList = trialList2;
+                break;
+            case 3:
+                trialList = trialList3;
+                break;
+            default:
+                Debug.Log("error choosing triallist");
+                break;
+        }
+    }
+    
     public List<String> objectList;
     /// <summary>
     /// Gets starting point/subject number and starts the experiment
@@ -368,50 +434,17 @@ public class ExperimentController : MonoBehaviour
             trialOrder[i] = i;
             Debug.Log(trialOrder[i]);
         }
-
-        List<int> stress_b = new List<int>();
-        List<int> stress_nb = new List<int>();
-        List<int> fixedstress = new List<int>();
-        List<int> nonStress = new List<int>();
-        for (int i = number_practice_trials; i < trialList.Length; i++) {
-            if (trialList[i].stressTrial)
-                if((subjectNumber % 2 != 0 && trialList[i].isWallTrial) || (subjectNumber % 2 == 0 && !trialList[i].isWallTrial))
-                    stress_nb.Add(i);
-                else
-                    stress_b.Add(i);
-            else
-                nonStress.Add(i); }
-
-        Random.InitState(subjectNumber * 10);
-
-        int x = Random.Range(0,stress_b.Count);
-        fixedstress.Add(stress_b[x]);
-        List<int> stress = new List<int>();
-        for (int i = stress_b[0]; i < (stress_b[0] + stress_b.Count); i++)
+        
+        List<int> trials = new List<int>();
+        for (int i = number_practice_trials; i < trialList.Length; i++)
         {
-            if (i == (stress_b[0] + x))
-                continue;
-            stress.Add(i);
+            trials.Add(i);
         }
-        stress = stress.Concat(stress_nb).ToList();
+        Random.InitState((subjectNumber * 100) + (augNumber * 10));
+        trials = trials.ToArray().OrderBy(x => Random.Range(0, trials.Count)).ToList();
+        for (int i = 0; i < trials.Count; i++) 
+            trialOrder[number_practice_trials + i] = trials[i];
         
-        stress = stress.ToArray().OrderBy(x => Random.Range(0, stress.Count)).ToList();
-        nonStress = nonStress.ToArray().OrderBy(x => Random.Range(0, nonStress.Count)).ToList();
-        stress = fixedstress.Concat(stress).ToList();
-        
-        
-        if (stressFirst){
-            for (int i = 0; i < stress.Count; i++)
-                trialOrder[number_practice_trials + i] = stress[i];
-            for (int i = 0; i < nonStress.Count; i++)
-                trialOrder[number_practice_trials + stress.Count + i] = nonStress[i]; }
-        else {
-            for (int i = 0; i < nonStress.Count; i++)
-                trialOrder[number_practice_trials + i] = nonStress[i];
-            for (int i = 0; i < stress.Count; i++)
-                trialOrder[number_practice_trials + nonStress.Count + i] = stress[i];
-        }
-
         // Create a web of invisible node colliders to track position
         string[] letters = { "A", "B", "C", "D", "E", "F", "G" };
         int[] numbers = { 1, 2, 3, 4, 5, 6, 7 };
@@ -706,7 +739,6 @@ public class ExperimentController : MonoBehaviour
                     footprints.GetComponent<MeshRenderer>().enabled = true;
                     if (NodeExtension.SameNode(player, footprints) & GetTrigger(false))
                     {
-
                         footprints.SetActive(false);
                         secondary.SetActive(true);
                         RemoveSecondaryObjects();
@@ -715,7 +747,6 @@ public class ExperimentController : MonoBehaviour
                         fileHandler.AppendLine(
                             (subjectFile).Replace(Date_time + ".csv", "_nodePath.csv"),
                             PrintStepInfo() + "," + GetTrialInfo().start.GetString() + "," + GetTrialInfo().end.GetString());
-
                     }
                     break;
 
@@ -725,9 +756,12 @@ public class ExperimentController : MonoBehaviour
                         "Touch the painting and press " + (XRSettings.enabled ? "trigger" : "space" ) + " to start trial";
                     if (GetTrigger(true) )
                     {
-                        SecondaryObject();
-                        trackv3.Instance.objectsInView.Clear();
-                        trackv3.Instance.secObjectsInView.Clear();
+                        if (GetTrialInfo().stressTrial)
+                        {
+                            SecondaryObject();
+                            trackv3.Instance.objectsInView.Clear();
+                            trackv3.Instance.secObjectsInView.Clear();
+                        }
                         dynamicBlock.enabled = true;
                         stepInPhase++;
                         trialStartTime = Time.realtimeSinceStartup;
@@ -748,7 +782,8 @@ public class ExperimentController : MonoBehaviour
                     break;
 
                 case 3: // Walk to end
-                    trackv3.Instance.trackSecObjects();
+                    if (GetTrialInfo().stressTrial)
+                        trackv3.Instance.trackSecObjects();
                     recordCameraAndNodes = true;
                     userText.GetComponent<TextMeshProUGUI>().text =
                         "Target Object: " + GetTrialInfo().end.GetTarget();
@@ -761,14 +796,17 @@ public class ExperimentController : MonoBehaviour
                         
                         fileHandler.AppendLine(subjectFile,
                             PrintStepInfo() + "," + GetTrialInfo() + "," + NodeExtension.CurrentNode(player.transform.position).GetString()  + "," + blockedWall + "," + GetTrialInfo().stressTrial + "," + GetTrialInfo().augmentation);
-                        // add the objects that should have been seen
-                        string objectsSeen = "";
-                        foreach (string obj in objectList)
+                        if (GetTrialInfo().stressTrial)
                         {
-                            objectsSeen += trackv3.Instance.secObjectsInView.Contains(obj) ? "true," : "false,"; 
+                            // add the objects that should have been seen
+                            string objectsSeen = "";
+                            foreach (string obj in objectList)
+                            {
+                                objectsSeen += trackv3.Instance.secObjectsInView.Contains(obj) ? "true," : "false,"; 
+                            }
+                            fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobjSeen.csv"),
+                                GetTrialInfo() + "," + objectsSeen);
                         }
-                        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobjSeen.csv"),
-                            GetTrialInfo() + "," + objectsSeen);
                         maze.SetActive(false);
                         stressLevel.GetComponent<TextMeshProUGUI>().text = "4";
                         dynamicBlock.enabled = false;
@@ -822,11 +860,23 @@ public class ExperimentController : MonoBehaviour
                         //move forward
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
                         stressCanvas.enabled = false;
-                        ToggleAllOff();
-                        myToggle = toggles[0];
-                        HighlightToggle();
-                        currentIndex = 0;
-                        stepInPhase++;
+                        if (GetTrialInfo().stressTrial)
+                        {
+                            ToggleAllOff();
+                            myToggle = toggles[0];
+                            HighlightToggle();
+                            currentIndex = 0;
+                            stepInPhase++;
+                        }
+                        else
+                        {
+                            stepInPhase = 0;
+                            floor.SetActive(true);
+                            stepInPhase = 0;
+                            footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
+                                Random.Range(-3, 3));
+                            currentTrial++;
+                        }
                         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text);
                         Debug.Log("Current trial: " + currentTrial);
                     }
@@ -869,6 +919,7 @@ public class ExperimentController : MonoBehaviour
                         stepInPhase++;
                     }
                     break;
+                
                 case 7:
                     if (GetTrigger(false))
                     {
@@ -896,7 +947,6 @@ public class ExperimentController : MonoBehaviour
                         sectext.GetComponent<TextMeshProUGUI>().text = "Select objects that you saw";
                     }
                     break;
-
 
                 default:
                     Debug.Log("Unexpected stepInPhase during RunTesting()");
@@ -1130,15 +1180,15 @@ public class ExperimentController : MonoBehaviour
     {
         return trialOrder[currentTrial] + "," + (Time.realtimeSinceStartup - trialStartTime) + "," + phase + "," + currentTrial + "," + stepInPhase; }
 
-    public void ChangeBlockingOrder()
-    {
-        stressFirst = !stressFirst;
-    }
+    // public void ChangeBlockingOrder()
+    // {
+    //     stressFirst = !stressFirst;
+    // }
     
-    public void ChangeLearning()
-    {
-        stressLearning = !stressLearning;
-    }
+    // public void ChangeLearning()
+    // {
+    //     stressLearning = !stressLearning;
+    // }
 
     void RandomizeTrialOrder()
     {
