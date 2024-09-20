@@ -220,7 +220,7 @@ public class ExperimentController : MonoBehaviour
                         break;
                     case 4:
                         FinishExperiment();
-                        StartCoroutine(WaitCoroutine());
+                        // StartCoroutine(WaitCoroutine());
                         Application.Quit();
                         break; }
 
@@ -609,32 +609,8 @@ public class ExperimentController : MonoBehaviour
         {
             textMesh.enabled = false;
         }
-        switch (GetTrialInfo().augmentation)
-        {
-            case 0:
-                minimap.SetActive(false);
-                arrow.SetActive(false);
-                compass.SetActive(false);
-                break;
-            case 1: //minimap
-                arrow.SetActive(false);
-                compass.SetActive(false);
-                augmentation = minimap;
-                break;
-            case 2: //arrow
-                minimap.SetActive(false);
-                compass.SetActive(false);
-                augmentation = arrow;
-                break;
-            case 3: //compass
-                minimap.SetActive(false);
-                arrow.SetActive(false);
-                augmentation = compass;
-                break;
-            default:
-                break;
-        }
-
+        
+        // Debug.Log(trialList.Length);
         if (currentTrial < trialList.Length)
         {
             // foreach (var painting in paintings.GetComponentsInChildren<MeshRenderer>())
@@ -643,6 +619,31 @@ public class ExperimentController : MonoBehaviour
             //             painting.enabled = false;  // Hides all text/pictures in the paintings
             //         else if (!painting.name.Contains(GetTrialInfo().start.GetTarget()))
             //             painting.enabled = false;
+            switch (GetTrialInfo().augmentation)
+            {
+                case 0:
+                    minimap.SetActive(false);
+                    arrow.SetActive(false);
+                    compass.SetActive(false);
+                    break;
+                case 1: //minimap
+                    arrow.SetActive(false);
+                    compass.SetActive(false);
+                    augmentation = minimap;
+                    break;
+                case 2: //arrow
+                    minimap.SetActive(false);
+                    compass.SetActive(false);
+                    augmentation = arrow;
+                    break;
+                case 3: //compass
+                    minimap.SetActive(false);
+                    arrow.SetActive(false);
+                    augmentation = compass;
+                    break;
+                default:
+                    break;
+            }
             switch (stepInPhase)
             {
                 case 0: // Reorient
@@ -806,7 +807,14 @@ public class ExperimentController : MonoBehaviour
                             stepInPhase = 0;
                             footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
                                 Random.Range(-3, 3));
-                            currentTrial++;
+                            if (currentTrial + 1 == trialList.Length)
+                            {
+                                phase++;
+                            }
+                            else
+                            {
+                                currentTrial++;
+                            }
                         }
                     }
                     else if (XRSettings.enabled && SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
@@ -867,7 +875,14 @@ public class ExperimentController : MonoBehaviour
                         footprints.transform.position = new Vector3(Random.Range(-3, 3), footprints.transform.position.y,
                             Random.Range(-3, 3));
                         ToggleAllOff();
-                        currentTrial++;
+                        if (currentTrial + 1 == trialList.Length)
+                        {
+                            phase++;
+                        }
+                        else
+                        {
+                            currentTrial++;
+                        }
                         Debug.Log("Current trial: " + currentTrial);
                     }
                     else if (XRSettings.enabled && SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
@@ -884,6 +899,7 @@ public class ExperimentController : MonoBehaviour
         }
         else
         {
+            Debug.Log("end");
             phase++;
         }
     }
