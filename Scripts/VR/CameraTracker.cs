@@ -107,7 +107,7 @@ namespace VR
                                 "_camera_tracker.csv"),
                             ExperimentController.Instance.PrintStepInfo() + "," +
                             ExperimentController.Instance.GetTrialInfo().ToString() +
-                            "," + gameObject.transform.rotation.eulerAngles.x.ToString() + "," +
+                            "," + ExperimentController.Instance.GetTrialInfo().augmentation + "," + gameObject.transform.rotation.eulerAngles.x.ToString() + "," +
                             gameObject.transform.rotation.eulerAngles.y.ToString() +
                             "," + gameObject.transform.rotation.eulerAngles.z.ToString() + "," +
                             gameObject.transform.position.x.ToString() + "," +

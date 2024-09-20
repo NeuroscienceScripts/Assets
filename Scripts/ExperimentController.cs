@@ -337,20 +337,20 @@ public class ExperimentController : MonoBehaviour
         Debug.Log(subjectFile);
         fileHandler.AppendLine(
             ExperimentController.Instance.subjectFile.Replace(ExperimentController.Instance.Date_time + ".csv",
-                "_camera_tracker.csv"), "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End," +
+                "_camera_tracker.csv"), "Trial_ID,TrialTime,Phase,TrialNumber,StepInPhase,Start,End,Augmentation," +
                                         "CamRotX,CamRotY,CamRotZ,CamPosX,CamPosY,CamPosZ,ScreenGazeX,ScreenGazeY,WorldGazeX,WorldGazeY,WorldGazeZ");
         fileHandler.AppendLine(subjectFile, "trialID,timeInTrial,phase,trialNumber,stepInPhase,start,goal,selected,blockedWall,isStressTrial,augmentation");
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_nodePath.csv"),
             DateTime.Today.Month + "_" + DateTime.Today.Day + "_" + DateTime.Now.Hour + ":" + DateTime.Now.Minute);
         
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"),
-            "start,end,stress_level");
+            "start,goal,augmentation,stressLevel");
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobj.csv"),
-            "start,end,Ahall,Acorner,Ccorner,Chall,Ehall,Ecorner,Gcorner,Ghall");
+            "start,end,augmentation,Ahall,Acorner,Ccorner,Chall,Ehall,Ecorner,Gcorner,Ghall");
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobjSeen.csv"),
-            "start,end,1,2,3,4,5,6,7,8,9,10,11,12");
+            "start,end,augmentation,1,2,3,4,5,6,7,8,9,10,11,12");
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secselected.csv"), 
-            "start,end,1,2,3,4,5,6,7,8,9,10,11,12");
+            "start,end,augmentation,1,2,3,4,5,6,7,8,9,10,11,12");
         objectList = new List<string>();
         for (int i = 1; i <= 12; i++)
         {
@@ -731,10 +731,10 @@ public class ExperimentController : MonoBehaviour
                             string objectsSeen = "";
                             foreach (string obj in objectList)
                             {
-                                objectsSeen += trackv3.Instance.secObjectsInView.Contains(obj) ? "true," : "false,"; 
+                                objectsSeen += trackv3.Instance.secObjectsInView.Contains(obj) ? ",true" : ",false"; 
                             }
                             fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobjSeen.csv"),
-                                GetTrialInfo() + "," + objectsSeen);
+                                GetTrialInfo() + "," + GetTrialInfo().augmentation + objectsSeen);
                         }
                         maze.SetActive(false);
                         stressLevel.GetComponent<TextMeshProUGUI>().text = "4";
@@ -789,6 +789,8 @@ public class ExperimentController : MonoBehaviour
                         //move forward
                         stressText.GetComponent<TextMeshProUGUI>().text = "Rate your Stress Level";
                         stressCanvas.enabled = false;
+                        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"), GetTrialInfo() + "," + GetTrialInfo().augmentation + "," + stressLevel.GetComponent<TextMeshProUGUI>().text);
+                        Debug.Log("Current trial: " + currentTrial);
                         if (GetTrialInfo().stressTrial)
                         {
                             ToggleAllOff();
@@ -806,8 +808,6 @@ public class ExperimentController : MonoBehaviour
                                 Random.Range(-3, 3));
                             currentTrial++;
                         }
-                        fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_stress.csv"), GetTrialInfo() + "," + stressLevel.GetComponent<TextMeshProUGUI>().text);
-                        Debug.Log("Current trial: " + currentTrial);
                     }
                     else if (XRSettings.enabled && SteamVR_Actions._default.GrabGrip.GetStateDown(SteamVR_Input_Sources.Any))
                     {
@@ -858,7 +858,7 @@ public class ExperimentController : MonoBehaviour
                         secobjectcanvas.enabled = false;
                         floor.SetActive(true);
                         stepInPhase = 0;
-                        string selectedobjects = GetTrialInfo() + "";
+                        string selectedobjects = GetTrialInfo() + "," + GetTrialInfo().augmentation + "";
                         foreach (Toggle toggle in toggles)
                         {
                             selectedobjects = selectedobjects + "," + toggle.isOn;
@@ -974,7 +974,7 @@ public class ExperimentController : MonoBehaviour
         // Join the names with commas
         string namesLine = string.Join(", ", selectedChildrenNames);
         fileHandler.AppendLine(subjectFile.Replace(Date_time + ".csv", "_secobj.csv"),
-            GetTrialInfo() + "," + namesLine);
+            GetTrialInfo() + "," + GetTrialInfo().augmentation + "," + namesLine);
     }
 
     private void RemoveSecondaryObjects()
