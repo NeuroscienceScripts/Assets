@@ -13,8 +13,10 @@ using UnityEngine.UI;
 using UnityEngine.XR;
 using Valve.Newtonsoft.Json.Utilities;
 using Valve.VR;
+using ViveSR.anipal;
 using Random = UnityEngine.Random;
 // using LabJack.LabJackUD;
+using ViveSR.anipal.Eye;
 
 //TODO: Fix paintings to be on wall, fix footprints to rotate toward next target 
 /// <summary>
@@ -220,7 +222,8 @@ public class ExperimentController : MonoBehaviour
                         break;
                     case 4:
                         FinishExperiment();
-                        // StartCoroutine(WaitCoroutine());
+                        // SRanipal_API.Release(SRanipal_Eye_v2.ANIPAL_TYPE_EYE_V2);
+                        StartCoroutine(WaitCoroutine());
                         Application.Quit();
                         break; }
 

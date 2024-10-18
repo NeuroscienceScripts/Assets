@@ -6,6 +6,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using ViveSR.anipal.Eye;
 using System.Runtime.InteropServices;
+using ViveSR.anipal;
 
 namespace VR
 {
@@ -57,6 +58,16 @@ namespace VR
         //     eyeData = eye_data;
         // }
 
+        private void OnDestroy()
+        {
+            SRanipal_API.Release(SRanipal_Eye_v2.ANIPAL_TYPE_EYE_V2);
+        }
+
+        private void Start()
+        {
+            SRanipal_API.Initial(SRanipal_Eye.ANIPAL_TYPE_EYE, IntPtr.Zero);
+        }
+
         private void OnRenderImage(RenderTexture src, RenderTexture dest)
         {
             if (Time.time - recordHeadTimer > timeInterval & ExperimentController.Instance.recordCameraAndNodes)
@@ -104,7 +115,7 @@ namespace VR
                         //     SRanipal_Eye_v2.WrapperUnRegisterEyeDataCallback(Marshal.GetFunctionPointerForDelegate((SRanipal_Eye_v2.CallbackBasic)EyeCallback));
                         //     eye_callback_registered = false;
                         // }
-                        
+
                         if (SRanipal_Eye_v2.GetVerboseData(out verboseData)) { }
                         else { Debug.LogWarning("Failed to find SRanipal Framework V1 (verboseData), do you have the SDK installed?"); }
                         
